@@ -13,6 +13,41 @@
 <script src="{{ asset('js/modal-crud.js') }}"></script>
 <script src="{{ asset('js/searchable-select.js') }}?v={{ filemtime(public_path('js/searchable-select.js')) }}"></script>
 <script>
+    // Global jQuery AJAX Setup (CSRF & AJAX Header)
+    $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    });
+
+    // Matikan popup browser alert bawaan DataTables (tn/7)
+    $.fn.dataTable.ext.errMode = 'none';
+
+    // Tangani error AJAX DataTables secara anggun (suppress alert, log ke console)
+    $(document).on('error.dt', function (e, settings, techNote, message) {
+        console.warn('DataTables error ditangani:', message, techNote);
+    });
+
+    // Tangani sesi login kedaluwarsa (401 / 419) tanpa crash popup
+    $(document).ajaxError(function (event, jqXHR) {
+        if (jqXHR.status === 401 || jqXHR.status === 419) {
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Sesi Kedaluwarsa',
+                    text: 'Sesi login Anda telah berakhir. Mengalihkan ke halaman login...',
+                    timer: 2500,
+                    showConfirmButton: false
+                }).then(function () {
+                    window.location.href = '{{ route('login') }}';
+                });
+            } else {
+                window.location.href = '{{ route('login') }}';
+            }
+        }
+    });
+
     $.extend(true, $.fn.dataTable.defaults, {
         pageLength: 25,
         lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, 'Semua']],
