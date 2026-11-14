@@ -57,68 +57,31 @@
                     </button>
                 </div>
             </div>
-            <div class="form-hint-sm mt-2 mb-0">Pindah tab untuk layani pelanggan lain. Stok dicek saat bayar/submit.</div>
+            <div class="form-hint-sm mt-2 mb-0">Pindah tab untuk melayani transaksi lain secara bersamaan. Stok dicek saat bayar/submit.</div>
         </div>
         @endif
         <div class="row g-4 align-items-lg-start">
             <div class="col-lg-8">
-                <div class="data-panel mb-4" id="customer-panel">
-                    <div class="data-panel-head">
-                        <h2 class="data-panel-title"><i class="bi bi-person me-1"></i> Pelanggan</h2>
-                    </div>
-                    <div class="data-panel-body">
-                        <div class="mb-3">
-                            <label class="form-label">Pilih Pelanggan <span class="text-danger">*</span></label>
-                            <select id="customer_id" class="form-control-clean atha-searchable-select atha-select2-customer" @if ($ticket) disabled @endif>
-                                <option value="">-- Pilih Pelanggan --</option>
-                                <option value="__umum__">{{ config('workshop.walk_in_customer_label', 'Umum') }} (pelanggan lewat)</option>
-                                <optgroup label="Pelanggan terdaftar">
-                                    @foreach ($customers as $customer)
-                                        <option value="{{ $customer->id }}"
-                                            data-code="{{ $customer->code }}"
-                                            data-name="{{ $customer->name }}"
-                                            data-phone="{{ $customer->phone }}">
-                                            {{ $customer->code }} — {{ $customer->name }}
-                                        </option>
-                                    @endforeach
-                                </optgroup>
-                                <option value="__new__">+ Pelanggan baru...</option>
-                            </select>
-                            <div class="form-hint-sm">{{ $ticket ? 'Pelanggan mengikuti data tiket servis.' : 'Cari nama, kode, atau nomor WhatsApp. Pilih pelanggan sebelum menambah barang.' }}</div>
-                        </div>
-                        <div id="new-customer-fields" class="border rounded p-3 d-none customer-inline-panel">
-                            <div class="small fw-semibold mb-2"><i class="bi bi-person-plus me-1"></i> Data pelanggan baru</div>
-                            <div class="mb-2">
-                                <label class="form-label small mb-0" for="new_customer_name">Nama <span class="text-danger">*</span></label>
-                                <input type="text" id="new_customer_name" class="form-control form-control-clean" placeholder="Nama pelanggan" autocomplete="off">
-                            </div>
-                            <div class="mb-2">
-                                <label class="form-label small mb-0" for="new_customer_phone">Telepon</label>
-                                <input type="text" id="new_customer_phone" class="form-control form-control-clean" placeholder="Opsional" autocomplete="off">
-                            </div>
-                            <div class="mb-0">
-                                <label class="form-label small mb-0" for="new_customer_address">Alamat</label>
-                                <input type="text" id="new_customer_address" class="form-control form-control-clean" placeholder="Opsional" autocomplete="off">
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                {{-- Mode tanpa pelanggan: otomatis ke Umum (walk-in) --}}
+                <input type="hidden" id="customer_id" value="__umum__">
+                <input type="hidden" id="new_customer_name" value="">
+                <input type="hidden" id="new_customer_phone" value="">
+                <input type="hidden" id="new_customer_address" value="">
 
                 <div class="data-panel mb-4" id="items-section">
                     <div class="data-panel-head">
-                        <h2 class="data-panel-title"><i class="bi bi-box-seam me-1"></i> Barang / Sparepart HP & Laptop</h2>
+                        <h2 class="data-panel-title"><i class="bi bi-box-seam me-1"></i> Data Barang</h2>
                     </div>
                     <div class="data-panel-body">
-                        <div id="items-section-lock" class="items-section-empty text-center text-muted py-4 px-3">
+                        <div id="items-section-lock" class="items-section-empty text-center text-muted py-4 px-3 d-none">
                             <i class="bi bi-person-check fs-4 d-block mb-2"></i>
-                            <div class="fw-medium">Pilih pelanggan terlebih dahulu</div>
-                            <div class="small">Barang hanya bisa ditambahkan setelah pelanggan dipilih.</div>
+                            <div class="fw-medium">Pilih barang untuk transaksi</div>
                         </div>
-                        <div id="items-add-form" class="stock-cart-add border rounded p-3 mb-3 d-none">
+                        <div id="items-add-form" class="stock-cart-add border rounded p-3 mb-3">
                             <div class="cart-add-row row g-2">
                                 <div class="col-md-7">
                                     <label class="form-label small mb-0" for="item_select">Pilih Barang</label>
-                                    <select id="item_select" class="form-control-clean cart-add-control atha-searchable-select atha-select2-item" disabled>
+                                    <select id="item_select" class="form-control-clean cart-add-control atha-searchable-select atha-select2-item">
                                         <option value="">-- Pilih Barang --</option>
                                         @foreach ($items as $item)
                                             @include('transactions.include.item-option', ['item' => $item])
@@ -127,11 +90,11 @@
                                 </div>
                                 <div class="col-md-3">
                                     <label class="form-label small mb-0" for="item_qty">Qty</label>
-                                    <input type="number" id="item_qty" class="form-control form-control-clean cart-add-control" min="1" placeholder="0" disabled>
+                                    <input type="number" id="item_qty" class="form-control form-control-clean cart-add-control" min="1" placeholder="1" value="1">
                                 </div>
                                 <div class="col-md-2">
                                     <label class="form-label small mb-0 cart-add-action-label" aria-hidden="true">Aksi</label>
-                                    <button type="button" class="btn btn-outline-primary w-100 cart-add-btn" id="btn-add-item" disabled>
+                                    <button type="button" class="btn btn-outline-primary w-100 cart-add-btn" id="btn-add-item">
                                         <i class="bi bi-cart-plus"></i>
                                     </button>
                                 </div>

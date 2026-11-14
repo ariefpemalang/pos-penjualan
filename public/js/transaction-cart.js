@@ -49,16 +49,13 @@
 
             function getCustomerMode() {
                 const val = $('#customer_id').val();
-                if (val === '__umum__') {
+                if (!val || val === '__umum__') {
                     return 'umum';
                 }
                 if (val === '__new__') {
                     return 'new';
                 }
-                if (val) {
-                    return 'existing';
-                }
-                return null;
+                return 'existing';
             }
 
             function hasCustomerSelected() {
@@ -69,7 +66,7 @@
                 if (mode === 'new') {
                     return !!$('#new_customer_name').val().trim();
                 }
-                return false;
+                return true;
             }
 
             function getDefaultItemPrice(item) {
@@ -182,7 +179,7 @@
                     label: customLabel || ('Transaksi ' + number),
                     items: [],
                     services: [],
-                    customerId: '',
+                    customerId: '__umum__',
                     newCustomer: { name: '', phone: '', address: '' },
                     discount: '0',
                     notes: '',
@@ -206,9 +203,6 @@
                         return (parts.length > 1 ? parts[parts.length - 1] : text).trim();
                     }
                 }
-                if (mode === 'umum') {
-                    return 'Umum';
-                }
                 if (mode === 'new') {
                     const name = $('#new_customer_name').val().trim();
                     if (name) {
@@ -228,7 +222,7 @@
 
                 tab.items = cloneCartLines(itemCart);
                 tab.services = cloneCartLines(serviceCart);
-                tab.customerId = $('#customer_id').val() || '';
+                tab.customerId = $('#customer_id').val() || '__umum__';
                 tab.newCustomer = {
                     name: $('#new_customer_name').val().trim(),
                     phone: $('#new_customer_phone').val().trim(),
@@ -253,7 +247,7 @@
                 $('#notes').val('');
                 fitNotesField();
                 $('#technician_id').val('').trigger('change');
-                $('#customer_id').val('').trigger('change');
+                $('#customer_id').val('__umum__').trigger('change');
                 $('#new_customer_name, #new_customer_phone, #new_customer_address').val('');
                 $('#payment_method').val('cash').trigger('change');
                 $('#amount_paid').val('');

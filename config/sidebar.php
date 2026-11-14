@@ -17,12 +17,6 @@ return [
             'title' => 'Master Data',
             'items' => [
                 [
-                    'label' => 'Pelanggan',
-                    'icon' => 'bi-person-vcard',
-                    'route' => 'customers.index',
-                    'permission' => 'customer view',
-                ],
-                [
                     'label' => 'Supplier',
                     'icon' => 'bi-truck',
                     'route' => 'suppliers.index',

@@ -33,7 +33,6 @@
                             <th>No. Transaksi</th>
                             <th>Jenis</th>
                             <th>Status</th>
-                            <th>Pelanggan</th>
                             <th>Total</th>
                             <th>Metode Bayar</th>
                             <th>Kasir</th>
@@ -88,13 +87,12 @@
                     d.to = $('#filter-to').val();
                 },
             },
-            order: [[8, 'desc']],
+            order: [[7, 'desc']],
             columns: [
                 { data: 'DT_RowIndex', orderable: false, searchable: false },
                 { data: 'transaction_no', name: 'transaction_no' },
                 { data: 'type_label', name: 'type', orderable: false },
                 { data: 'status_label', name: 'status', orderable: false, searchable: false },
-                { data: 'customer_name', name: 'customer.name', orderable: false },
                 { data: 'total_fmt', name: 'total', orderable: false, searchable: false },
                 { data: 'payment_label', name: 'payment_method', orderable: false },
                 { data: 'user_name', name: 'user.name', orderable: false },

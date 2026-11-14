@@ -81,7 +81,7 @@
     {{-- KPI operasional --}}
     <div class="row g-3 mb-4">
         @can('dashboard items view')
-            <div class="col-12 col-sm-6 col-md-4">
+            <div class="col-12 col-sm-6">
                 <a href="{{ route('items.index') }}" class="dash-card-link" title="Lihat data barang">
                     <div class="stat-card dash-mini-stat">
                         <div class="dash-mini-icon text-primary"><i class="bi bi-box-seam"></i></div>
@@ -92,23 +92,12 @@
             </div>
         @endcan
         @can('dashboard low stock view')
-            <div class="col-12 col-sm-6 col-md-4">
+            <div class="col-12 col-sm-6">
                 <a href="{{ $lowStockUrl }}" class="dash-card-link" title="Lihat barang stok menipis">
                     <div class="stat-card dash-mini-stat {{ ($kpis['low_stock'] ?? 0) > 0 ? 'dash-mini-stat-danger' : '' }}">
                         <div class="dash-mini-icon text-danger"><i class="bi bi-exclamation-triangle"></i></div>
                         <div class="stat-label">Stok Menipis</div>
                         <div class="stat-value {{ ($kpis['low_stock'] ?? 0) > 0 ? 'text-danger' : 'accent' }}">{{ $kpis['low_stock'] ?? 0 }}</div>
-                    </div>
-                </a>
-            </div>
-        @endcan
-        @can('dashboard customers view')
-            <div class="col-12 col-sm-6 col-md-4">
-                <a href="{{ route('customers.index') }}" class="dash-card-link" title="Lihat data pelanggan">
-                    <div class="stat-card dash-mini-stat">
-                        <div class="dash-mini-icon text-info"><i class="bi bi-people"></i></div>
-                        <div class="stat-label">Pelanggan</div>
-                        <div class="stat-value accent">{{ number_format($kpis['customers'] ?? 0) }}</div>
                     </div>
                 </a>
             </div>
@@ -125,7 +114,7 @@
                 <div class="data-panel-body">
                     <div class="row g-2">
                         @can('transaction create')
-                            <div class="col-6 col-md-4 col-lg-2">
+                            <div class="col-6 col-sm-4 col-md">
                                 <a href="{{ route('transactions.create') }}" class="dash-quick-link">
                                     <i class="bi bi-plus-circle"></i>
                                     <span>Transaksi Baru</span>
@@ -133,7 +122,7 @@
                             </div>
                         @endcan
                         @can('purchase create')
-                            <div class="col-6 col-md-4 col-lg-2">
+                            <div class="col-6 col-sm-4 col-md">
                                 <a href="{{ route('purchases.create') }}" class="dash-quick-link">
                                     <i class="bi bi-bag-plus"></i>
                                     <span>Pembelian Barang</span>
@@ -141,7 +130,7 @@
                             </div>
                         @endcan
                         @can('financial report view')
-                            <div class="col-6 col-md-4 col-lg-2">
+                            <div class="col-6 col-sm-4 col-md">
                                 <a href="{{ route('financial-reports.index') }}" class="dash-quick-link">
                                     <i class="bi bi-graph-up"></i>
                                     <span>Laporan Keuangan</span>
@@ -149,23 +138,15 @@
                             </div>
                         @endcan
                         @can('stock report view')
-                            <div class="col-6 col-md-4 col-lg-2">
+                            <div class="col-6 col-sm-4 col-md">
                                 <a href="{{ route('stock-reports.index') }}" class="dash-quick-link">
                                     <i class="bi bi-clipboard-data"></i>
                                     <span>Laporan Stok</span>
                                 </a>
                             </div>
                         @endcan
-                        @can('customer create')
-                            <div class="col-6 col-md-4 col-lg-2">
-                                <a href="{{ route('customers.index') }}" class="dash-quick-link">
-                                    <i class="bi bi-person-plus"></i>
-                                    <span>Data Pelanggan</span>
-                                </a>
-                            </div>
-                        @endcan
                         @can('settings view')
-                            <div class="col-6 col-md-4 col-lg-2">
+                            <div class="col-6 col-sm-4 col-md">
                                 <a href="{{ route('settings.edit') }}" class="dash-quick-link">
                                     <i class="bi bi-gear"></i>
                                     <span>Pengaturan</span>

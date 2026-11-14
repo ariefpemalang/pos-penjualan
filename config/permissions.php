@@ -8,7 +8,6 @@ return [
             'dashboard finance view',
             'dashboard low stock view',
             'dashboard items view',
-            'dashboard customers view',
         ],
     ],
     [
@@ -18,10 +17,6 @@ return [
     [
         'group' => 'Role',
         'access' => ['role view', 'role create', 'role edit', 'role delete'],
-    ],
-    [
-        'group' => 'Pelanggan',
-        'access' => ['customer view', 'customer create', 'customer edit', 'customer delete'],
     ],
     [
         'group' => 'Supplier',
