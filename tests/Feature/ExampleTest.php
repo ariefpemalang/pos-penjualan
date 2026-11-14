@@ -16,4 +16,14 @@ class ExampleTest extends TestCase
 
         $response->assertRedirect(route('login'));
     }
+
+    public function test_login_page_renders_with_circular_logo_and_caption(): void
+    {
+        $response = $this->get(route('login'));
+
+        $response->assertOk()
+            ->assertSee('logo-circle.png')
+            ->assertSee('Aksesories &amp; Voucher', false)
+            ->assertSee('auth.css');
+    }
 }

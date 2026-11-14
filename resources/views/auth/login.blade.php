@@ -7,7 +7,8 @@
         <div class="auth-card">
             <div class="auth-brand">
                 <div class="auth-brand-glow" aria-hidden="true"></div>
-                <img src="{{ brand_logo_url() }}" alt="{{ brand_name() }}" class="auth-logo">
+                <img src="{{ asset('logo-circle.png') }}?v={{ file_exists(public_path('logo-circle.png')) ? filemtime(public_path('logo-circle.png')) : time() }}" alt="{{ brand_name() }}" class="auth-logo">
+                <div class="auth-brand-caption">Aksesories &amp; Voucher</div>
                 <h1 class="visually-hidden">{{ brand_name() }}</h1>
             </div>
 
