@@ -34,12 +34,17 @@ class DashboardService
             ->where('status', 'completed')
             ->whereBetween('created_at', [$monthStart, $monthEnd]);
 
+        $purchaseToday = Purchase::query()
+            ->where('status', 'completed')
+            ->whereDate('created_at', $today);
+
         $purchaseMonth = Purchase::query()
             ->where('status', 'completed')
             ->whereBetween('created_at', [$monthStart, $monthEnd]);
 
         $revenueToday = (float) (clone $txToday)->sum('total');
         $revenueMonth = (float) (clone $txMonth)->sum('total');
+        $purchaseExpenseToday = (float) (clone $purchaseToday)->sum('total');
         $purchaseExpense = (float) (clone $purchaseMonth)->sum('total');
         $commissionMonth = (float) (clone $txMonth)->sum('technician_commission');
         $manualIncomeMonth = (float) ManualCashEntry::query()
@@ -47,11 +52,18 @@ class DashboardService
             ->income()
             ->whereBetween('occurred_at', [$monthStart, $monthEnd])
             ->sum('amount');
+        $manualExpenseToday = (float) ManualCashEntry::query()
+            ->completed()
+            ->expense()
+            ->whereDate('occurred_at', $today)
+            ->sum('amount');
         $manualExpenseMonth = (float) ManualCashEntry::query()
             ->completed()
             ->expense()
             ->whereBetween('occurred_at', [$monthStart, $monthEnd])
             ->sum('amount');
+        $expenseToday = round($purchaseExpenseToday + $manualExpenseToday, 2);
+        $expensesTodayCount = (int) (clone $purchaseToday)->count() + (int) ManualCashEntry::query()->completed()->expense()->whereDate('occurred_at', $today)->count();
         $outflowMonth = round($purchaseExpense + $manualExpenseMonth + $commissionMonth, 2);
         $inflowMonth = round($revenueMonth + $manualIncomeMonth, 2);
 
@@ -61,6 +73,10 @@ class DashboardService
             'kpis' => [
                 'transactions_today' => (int) (clone $txToday)->count(),
                 'revenue_today' => $revenueToday,
+                'expense_today' => $expenseToday,
+                'purchase_expense_today' => $purchaseExpenseToday,
+                'manual_expense_today' => $manualExpenseToday,
+                'expenses_today_count' => $expensesTodayCount,
                 'revenue_month' => $revenueMonth,
                 'expense_month' => $purchaseExpense,
                 'commission_month' => $commissionMonth,

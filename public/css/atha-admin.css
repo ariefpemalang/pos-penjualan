@@ -2836,6 +2836,7 @@ a.dash-card-link .stat-card {
 .dash-kpi-success .dash-kpi-icon { background: rgba(34, 197, 94, 0.12); color: #22c55e; }
 .dash-kpi-warning .dash-kpi-icon { background: rgba(245, 158, 11, 0.12); color: #f59e0b; }
 .dash-kpi-info .dash-kpi-icon { background: rgba(6, 182, 212, 0.12); color: #06b6d4; }
+.dash-kpi-danger .dash-kpi-icon { background: rgba(239, 68, 68, 0.12); color: #ef4444; }
 
 .dash-kpi-label {
   font-size: 0.75rem;
