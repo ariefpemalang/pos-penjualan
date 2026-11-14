@@ -1,0 +1,78 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Services\SalesReportService;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Carbon\Carbon;
+use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use Illuminate\View\View;
+
+class ItemSalesReportController extends Controller
+{
+    public function __construct(private SalesReportService $reportService)
+    {
+        $this->middleware('permission:financial report view|sales report view');
+    }
+
+    public function index(Request $request): View
+    {
+        [$from, $to] = $this->resolvePeriod($request);
+        $categoryId = $request->query('category_id') ? (int) $request->query('category_id') : null;
+        $search = $request->query('search');
+
+        $data = $this->reportService->getItemSalesReport($from, $to, $categoryId, $search);
+
+        return view('item-sales-reports.index', [
+            'summary' => $data['summary'],
+            'items' => $data['items'],
+            'categories' => $data['categories'],
+            'from' => $from->toDateString(),
+            'to' => $to->toDateString(),
+            'categoryId' => $categoryId,
+            'search' => $search,
+        ]);
+    }
+
+    public function exportPdf(Request $request): Response
+    {
+        [$from, $to] = $this->resolvePeriod($request);
+        $categoryId = $request->query('category_id') ? (int) $request->query('category_id') : null;
+        $search = $request->query('search');
+
+        $data = $this->reportService->getItemSalesReport($from, $to, $categoryId, $search);
+
+        $pdf = Pdf::loadView('item-sales-reports.pdf', [
+            'summary' => $data['summary'],
+            'items' => $data['items'],
+            'from' => $from->toDateString(),
+            'to' => $to->toDateString(),
+            'search' => $search,
+        ])->setPaper('a4', 'portrait');
+
+        $filename = 'laporan-penjualan-barang-'.$from->format('Ymd').'-'.$to->format('Ymd').'.pdf';
+
+        return $pdf->download($filename);
+    }
+
+    /**
+     * @return array{0: Carbon, 1: Carbon}
+     */
+    private function resolvePeriod(Request $request): array
+    {
+        $validated = $request->validate([
+            'from' => ['nullable', 'date'],
+            'to' => ['nullable', 'date'],
+        ]);
+
+        $from = Carbon::parse($validated['from'] ?? now()->startOfMonth()->toDateString());
+        $to = Carbon::parse($validated['to'] ?? now()->toDateString());
+
+        if ($from->gt($to)) {
+            $from = $to->copy()->startOfMonth();
+        }
+
+        return [$from, $to];
+    }
+}

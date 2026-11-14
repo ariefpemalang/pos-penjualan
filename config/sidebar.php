@@ -104,12 +104,28 @@ return [
                     'label' => 'Keuangan',
                     'icon' => 'bi-wallet2',
                     'permissions' => [
+                        'sales report view',
                         'financial report view',
                         'asset report view',
                         'manual income view',
                         'manual expense view',
                     ],
                     'submenus' => [
+                        [
+                            'label' => 'Laporan Penjualan',
+                            'route' => 'sales-reports.index',
+                            'permission' => 'financial report view',
+                        ],
+                        [
+                            'label' => 'Laporan Penjualan Barang',
+                            'route' => 'item-sales-reports.index',
+                            'permission' => 'financial report view',
+                        ],
+                        [
+                            'label' => 'Laporan Penjualan Kategori',
+                            'route' => 'category-sales-reports.index',
+                            'permission' => 'financial report view',
+                        ],
                         [
                             'label' => 'Laporan Keuangan',
                             'route' => 'financial-reports.index',

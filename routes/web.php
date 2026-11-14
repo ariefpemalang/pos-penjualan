@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AssetReportController;
 use App\Http\Controllers\BankAccountController;
+use App\Http\Controllers\CategorySalesReportController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EntityCodeController;
@@ -9,12 +10,14 @@ use App\Http\Controllers\FinancialReportController;
 use App\Http\Controllers\ItemCategoryController;
 use App\Http\Controllers\ItemController;
 use App\Http\Controllers\ItemImportExportController;
+use App\Http\Controllers\ItemSalesReportController;
 use App\Http\Controllers\ItemUnitController;
 use App\Http\Controllers\ManualExpenseController;
 use App\Http\Controllers\ManualIncomeController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\RoleController;
+use App\Http\Controllers\SalesReportController;
 use App\Http\Controllers\ServiceReportController;
 use App\Http\Controllers\ServiceTicketController;
 use App\Http\Controllers\ServiceTicketTrackingController;
@@ -97,6 +100,15 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('transactions', TransactionController::class)->only(['index', 'create', 'store', 'show', 'edit', 'update', 'destroy']);
 
     Route::resource('purchases', PurchaseController::class)->only(['index', 'create', 'store', 'show', 'edit', 'update', 'destroy']);
+
+    Route::get('sales-reports', [SalesReportController::class, 'index'])->name('sales-reports.index');
+    Route::get('sales-reports/export-pdf', [SalesReportController::class, 'exportPdf'])->name('sales-reports.export-pdf');
+
+    Route::get('item-sales-reports', [ItemSalesReportController::class, 'index'])->name('item-sales-reports.index');
+    Route::get('item-sales-reports/export-pdf', [ItemSalesReportController::class, 'exportPdf'])->name('item-sales-reports.export-pdf');
+
+    Route::get('category-sales-reports', [CategorySalesReportController::class, 'index'])->name('category-sales-reports.index');
+    Route::get('category-sales-reports/export-pdf', [CategorySalesReportController::class, 'exportPdf'])->name('category-sales-reports.export-pdf');
 
     Route::get('financial-reports', [FinancialReportController::class, 'index'])->name('financial-reports.index');
     Route::get('financial-reports/export-pdf', [FinancialReportController::class, 'exportPdf'])->name('financial-reports.export-pdf');

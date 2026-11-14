@@ -63,6 +63,10 @@ return [
         'access' => ['purchase view', 'purchase create', 'purchase edit', 'purchase delete'],
     ],
     [
+        'group' => 'Laporan Penjualan',
+        'access' => ['sales report view'],
+    ],
+    [
         'group' => 'Laporan Keuangan',
         'access' => ['financial report view'],
     ],
