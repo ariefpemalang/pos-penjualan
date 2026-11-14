@@ -3,6 +3,7 @@
  */
 (function () {
     const THEME_KEY = 'atha-theme';
+    const VALID_THEMES = ['normal', 'dark', 'hijau', 'biru'];
     const SIDEBAR_COLLAPSED_KEY = 'atha-sidebar-collapsed';
     const DESKTOP_BP = 992;
 
@@ -20,12 +21,41 @@
     }
 
     function getTheme() {
-        return localStorage.getItem(THEME_KEY) || 'dark';
+        let theme = localStorage.getItem(THEME_KEY) || 'normal';
+        if (theme === 'light') theme = 'normal';
+        if (!VALID_THEMES.includes(theme)) theme = 'normal';
+        return theme;
     }
 
     function setTheme(theme) {
-        html.setAttribute('data-bs-theme', theme);
+        if (theme === 'light') theme = 'normal';
+        if (!VALID_THEMES.includes(theme)) theme = 'normal';
+
+        html.setAttribute('data-theme', theme);
+        html.setAttribute('data-bs-theme', theme === 'dark' ? 'dark' : 'light');
         localStorage.setItem(THEME_KEY, theme);
+
+        document.querySelectorAll('.theme-choice-btn').forEach(function (btn) {
+            const val = btn.getAttribute('data-theme-value');
+            if (val === theme) {
+                btn.classList.add('is-active');
+            } else {
+                btn.classList.remove('is-active');
+            }
+        });
+
+        const metaThemeColor = document.querySelector('meta[name="theme-color"]');
+        if (metaThemeColor) {
+            const themeColors = {
+                normal: '#D4A017',
+                dark: '#0F172A',
+                hijau: '#10B981',
+                biru: '#2563EB'
+            };
+            metaThemeColor.setAttribute('content', themeColors[theme] || '#D4A017');
+        }
+
+        window.dispatchEvent(new CustomEvent('atha-theme-changed', { detail: { theme } }));
     }
 
     function isSidebarCollapsed() {
@@ -214,8 +244,18 @@
         setSidebarCollapsed(true, false);
     }
 
+    document.querySelectorAll('.theme-choice-btn').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            const chosen = this.getAttribute('data-theme-value');
+            if (chosen) {
+                setTheme(chosen);
+            }
+        });
+    });
+
     btnTheme?.addEventListener('click', function () {
-        const next = html.getAttribute('data-bs-theme') === 'dark' ? 'light' : 'dark';
+        const current = getTheme();
+        const next = current === 'dark' ? 'normal' : 'dark';
         setTheme(next);
     });
 
