@@ -9,7 +9,7 @@
             ['label' => 'Transaksi Penjualan'],
         ],
         'title' => 'Transaksi Penjualan',
-        'subtitle' => 'Penjualan barang, servis jasa, dan transaksi gabungan.',
+        'subtitle' => 'Penjualan barang dan riwayat transaksi kasir.',
     ])
 
     <div class="data-panel">
@@ -24,11 +24,6 @@
         <div class="data-panel-body">
             @include('layouts.partials.history-list-filter', [
                 'filters' => $filters,
-                'entityFieldId' => 'filter-technician',
-                'entityLabel' => 'Teknisi',
-                'entityEmpty' => 'Semua teknisi',
-                'entityIcon' => 'bi-tools',
-                'entities' => $technicians,
             ])
             <div class="table-responsive">
                 <table class="table table-hover align-middle" id="data-table" width="100%">
@@ -39,10 +34,8 @@
                             <th>Jenis</th>
                             <th>Status</th>
                             <th>Pelanggan</th>
-                            <th>Teknisi</th>
                             <th>Total</th>
                             <th>Metode Bayar</th>
-                            <th>Komisi Teknisi</th>
                             <th>Kasir</th>
                             <th>Waktu</th>
                             <th class="text-end">Aksi</th>
@@ -93,34 +86,30 @@
                 data: function (d) {
                     d.from = $('#filter-from').val();
                     d.to = $('#filter-to').val();
-                    d.technician_id = $('#filter-technician').val();
                 },
             },
-            order: [[10, 'desc']],
+            order: [[8, 'desc']],
             columns: [
                 { data: 'DT_RowIndex', orderable: false, searchable: false },
                 { data: 'transaction_no', name: 'transaction_no' },
                 { data: 'type_label', name: 'type', orderable: false },
                 { data: 'status_label', name: 'status', orderable: false, searchable: false },
                 { data: 'customer_name', name: 'customer.name', orderable: false },
-                { data: 'technician_name', name: 'technician.name', orderable: false },
                 { data: 'total_fmt', name: 'total', orderable: false, searchable: false },
                 { data: 'payment_label', name: 'payment_method', orderable: false },
-                { data: 'commission_fmt', name: 'technician_commission', orderable: false, searchable: false },
                 { data: 'user_name', name: 'user.name', orderable: false },
                 { data: 'created_at', name: 'created_at' },
                 { data: 'action', orderable: false, searchable: false, className: 'text-end' },
             ],
         });
 
-        $('#filter-from, #filter-to, #filter-technician').on('change', function () {
+        $('#filter-from, #filter-to').on('change', function () {
             txTable.ajax.reload();
         });
 
         $('#btn-reset-list-filter').on('click', function () {
             $('#filter-from').val(txDefaultFrom);
             $('#filter-to').val(txDefaultTo);
-            $('#filter-technician').val('');
             txTable.ajax.reload();
         });
 
