@@ -130,7 +130,7 @@ return [
                             'permission' => 'financial report view',
                         ],
                         [
-                            'label' => 'Keuangan',
+                            'label' => 'Laporan Kategori',
                             'route' => 'asset-reports.index',
                             'permission' => 'asset report view',
                         ],
