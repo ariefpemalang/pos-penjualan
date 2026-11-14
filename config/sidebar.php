@@ -19,7 +19,7 @@ return [
                 [
                     'label' => 'Transaksi',
                     'icon' => 'bi-receipt-cutoff',
-                    'permissions' => ['transaction view', 'purchase view'],
+                    'permissions' => ['transaction view', 'purchase view', 'purchase create'],
                     'submenus' => [
                         [
                             'label' => 'Transaksi Penjualan',
@@ -28,8 +28,18 @@ return [
                         ],
                         [
                             'label' => 'Pembelian Barang',
-                            'route' => 'purchases.index',
-                            'permission' => 'purchase view',
+                            'submenus' => [
+                                [
+                                    'label' => 'Pembelian',
+                                    'route' => 'purchases.create',
+                                    'permission' => 'purchase create',
+                                ],
+                                [
+                                    'label' => 'Data Pembelian',
+                                    'route' => 'purchases.index',
+                                    'permission' => 'purchase view',
+                                ],
+                            ],
                         ],
                     ],
                 ],
