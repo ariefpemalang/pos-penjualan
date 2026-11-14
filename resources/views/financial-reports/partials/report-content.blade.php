@@ -22,14 +22,9 @@
                 <div class="fr-stat-meta">{{ $purchases['purchase_count'] }} pembelian + {{ $manualExpense['entry_count'] }} manual</div>
             </td>
             <td class="fr-stat-card">
-                <div class="fr-stat-label">Komisi Teknisi</div>
-                <div class="fr-stat-value fr-text-info">{{ $rp($sales['technician_commission']) }}</div>
-                <div class="fr-stat-meta">Sesuai % komisi masing-masing teknisi</div>
-            </td>
-            <td class="fr-stat-card">
                 <div class="fr-stat-label">Estimasi Laba Owner</div>
                 <div class="fr-stat-value">{{ $rp($profit['owner_net_estimate']) }}</div>
-                <div class="fr-stat-meta">Margin barang + jasa owner − pengeluaran manual</div>
+                <div class="fr-stat-meta">Margin barang − pengeluaran operasional</div>
             </td>
         </tr>
     </table>
@@ -43,7 +38,6 @@
                 <table class="fr-table fr-table-simple" width="100%">
                     <tbody>
                         <tr><td>Penjualan Barang</td><td class="text-end">{{ $rp($sales['items_revenue']) }}</td></tr>
-                        <tr><td>Jasa Servis</td><td class="text-end">{{ $rp($sales['services_revenue']) }}</td></tr>
                         <tr class="fw-medium"><td>Subtotal Kotor</td><td class="text-end">{{ $rp($sales['gross']) }}</td></tr>
                         <tr><td class="fr-text-danger">Diskon</td><td class="text-end fr-text-danger">- {{ $rp($sales['discount']) }}</td></tr>
                         <tr><td>Uang muka tiket</td><td class="text-end">{{ $rp($sales['down_payment_in'] ?? 0) }}</td></tr>
@@ -58,14 +52,12 @@
             <div class="fr-panel-body">
                 <table class="fr-table fr-table-simple" width="100%">
                     <tbody>
-                        <tr><td>Komisi Teknisi (dari jasa)</td><td class="text-end">{{ $rp($sales['technician_commission']) }}</td></tr>
-                        <tr><td>Bagian Owner — Jasa</td><td class="text-end">{{ $rp($sales['owner_service_share']) }}</td></tr>
                         <tr><td>HPP Barang (harga beli)</td><td class="text-end">{{ $rp($sales['items_cost'] ?? 0) }}</td></tr>
                         <tr><td>Bagian Owner — Barang (margin)</td><td class="text-end">{{ $rp($sales['owner_items_share']) }}</td></tr>
                         <tr class="fr-total-row"><td>Total Bagian Owner</td><td class="text-end">{{ $rp($sales['owner_share']) }}</td></tr>
                     </tbody>
                 </table>
-                <p class="fr-hint">Margin barang = harga jual − harga beli. Komisi hanya dari jasa service.</p>
+                <p class="fr-hint">Margin barang = harga jual − harga beli.</p>
             </div>
         </td>
     </tr>
@@ -126,42 +118,6 @@
         </td>
     </tr>
 </table>
-
-<div class="fr-panel fr-panel-block">
-    <div class="fr-panel-head">Komisi per Teknisi</div>
-    <div class="fr-panel-body">
-        <table class="fr-table" width="100%">
-            <thead>
-                <tr>
-                    <th>Teknisi</th>
-                    <th class="text-center">Jumlah Transaksi</th>
-                    <th class="text-end">Total Jasa</th>
-                    <th class="text-end">Total Komisi</th>
-                </tr>
-            </thead>
-            <tbody>
-                @forelse ($report['commissions'] as $row)
-                    <tr>
-                        <td class="fw-medium">{{ $row['technician_name'] }}</td>
-                        <td class="text-center">{{ $row['transaction_count'] }}</td>
-                        <td class="text-end">{{ $rp($row['services_total']) }}</td>
-                        <td class="text-end fw-semibold fr-text-info">{{ $rp($row['commission_total']) }}</td>
-                    </tr>
-                @empty
-                    <tr><td colspan="4" class="text-center fr-muted">Belum ada komisi pada periode ini.</td></tr>
-                @endforelse
-            </tbody>
-            @if ($report['commissions']->isNotEmpty())
-                <tfoot>
-                    <tr class="fw-bold">
-                        <td colspan="3" class="text-end">Total Komisi</td>
-                        <td class="text-end fr-text-info">{{ $rp($sales['technician_commission']) }}</td>
-                    </tr>
-                </tfoot>
-            @endif
-        </table>
-    </div>
-</div>
 
 @php $inflows = $report['payment_sources']['inflows']; @endphp
 <div class="fr-panel fr-panel-block">
@@ -267,7 +223,7 @@
                 </td>
                 <td width="8"></td>
                 <td class="fr-source-box">
-                    <div class="fr-source-label">Total pengeluaran + komisi</div>
+                    <div class="fr-source-label">Total pengeluaran</div>
                     <div class="fr-source-value fr-text-danger">- {{ $rp($totals['operating_outflow']) }}</div>
                 </td>
                 <td width="8"></td>

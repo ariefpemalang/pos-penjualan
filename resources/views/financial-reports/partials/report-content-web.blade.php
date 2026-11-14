@@ -10,7 +10,7 @@
 
 {{-- KPI ringkasan --}}
 <div class="row g-3 mb-4">
-    <div class="col-sm-6 col-xl-3">
+    <div class="col-md-4">
         <div class="dash-kpi dash-kpi-success">
             <div class="dash-kpi-icon"><i class="bi bi-cash-stack"></i></div>
             <div class="dash-kpi-body">
@@ -20,7 +20,7 @@
             </div>
         </div>
     </div>
-    <div class="col-sm-6 col-xl-3">
+    <div class="col-md-4">
         <div class="dash-kpi dash-kpi-warning">
             <div class="dash-kpi-icon"><i class="bi bi-cart-dash"></i></div>
             <div class="dash-kpi-body">
@@ -30,23 +30,13 @@
             </div>
         </div>
     </div>
-    <div class="col-sm-6 col-xl-3">
-        <div class="dash-kpi dash-kpi-info">
-            <div class="dash-kpi-icon"><i class="bi bi-person-gear"></i></div>
-            <div class="dash-kpi-body">
-                <div class="dash-kpi-label">Komisi Teknisi</div>
-                <div class="dash-kpi-value text-info">{{ $rp($sales['technician_commission']) }}</div>
-                <div class="dash-kpi-meta">Sesuai % komisi masing-masing teknisi</div>
-            </div>
-        </div>
-    </div>
-    <div class="col-sm-6 col-xl-3">
+    <div class="col-md-4">
         <div class="dash-kpi fr-kpi-owner">
             <div class="dash-kpi-icon"><i class="bi bi-piggy-bank"></i></div>
             <div class="dash-kpi-body">
                 <div class="dash-kpi-label">Estimasi Laba Owner</div>
                 <div class="dash-kpi-value">{{ $rp($profit['owner_net_estimate']) }}</div>
-                <div class="dash-kpi-meta">Margin barang + jasa owner − pengeluaran manual</div>
+                <div class="dash-kpi-meta">Margin barang − pengeluaran operasional</div>
             </div>
         </div>
     </div>
@@ -60,7 +50,7 @@
                 <div class="data-panel-icon"><i class="bi bi-receipt"></i></div>
                 <div>
                     <h3 class="data-panel-title">Rincian Pemasukan Penjualan</h3>
-                    <p class="data-panel-desc">Breakdown pendapatan dari barang dan jasa service</p>
+                    <p class="data-panel-desc">Breakdown pendapatan dari barang dan produk</p>
                 </div>
             </div>
             <div class="data-panel-body pt-3">
@@ -69,10 +59,6 @@
                         <tr>
                             <td>Penjualan Barang</td>
                             <td class="text-end">{{ $rp($sales['items_revenue']) }}</td>
-                        </tr>
-                        <tr>
-                            <td>Jasa Servis</td>
-                            <td class="text-end">{{ $rp($sales['services_revenue']) }}</td>
                         </tr>
                         <tr class="fr-subtotal-row">
                             <td class="fw-semibold">Subtotal Kotor</td>
@@ -101,20 +87,12 @@
                 <div class="data-panel-icon"><i class="bi bi-pie-chart"></i></div>
                 <div>
                     <h3 class="data-panel-title">Pembagian Penjualan</h3>
-                    <p class="data-panel-desc">Alokasi pendapatan antara teknisi dan owner</p>
+                    <p class="data-panel-desc">Alokasi pendapatan dan HPP barang</p>
                 </div>
             </div>
             <div class="data-panel-body pt-3">
                 <table class="table table-borderless fr-detail-table mb-0">
                     <tbody>
-                        <tr>
-                            <td>Komisi Teknisi (dari jasa)</td>
-                            <td class="text-end">{{ $rp($sales['technician_commission']) }}</td>
-                        </tr>
-                        <tr>
-                            <td>Bagian Owner — Jasa</td>
-                            <td class="text-end">{{ $rp($sales['owner_service_share']) }}</td>
-                        </tr>
                         <tr>
                             <td>HPP Barang (harga beli)</td>
                             <td class="text-end">{{ $rp($sales['items_cost'] ?? 0) }}</td>
@@ -131,7 +109,7 @@
                 </table>
                 <p class="fr-hint-web mb-0">
                     <i class="bi bi-info-circle me-1"></i>
-                    Margin barang = harga jual − harga beli. Komisi hanya dari jasa service.
+                    Margin barang = harga jual − harga beli.
                 </p>
             </div>
         </div>
@@ -204,55 +182,6 @@
                     </tbody>
                 </table>
             </div>
-        </div>
-    </div>
-</div>
-
-{{-- Komisi per teknisi --}}
-<div class="data-panel mb-4">
-    <div class="data-panel-head">
-        <div class="data-panel-icon"><i class="bi bi-people"></i></div>
-        <div>
-            <h3 class="data-panel-title">Komisi per Teknisi</h3>
-            <p class="data-panel-desc">Rincian komisi berdasarkan transaksi jasa pada periode ini</p>
-        </div>
-    </div>
-    <div class="data-panel-body">
-        <div class="table-responsive">
-            <table class="table table-hover align-middle fr-data-table mb-0">
-                <thead>
-                    <tr>
-                        <th>Teknisi</th>
-                        <th class="text-center">Jumlah Transaksi</th>
-                        <th class="text-end">Total Jasa</th>
-                        <th class="text-end">Total Komisi</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse ($report['commissions'] as $row)
-                        <tr>
-                            <td class="fw-semibold">{{ $row['technician_name'] }}</td>
-                            <td class="text-center">
-                                <span class="badge bg-light text-dark border">{{ $row['transaction_count'] }}</span>
-                            </td>
-                            <td class="text-end">{{ $rp($row['services_total']) }}</td>
-                            <td class="text-end fw-semibold text-info">{{ $rp($row['commission_total']) }}</td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="4" class="text-center text-muted py-4">Belum ada komisi pada periode ini.</td>
-                        </tr>
-                    @endforelse
-                </tbody>
-                @if ($report['commissions']->isNotEmpty())
-                    <tfoot>
-                        <tr>
-                            <td colspan="3" class="text-end fw-bold">Total Komisi</td>
-                            <td class="text-end fw-bold text-info">{{ $rp($sales['technician_commission']) }}</td>
-                        </tr>
-                    </tfoot>
-                @endif
-            </table>
         </div>
     </div>
 </div>
@@ -375,7 +304,7 @@
         <div class="data-panel-icon"><i class="bi bi-wallet2"></i></div>
         <div>
             <h3 class="data-panel-title">Ringkasan Arus Kas Estimasi</h3>
-            <p class="data-panel-desc">Perkiraan sisa kas setelah pemasukan, pengeluaran, dan komisi</p>
+            <p class="data-panel-desc">Perkiraan sisa kas setelah pemasukan dan pengeluaran</p>
         </div>
     </div>
     <div class="data-panel-body">
@@ -388,7 +317,7 @@
             </div>
             <div class="col-md-4">
                 <div class="fr-cash-tile fr-cash-tile-out">
-                    <div class="fr-cash-tile-label">Total pengeluaran + komisi</div>
+                    <div class="fr-cash-tile-label">Total pengeluaran</div>
                     <div class="fr-cash-tile-value text-danger">− {{ $rp($totals['operating_outflow']) }}</div>
                 </div>
             </div>

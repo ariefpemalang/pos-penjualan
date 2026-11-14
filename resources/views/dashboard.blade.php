@@ -70,7 +70,7 @@
                     <div class="dash-kpi-body">
                         <div class="dash-kpi-label">Estimasi Sisa Kas</div>
                         <div class="dash-kpi-value">{{ $rp($kpis['profit_estimate_month'] ?? 0) }}</div>
-                        <div class="dash-kpi-meta">Setelah pembelian & komisi</div>
+                        <div class="dash-kpi-meta">Setelah pembelian</div>
                     </div>
                 </div>
             </a>
@@ -81,7 +81,7 @@
     {{-- KPI operasional --}}
     <div class="row g-3 mb-4">
         @can('dashboard items view')
-            <div class="col-6 col-md-4 col-xl-2">
+            <div class="col-12 col-sm-6 col-md-4">
                 <a href="{{ route('items.index') }}" class="dash-card-link" title="Lihat data barang">
                     <div class="stat-card dash-mini-stat">
                         <div class="dash-mini-icon text-primary"><i class="bi bi-box-seam"></i></div>
@@ -92,7 +92,7 @@
             </div>
         @endcan
         @can('dashboard low stock view')
-            <div class="col-6 col-md-4 col-xl-2">
+            <div class="col-12 col-sm-6 col-md-4">
                 <a href="{{ $lowStockUrl }}" class="dash-card-link" title="Lihat barang stok menipis">
                     <div class="stat-card dash-mini-stat {{ ($kpis['low_stock'] ?? 0) > 0 ? 'dash-mini-stat-danger' : '' }}">
                         <div class="dash-mini-icon text-danger"><i class="bi bi-exclamation-triangle"></i></div>
@@ -103,7 +103,7 @@
             </div>
         @endcan
         @can('dashboard customers view')
-            <div class="col-6 col-md-4 col-xl-2">
+            <div class="col-12 col-sm-6 col-md-4">
                 <a href="{{ route('customers.index') }}" class="dash-card-link" title="Lihat data pelanggan">
                     <div class="stat-card dash-mini-stat">
                         <div class="dash-mini-icon text-info"><i class="bi bi-people"></i></div>
@@ -113,46 +113,73 @@
                 </a>
             </div>
         @endcan
-        @can('dashboard technicians view')
-            <div class="col-6 col-md-4 col-xl-2">
-                <a href="{{ route('technicians.index') }}" class="dash-card-link" title="Lihat data teknisi">
-                    <div class="stat-card dash-mini-stat">
-                        <div class="dash-mini-icon text-secondary"><i class="bi bi-wrench-adjustable"></i></div>
-                        <div class="stat-label">Teknisi Aktif</div>
-                        <div class="stat-value accent">{{ $kpis['technicians_active'] ?? 0 }}</div>
+    </div>
+
+    {{-- Akses Cepat (dipindahkan ke atas) --}}
+    <div class="row g-4 mb-4">
+        <div class="col-12">
+            <div class="data-panel">
+                <div class="data-panel-head data-panel-head-row">
+                    <h2 class="data-panel-title"><i class="bi bi-lightning me-1"></i> Akses Cepat</h2>
+                </div>
+                <div class="data-panel-body">
+                    <div class="row g-2">
+                        @can('transaction create')
+                            <div class="col-6 col-md-4 col-lg-2">
+                                <a href="{{ route('transactions.create') }}" class="dash-quick-link">
+                                    <i class="bi bi-plus-circle"></i>
+                                    <span>Transaksi Baru</span>
+                                </a>
+                            </div>
+                        @endcan
+                        @can('purchase create')
+                            <div class="col-6 col-md-4 col-lg-2">
+                                <a href="{{ route('purchases.create') }}" class="dash-quick-link">
+                                    <i class="bi bi-bag-plus"></i>
+                                    <span>Pembelian Barang</span>
+                                </a>
+                            </div>
+                        @endcan
+                        @can('financial report view')
+                            <div class="col-6 col-md-4 col-lg-2">
+                                <a href="{{ route('financial-reports.index') }}" class="dash-quick-link">
+                                    <i class="bi bi-graph-up"></i>
+                                    <span>Laporan Keuangan</span>
+                                </a>
+                            </div>
+                        @endcan
+                        @can('stock report view')
+                            <div class="col-6 col-md-4 col-lg-2">
+                                <a href="{{ route('stock-reports.index') }}" class="dash-quick-link">
+                                    <i class="bi bi-clipboard-data"></i>
+                                    <span>Laporan Stok</span>
+                                </a>
+                            </div>
+                        @endcan
+                        @can('customer create')
+                            <div class="col-6 col-md-4 col-lg-2">
+                                <a href="{{ route('customers.index') }}" class="dash-quick-link">
+                                    <i class="bi bi-person-plus"></i>
+                                    <span>Data Pelanggan</span>
+                                </a>
+                            </div>
+                        @endcan
+                        @can('settings view')
+                            <div class="col-6 col-md-4 col-lg-2">
+                                <a href="{{ route('settings.edit') }}" class="dash-quick-link">
+                                    <i class="bi bi-gear"></i>
+                                    <span>Pengaturan</span>
+                                </a>
+                            </div>
+                        @endcan
                     </div>
-                </a>
+                </div>
             </div>
-        @endcan
-        @can('dashboard services view')
-            <div class="col-6 col-md-4 col-xl-2">
-                <a href="{{ route('workshop-services.index') }}" class="dash-card-link" title="Lihat master jasa">
-                    <div class="stat-card dash-mini-stat">
-                        <div class="dash-mini-icon text-warning"><i class="bi bi-tools"></i></div>
-                        <div class="stat-label">Master Jasa</div>
-                        <div class="stat-value accent">{{ $kpis['services_active'] ?? 0 }}</div>
-                    </div>
-                </a>
-            </div>
-        @endcan
-        @can('dashboard commission view')
-            <div class="col-6 col-md-4 col-xl-2">
-                @can('financial report view')
-                    <a href="{{ $financialMonthUrl }}" class="dash-card-link" title="Lihat komisi di laporan keuangan">
-                @else
-                    <a href="{{ route('transactions.index') }}" class="dash-card-link" title="Lihat transaksi">
-                @endcan
-                    <div class="stat-card dash-mini-stat">
-                        <div class="dash-mini-icon text-success"><i class="bi bi-percent"></i></div>
-                        <div class="stat-label">Komisi Bulan Ini</div>
-                        <div class="stat-value accent" style="font-size:0.95rem">{{ $rp($kpis['commission_month'] ?? 0) }}</div>
-                    </div>
-                </a>
-            </div>
-        @endcan
+        </div>
     </div>
 
     @can('transaction view')
+        {{-- Tren 7 Hari Terakhir & Jenis Transaksi --}}
         <div class="row g-4 mb-4">
             <div class="col-lg-8">
                 <div class="data-panel h-100">
@@ -170,87 +197,12 @@
             <div class="col-lg-4">
                 <div class="data-panel h-100">
                     <div class="data-panel-head">
-                        <h2 class="data-panel-title"><i class="bi bi-pie-chart me-1"></i> Metode Bayar</h2>
-                        <span class="text-muted small d-block">Penjualan {{ $monthLabel }}</span>
-                    </div>
-                    <div class="data-panel-body d-flex align-items-center justify-content-center">
-                        <div class="dash-chart-donut">
-                            <canvas id="chart-payment-methods"></canvas>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="row g-4 mb-4">
-            <div class="col-lg-5">
-                <div class="data-panel h-100">
-                    <div class="data-panel-head">
                         <h2 class="data-panel-title"><i class="bi bi-diagram-3 me-1"></i> Jenis Transaksi</h2>
                         <span class="text-muted small d-block">{{ $monthLabel }}</span>
                     </div>
                     <div class="data-panel-body">
                         <div class="dash-chart-wrap" style="max-height:220px">
                             <canvas id="chart-transaction-types"></canvas>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-7">
-                <div class="data-panel h-100">
-                    <div class="data-panel-head data-panel-head-row">
-                        <h2 class="data-panel-title"><i class="bi bi-lightning me-1"></i> Akses Cepat</h2>
-                    </div>
-                    <div class="data-panel-body">
-                        <div class="row g-2">
-                            @can('transaction create')
-                                <div class="col-6 col-md-4">
-                                    <a href="{{ route('transactions.create') }}" class="dash-quick-link">
-                                        <i class="bi bi-plus-circle"></i>
-                                        <span>Transaksi Baru</span>
-                                    </a>
-                                </div>
-                            @endcan
-                            @can('purchase create')
-                                <div class="col-6 col-md-4">
-                                    <a href="{{ route('purchases.create') }}" class="dash-quick-link">
-                                        <i class="bi bi-bag-plus"></i>
-                                        <span>Pembelian Barang</span>
-                                    </a>
-                                </div>
-                            @endcan
-                            @can('financial report view')
-                                <div class="col-6 col-md-4">
-                                    <a href="{{ route('financial-reports.index') }}" class="dash-quick-link">
-                                        <i class="bi bi-graph-up"></i>
-                                        <span>Laporan Keuangan</span>
-                                    </a>
-                                </div>
-                            @endcan
-                            @can('stock report view')
-                                <div class="col-6 col-md-4">
-                                    <a href="{{ route('stock-reports.index') }}" class="dash-quick-link">
-                                        <i class="bi bi-clipboard-data"></i>
-                                        <span>Laporan Stok</span>
-                                    </a>
-                                </div>
-                            @endcan
-                            @can('customer create')
-                                <div class="col-6 col-md-4">
-                                    <a href="{{ route('customers.index') }}" class="dash-quick-link">
-                                        <i class="bi bi-person-plus"></i>
-                                        <span>Data Pelanggan</span>
-                                    </a>
-                                </div>
-                            @endcan
-                            @can('settings view')
-                                <div class="col-6 col-md-4">
-                                    <a href="{{ route('settings.edit') }}" class="dash-quick-link">
-                                        <i class="bi bi-gear"></i>
-                                        <span>Pengaturan</span>
-                                    </a>
-                                </div>
-                            @endcan
                         </div>
                     </div>
                 </div>
@@ -418,32 +370,25 @@
                     },
                 });
 
-                new Chart(document.getElementById('chart-payment-methods'), {
-                    type: 'doughnut',
-                    data: {
-                        labels: payments.labels,
-                        datasets: [{
-                            data: payments.values,
-                            backgroundColor: payments.colors,
-                            borderWidth: 0,
-                            hoverOffset: 6,
-                        }],
-                    },
-                    options: {
-                        responsive: true,
-                        cutout: '62%',
-                        plugins: {
-                            legend: { position: 'bottom', labels: { font: chartFont, padding: 12, usePointStyle: true } },
-                            tooltip: {
-                                callbacks: {
-                                    label: function (ctx) {
-                                        return ctx.label + ': Rp ' + Number(ctx.raw || 0).toLocaleString('id-ID');
-                                    },
-                                },
-                            },
+                const paymentChartEl = document.getElementById('chart-payment-methods');
+                if (paymentChartEl) {
+                    new Chart(paymentChartEl, {
+                        type: 'doughnut',
+                        data: {
+                            labels: payments.labels,
+                            datasets: [{
+                                data: payments.values,
+                                backgroundColor: payments.colors,
+                                borderWidth: 0,
+                                hoverOffset: 6,
+                            }],
                         },
-                    },
-                });
+                        options: {
+                            responsive: true,
+                            cutout: '62%',
+                        },
+                    });
+                }
 
                 new Chart(document.getElementById('chart-transaction-types'), {
                     type: 'bar',

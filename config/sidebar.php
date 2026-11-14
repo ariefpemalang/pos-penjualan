@@ -132,12 +132,6 @@ return [
                         ],
                     ],
                 ],
-                [
-                    'label' => 'Akun Bank',
-                    'icon' => 'bi-bank',
-                    'route' => 'bank-accounts.index',
-                    'permission' => 'bank account view',
-                ],
             ],
         ],
         [

@@ -9,17 +9,11 @@
     $activeTechnicianId = $ticket?->technician_id ?: $loggedInTechnician?->id;
 @endphp
 
-<div class="mb-3">
+<div class="mb-3 d-none" aria-hidden="true">
     <label class="form-label">Teknisi <span id="tech-required" class="text-danger d-none">*</span></label>
-    <select name="technician_id" id="technician_id" class="form-control-clean atha-searchable-select">
-        <option value="">-- Pilih Teknisi --</option>
-        @foreach ($technicians as $technician)
-            <option value="{{ $technician->id }}" data-commission-percent="{{ (float) $technician->commission_percent }}" @selected((string) $activeTechnicianId === (string) $technician->id)>{{ $technician->code }} — {{ $technician->name }} ({{ number_format((float) $technician->commission_percent, 0) }}%)</option>
-        @endforeach
+    <select name="technician_id" id="technician_id" class="form-control-clean">
+        <option value="">-- Tanpa Teknisi --</option>
     </select>
-    @if ($showTechHint)
-        <div class="form-hint-sm">Wajib jika transaksi memiliki jasa servis.</div>
-    @endif
 </div>
 
 <div class="row g-2 mb-3">
@@ -78,7 +72,7 @@
         <span class="text-muted">Sub. Barang</span>
         <span id="sum-items" class="fw-medium text-end">Rp 0</span>
     </div>
-    <div class="col-6 d-flex justify-content-between gap-1">
+    <div class="col-6 d-flex justify-content-between gap-1 d-none" aria-hidden="true">
         <span class="text-muted">Sub. Jasa</span>
         <span id="sum-services" class="fw-medium text-end">Rp 0</span>
     </div>

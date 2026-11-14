@@ -28,9 +28,7 @@
             ['label' => 'Baru'],
         ],
         'title' => $ticket ? 'Nota Tiket '.$ticket->ticket_no : 'Transaksi Baru',
-        'subtitle' => $ticket
-            ? 'Bayar jasa servis saja, atau jasa plus sparepart dalam satu nota.'
-            : 'Penjualan sparepart, jasa service, atau gabungan keduanya.',
+        'subtitle' => 'Penjualan barang dan sparepart.',
     ])
 
     <form id="transaction-form">
@@ -160,55 +158,13 @@
                     </div>
                 </div>
 
-                <div class="data-panel">
-                    <div class="data-panel-head">
-                        <h2 class="data-panel-title"><i class="bi bi-wrench-adjustable me-1"></i> Jasa Servis</h2>
-                    </div>
-                    <div class="data-panel-body">
-                        <div class="stock-cart-add border rounded p-3 mb-3">
-                            <div class="cart-add-row row g-2">
-                                <div class="col-md-7">
-                                    <label class="form-label small mb-0" for="service_select">Pilih Jasa</label>
-                                    <select id="service_select" class="form-control-clean cart-add-control atha-searchable-select">
-                                        <option value="">-- Pilih Jasa --</option>
-                                        @foreach ($services as $service)
-                                            <option value="{{ $service->id }}"
-                                                data-code="{{ $service->code }}"
-                                                data-name="{{ $service->name }}"
-                                                data-price="{{ $service->price }}">
-                                                {{ $service->code }} — {{ $service->name }} (Rp {{ number_format($service->price, 0, ',', '.') }})
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                                <div class="col-md-3">
-                                    <label class="form-label small mb-0" for="service_qty">Qty</label>
-                                    <input type="number" id="service_qty" class="form-control form-control-clean cart-add-control" min="1" value="1">
-                                </div>
-                                <div class="col-md-2">
-                                    <label class="form-label small mb-0 cart-add-action-label" aria-hidden="true">Aksi</label>
-                                    <button type="button" class="btn btn-outline-primary w-100 cart-add-btn" id="btn-add-service">
-                                        <i class="bi bi-plus-lg"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="table-responsive border rounded">
-                            <table class="table table-sm table-hover align-middle mb-0">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>Jasa</th>
-                                        <th class="text-center">Qty</th>
-                                        <th class="text-end">Harga</th>
-                                        <th class="text-end">Subtotal</th>
-                                        <th></th>
-                                    </tr>
-                                </thead>
-                                <tbody id="services-cart-body"></tbody>
-                            </table>
-                            <div id="services-cart-empty" class="text-center text-muted py-3 small">Belum ada jasa servis.</div>
-                        </div>
-                    </div>
+                {{-- Hidden fallback container untuk kompatibilitas script keranjang transaksi --}}
+                <div class="d-none" id="services-cart-container" aria-hidden="true">
+                    <select id="service_select"><option value=""></option></select>
+                    <input type="number" id="service_qty" value="1">
+                    <button type="button" id="btn-add-service"></button>
+                    <table><tbody id="services-cart-body"></tbody></table>
+                    <div id="services-cart-empty"></div>
                 </div>
             </div>
 

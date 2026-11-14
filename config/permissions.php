@@ -9,9 +9,6 @@ return [
             'dashboard low stock view',
             'dashboard items view',
             'dashboard customers view',
-            'dashboard technicians view',
-            'dashboard services view',
-            'dashboard commission view',
         ],
     ],
     [
@@ -29,10 +26,6 @@ return [
     [
         'group' => 'Supplier',
         'access' => ['supplier view', 'supplier create', 'supplier edit', 'supplier delete'],
-    ],
-    [
-        'group' => 'Teknisi',
-        'access' => ['technician view', 'technician create', 'technician edit', 'technician delete'],
     ],
     [
         'group' => 'Kategori Barang',
@@ -67,14 +60,6 @@ return [
         ],
     ],
     [
-        'group' => 'Master Jasa',
-        'access' => ['workshop service view', 'workshop service create', 'workshop service edit', 'workshop service delete'],
-    ],
-    [
-        'group' => 'Tiket Servis',
-        'access' => ['service ticket view', 'service ticket create', 'service ticket edit', 'service ticket delete'],
-    ],
-    [
         'group' => 'Transaksi',
         'access' => ['transaction view', 'transaction create', 'transaction edit', 'transaction delete'],
     ],
@@ -87,14 +72,6 @@ return [
         'access' => ['financial report view'],
     ],
     [
-        'group' => 'Laporan Servis',
-        'access' => ['service report view'],
-    ],
-    [
-        'group' => 'Laporan Teknisi',
-        'access' => ['technician report view'],
-    ],
-    [
         'group' => 'Laporan Aset Kategori',
         'access' => ['asset report view'],
     ],
@@ -105,10 +82,6 @@ return [
     [
         'group' => 'Pengeluaran Manual',
         'access' => ['manual expense view', 'manual expense create', 'manual expense cancel'],
-    ],
-    [
-        'group' => 'Akun Bank',
-        'access' => ['bank account view', 'bank account create', 'bank account edit', 'bank account delete'],
     ],
     [
         'group' => 'Pengaturan Aplikasi',

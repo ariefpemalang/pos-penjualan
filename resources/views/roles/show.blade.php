@@ -16,11 +16,14 @@
 
     <div class="form-panel form-panel-clean">
         <div class="form-panel-body">
-            @if ($role->permissions->isEmpty())
+            @php
+                $validPermissions = $role->permissions->filter(fn($p) => in_array($p->name, \App\Support\PermissionGroups::names()));
+            @endphp
+            @if ($validPermissions->isEmpty())
                 <p class="text-muted mb-0">Belum ada permission.</p>
             @else
                 <div class="perm-tag-list">
-                    @foreach ($role->permissions as $permission)
+                    @foreach ($validPermissions as $permission)
                         <span class="perm-tag">{{ ucwords($permission->name) }}</span>
                     @endforeach
                 </div>

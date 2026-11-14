@@ -9,7 +9,7 @@
             ['label' => 'Laporan Keuangan'],
         ],
         'title' => 'Laporan Keuangan',
-        'subtitle' => 'Pemasukan penjualan, komisi teknisi, dan pengeluaran pembelian.',
+        'subtitle' => 'Pemasukan penjualan dan pengeluaran operasional.',
     ])
 
     <div class="data-panel mb-4">
@@ -44,12 +44,6 @@
                     </a>
                     <a href="{{ route('asset-reports.index') }}" class="btn btn-outline-primary">
                         <i class="bi bi-wallet2 me-1"></i> Laporan Aset Kategori
-                    </a>
-                    <a href="{{ route('service-reports.index') }}" class="btn btn-outline-info">
-                        <i class="bi bi-tools me-1"></i> Laporan Servis
-                    </a>
-                    <a href="{{ route('technician-reports.index') }}" class="btn btn-outline-dark">
-                        <i class="bi bi-person-badge me-1"></i> Laporan Teknisi
                     </a>
                 </div>
             </form>
