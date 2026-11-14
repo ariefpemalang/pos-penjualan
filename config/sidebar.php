@@ -128,17 +128,17 @@ return [
                             'label' => 'Laporan Penjualan',
                             'submenus' => [
                                 [
-                                    'label' => 'Transaksi',
+                                    'label' => 'Laporan Transaksi',
                                     'route' => 'sales-reports.index',
                                     'permission' => 'financial report view',
                                 ],
                                 [
-                                    'label' => 'Penjualan Barang',
+                                    'label' => 'Laporan Penjualan Barang',
                                     'route' => 'item-sales-reports.index',
                                     'permission' => 'financial report view',
                                 ],
                                 [
-                                    'label' => 'Penjualan Kategori',
+                                    'label' => 'Laporan Penjualan Kategori',
                                     'route' => 'category-sales-reports.index',
                                     'permission' => 'financial report view',
                                 ],
