@@ -64,13 +64,20 @@ if (! function_exists('brand_logo_url')) {
             $path = trim(app(\App\Services\SettingService::class)->getString('company_logo'));
 
             if ($path !== '' && \Illuminate\Support\Facades\Storage::disk('public')->exists($path)) {
-                return \Illuminate\Support\Facades\Storage::disk('public')->url($path);
+                $fullStoragePath = \Illuminate\Support\Facades\Storage::disk('public')->path($path);
+                $v = file_exists($fullStoragePath) ? filemtime($fullStoragePath) : time();
+
+                return \Illuminate\Support\Facades\Storage::disk('public')->url($path) . '?v=' . $v;
             }
         } catch (\Throwable) {
             // fallback ke logo default
         }
 
-        return asset((string) config('branding.logo', 'logo.png'));
+        $logo = (string) config('branding.logo', 'logo.png');
+        $filePath = public_path($logo);
+        $v = file_exists($filePath) ? filemtime($filePath) : time();
+
+        return asset($logo) . '?v=' . $v;
     }
 }
 

@@ -2,9 +2,9 @@
 
 return [
     'defaults' => [
-        'app_name' => env('APP_BRAND_NAME', 'AR Service'),
-        'app_tagline' => env('APP_BRAND_TAGLINE', 'Service Smartphone & Laptop'),
-        'app_description' => 'Sistem manajemen service smartphone dan laptop untuk transaksi, stok sparepart, dan layanan pelanggan.',
+        'app_name' => env('APP_BRAND_NAME', 'AR POS'),
+        'app_tagline' => env('APP_BRAND_TAGLINE', 'Aksesories & Voucher'),
+        'app_description' => 'Sistem POS dan manajemen penjualan toko retail, aksesoris, dan voucher.',
         'company_address' => '',
         'company_whatsapp' => '',
         'company_logo' => '',

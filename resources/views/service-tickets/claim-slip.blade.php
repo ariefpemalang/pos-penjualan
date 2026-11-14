@@ -171,7 +171,7 @@
                                 <div class="ncr-sign-name">( {{ $ticket->customer?->name ?? 'Pelanggan' }} )</div>
                             </div>
                             <div class="ncr-sign-col">
-                                <div>Penerima / AR Service,</div>
+                                <div>Penerima / {{ brand_name() }},</div>
                                 <div class="ncr-sign-space"></div>
                                 <div class="ncr-sign-name">( {{ brand_name() }} )</div>
                             </div>
