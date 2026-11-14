@@ -135,7 +135,7 @@ return [
                             'permission' => 'asset report view',
                         ],
                         [
-                            'label' => 'Penjualan',
+                            'label' => 'Laporan Penjualan',
                             'submenus' => [
                                 [
                                     'label' => 'Transaksi',
@@ -155,7 +155,7 @@ return [
                             ],
                         ],
                         [
-                            'label' => 'Pembelian',
+                            'label' => 'Laporan Pembelian',
                             'submenus' => [
                                 [
                                     'label' => 'Data Pembelian',
