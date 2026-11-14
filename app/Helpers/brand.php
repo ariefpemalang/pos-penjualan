@@ -133,7 +133,19 @@ if (! function_exists('is_active_menu')) {
 if (! function_exists('is_active_submenu')) {
     function is_active_submenu(array $submenus): string
     {
-        $routes = collect($submenus)->pluck('route')->filter()->all();
+        $routes = [];
+        foreach ($submenus as $sub) {
+            if (! empty($sub['route'])) {
+                $routes[] = $sub['route'];
+            }
+            if (! empty($sub['submenus']) && is_array($sub['submenus'])) {
+                foreach ($sub['submenus'] as $child) {
+                    if (! empty($child['route'])) {
+                        $routes[] = $child['route'];
+                    }
+                }
+            }
+        }
 
         return is_active_menu($routes);
     }

@@ -102,39 +102,67 @@ return [
             'items' => [
                 [
                     'label' => 'Keuangan',
-                    'icon' => 'bi-wallet2',
+                    'icon' => 'bi-file-earmark-text',
                     'permissions' => [
                         'sales report view',
                         'financial report view',
                         'asset report view',
                         'manual income view',
                         'manual expense view',
+                        'transaction view',
+                        'purchase view',
+                        'purchase create',
                     ],
                     'submenus' => [
                         [
-                            'label' => 'Laporan Penjualan',
-                            'route' => 'sales-reports.index',
-                            'permission' => 'financial report view',
-                        ],
-                        [
-                            'label' => 'Laporan Penjualan Barang',
-                            'route' => 'item-sales-reports.index',
-                            'permission' => 'financial report view',
-                        ],
-                        [
-                            'label' => 'Laporan Penjualan Kategori',
-                            'route' => 'category-sales-reports.index',
-                            'permission' => 'financial report view',
-                        ],
-                        [
-                            'label' => 'Laporan Keuangan',
+                            'label' => 'Laba Rugi',
                             'route' => 'financial-reports.index',
                             'permission' => 'financial report view',
                         ],
                         [
-                            'label' => 'Laporan Aset Kategori',
+                            'label' => 'Keuangan',
                             'route' => 'asset-reports.index',
                             'permission' => 'asset report view',
+                        ],
+                        [
+                            'label' => 'Penjualan',
+                            'submenus' => [
+                                [
+                                    'label' => 'Transaksi',
+                                    'route' => 'sales-reports.index',
+                                    'permission' => 'financial report view',
+                                ],
+                                [
+                                    'label' => 'Data Transaksi',
+                                    'route' => 'transactions.index',
+                                    'permission' => 'transaction view',
+                                ],
+                                [
+                                    'label' => 'Penjualan Barang',
+                                    'route' => 'item-sales-reports.index',
+                                    'permission' => 'financial report view',
+                                ],
+                                [
+                                    'label' => 'Penjualan Kategori',
+                                    'route' => 'category-sales-reports.index',
+                                    'permission' => 'financial report view',
+                                ],
+                            ],
+                        ],
+                        [
+                            'label' => 'Pembelian',
+                            'submenus' => [
+                                [
+                                    'label' => 'Pembelian',
+                                    'route' => 'purchases.create',
+                                    'permission' => 'purchase create',
+                                ],
+                                [
+                                    'label' => 'Data Pembelian',
+                                    'route' => 'purchases.index',
+                                    'permission' => 'purchase view',
+                                ],
+                            ],
                         ],
                         [
                             'label' => 'Pemasukan Manual',

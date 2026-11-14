@@ -20,9 +20,14 @@
                     @foreach ($group['items'] as $item)
                         @if (! empty($item['submenus']))
                             @php
-                                $visibleSubmenus = collect($item['submenus'])->filter(
-                                    fn ($sub) => user_can_menu($sub['permission'] ?? null)
-                                );
+                                $visibleSubmenus = collect($item['submenus'])->filter(function ($sub) {
+                                    if (! empty($sub['submenus'])) {
+                                        return collect($sub['submenus'])->some(
+                                            fn ($c) => user_can_menu($c['permission'] ?? null)
+                                        );
+                                    }
+                                    return user_can_menu($sub['permission'] ?? null);
+                                });
                                 $submenuId = 'submenu-' . str()->slug($item['label']);
                                 $isOpen = is_active_submenu($item['submenus']) === ' active';
                             @endphp
@@ -41,12 +46,44 @@
                                         <div class="sidebar-flyout-head">{{ $item['label'] }}</div>
                                         <ul class="sidebar-submenu list-unstyled">
                                             @foreach ($visibleSubmenus as $submenu)
-                                                <li>
-                                                    <a href="{{ route($submenu['route']) }}"
-                                                        class="sidebar-submenu-link{{ is_active_menu($submenu['route']) }}">
-                                                        {{ $submenu['label'] }}
-                                                    </a>
-                                                </li>
+                                                @if (! empty($submenu['submenus']))
+                                                    @php
+                                                        $visibleNested = collect($submenu['submenus'])->filter(
+                                                            fn ($child) => user_can_menu($child['permission'] ?? null)
+                                                        );
+                                                        $nestedId = 'nested-' . str()->slug($item['label'] . '-' . $submenu['label']);
+                                                        $isNestedOpen = is_active_submenu($submenu['submenus']) === ' active';
+                                                    @endphp
+                                                    @if ($visibleNested->isNotEmpty())
+                                                        <li class="sidebar-subgroup-item">
+                                                            <a class="sidebar-subgroup-toggle {{ $isNestedOpen ? 'is-active' : '' }}"
+                                                                data-bs-toggle="collapse" href="#{{ $nestedId }}"
+                                                                role="button" aria-expanded="{{ $isNestedOpen ? 'true' : 'false' }}">
+                                                                <span class="sidebar-subgroup-label">{{ $submenu['label'] }}</span>
+                                                                <i class="bi bi-chevron-down sidebar-chevron"></i>
+                                                            </a>
+                                                            <div class="collapse {{ $isNestedOpen ? 'show' : '' }}" id="{{ $nestedId }}">
+                                                                <ul class="sidebar-nested-list list-unstyled">
+                                                                    @foreach ($visibleNested as $nested)
+                                                                        <li>
+                                                                            <a href="{{ route($nested['route']) }}"
+                                                                                class="sidebar-nested-link{{ is_active_menu($nested['route']) }}">
+                                                                                {{ $nested['label'] }}
+                                                                            </a>
+                                                                        </li>
+                                                                    @endforeach
+                                                                </ul>
+                                                            </div>
+                                                        </li>
+                                                    @endif
+                                                @else
+                                                    <li>
+                                                        <a href="{{ route($submenu['route']) }}"
+                                                            class="sidebar-submenu-link{{ is_active_menu($submenu['route']) }}">
+                                                            {{ $submenu['label'] }}
+                                                        </a>
+                                                    </li>
+                                                @endif
                                             @endforeach
                                         </ul>
                                     </div>
