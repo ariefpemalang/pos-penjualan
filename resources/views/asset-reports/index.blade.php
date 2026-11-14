@@ -46,13 +46,7 @@
                     </label>
                     <div class="d-flex flex-wrap gap-2">
                         <button type="button" class="btn btn-sm ar-quick-btn" id="btn-select-all">
-                            <i class="bi bi-check-all me-1"></i> Semua
-                        </button>
-                        <button type="button" class="btn btn-sm ar-quick-btn ar-quick-btn-primary" id="btn-select-etalase">
-                            <i class="bi bi-shop me-1"></i> Etalase Toko
-                        </button>
-                        <button type="button" class="btn btn-sm ar-quick-btn ar-quick-btn-info" id="btn-select-sparepart">
-                            <i class="bi bi-tools me-1"></i> Sparepart
+                            <i class="bi bi-check-all me-1"></i> Semua Kategori
                         </button>
                         <button type="button" class="btn btn-sm ar-quick-btn" id="btn-unselect-all">
                             <i class="bi bi-x-circle me-1"></i> Kosongkan
@@ -65,20 +59,13 @@
                     @foreach ($allCategories as $cat)
                         @php
                             $isChecked = in_array($cat->id, $selectedCategoryIds, true);
-                            $groupType = \App\Services\AssetReportService::resolveGroup($cat->name);
                         @endphp
-                        <label class="ar-chip {{ $isChecked ? 'ar-chip-active' : '' }}" data-cat-group="{{ $groupType }}">
+                        <label class="ar-chip {{ $isChecked ? 'ar-chip-active' : '' }}">
                             <input type="checkbox" name="categories[]" value="{{ $cat->id }}"
                                 class="category-checkbox d-none"
-                                {{ $isChecked ? 'checked' : '' }}
-                                data-group="{{ $groupType }}">
+                                {{ $isChecked ? 'checked' : '' }}>
                             <i class="bi bi-check2 me-1 ar-chip-check"></i>
                             <span>{{ $cat->name }}</span>
-                            @if ($groupType === 'etalase_depan')
-                                <span class="ar-chip-badge ar-chip-badge-primary">Toko</span>
-                            @elseif ($groupType === 'sparepart')
-                                <span class="ar-chip-badge ar-chip-badge-info">Part</span>
-                            @endif
                         </label>
                     @endforeach
                 </div>
@@ -103,43 +90,43 @@
                 <div class="dash-kpi-body">
                     <div class="dash-kpi-label">TOTAL UANG ASET (HPP)</div>
                     <div class="dash-kpi-value text-warning">{{ $rp($summary['total_asset_cost']) }}</div>
-                    <div class="dash-kpi-meta">{{ number_format($summary['total_items_count']) }} jenis · {{ number_format($summary['total_stock']) }} unit</div>
+                    <div class="dash-kpi-meta">{{ number_format($summary['total_items_count']) }} variasi produk</div>
                 </div>
             </div>
         </div>
 
-        {{-- Total Etalase Toko --}}
+        {{-- Total Kuantitas Stok --}}
         <div class="col-6 col-xl-3">
             <div class="dash-kpi dash-kpi-primary">
-                <div class="dash-kpi-icon"><i class="bi bi-shop"></i></div>
+                <div class="dash-kpi-icon"><i class="bi bi-box-seam"></i></div>
                 <div class="dash-kpi-body">
-                    <div class="dash-kpi-label">TOTAL ETALASE TOKO</div>
-                    <div class="dash-kpi-value" style="color:#6366f1;">{{ $rp($summary['total_asset_depan']) }}</div>
-                    <div class="dash-kpi-meta">{{ number_format($summary['total_items_depan']) }} jenis · {{ number_format($summary['total_stock_depan']) }} unit</div>
-                </div>
-            </div>
-        </div>
-
-        {{-- Total Sparepart --}}
-        <div class="col-6 col-xl-3">
-            <div class="dash-kpi dash-kpi-info">
-                <div class="dash-kpi-icon"><i class="bi bi-tools"></i></div>
-                <div class="dash-kpi-body">
-                    <div class="dash-kpi-label">TOTAL SPAREPART</div>
-                    <div class="dash-kpi-value" style="color:#06b6d4;">{{ $rp($summary['total_sparepart']) }}</div>
-                    <div class="dash-kpi-meta">{{ number_format($summary['total_items_sparepart']) }} jenis · {{ number_format($summary['total_stock_sparepart']) }} unit</div>
+                    <div class="dash-kpi-label">TOTAL KUANTITAS STOK</div>
+                    <div class="dash-kpi-value text-primary">{{ number_format($summary['total_stock']) }} Unit</div>
+                    <div class="dash-kpi-meta">{{ $summary['selected_categories_count'] }} kategori dipilih</div>
                 </div>
             </div>
         </div>
 
         {{-- Estimasi Nilai Jual --}}
         <div class="col-6 col-xl-3">
+            <div class="dash-kpi dash-kpi-info">
+                <div class="dash-kpi-icon"><i class="bi bi-cash-stack"></i></div>
+                <div class="dash-kpi-body">
+                    <div class="dash-kpi-label">ESTIMASI NILAI JUAL</div>
+                    <div class="dash-kpi-value text-info">{{ $rp($summary['total_asset_sale']) }}</div>
+                    <div class="dash-kpi-meta">Jika seluruh stok terjual</div>
+                </div>
+            </div>
+        </div>
+
+        {{-- Potensi Laba Kotor --}}
+        <div class="col-6 col-xl-3">
             <div class="dash-kpi dash-kpi-success">
                 <div class="dash-kpi-icon"><i class="bi bi-graph-up-arrow"></i></div>
                 <div class="dash-kpi-body">
-                    <div class="dash-kpi-label">ESTIMASI NILAI JUAL</div>
-                    <div class="dash-kpi-value" style="color:#22c55e;">{{ $rp($summary['total_asset_sale']) }}</div>
-                    <div class="dash-kpi-meta">Potensi Laba: <strong style="color:#22c55e;">+{{ $rp($summary['total_potential_margin']) }}</strong></div>
+                    <div class="dash-kpi-label">POTENSI LABA KOTOR</div>
+                    <div class="dash-kpi-value text-success">+{{ $rp($summary['total_potential_margin']) }}</div>
+                    <div class="dash-kpi-meta">Estimasi selisih margin</div>
                 </div>
             </div>
         </div>
@@ -158,14 +145,11 @@
                 <p class="data-panel-desc">Total aset dihitung dari stok × harga beli (HPP).</p>
             </div>
             <div class="d-none d-md-flex flex-wrap gap-2 align-items-center">
-                <span class="ar-summary-pill ar-summary-pill-primary">
-                    <i class="bi bi-shop"></i> Etalase: <strong>{{ $rp($summary['total_asset_depan']) }}</strong>
-                </span>
-                <span class="ar-summary-pill ar-summary-pill-info">
-                    <i class="bi bi-tools"></i> Sparepart: <strong>{{ $rp($summary['total_sparepart']) }}</strong>
-                </span>
                 <span class="ar-summary-pill ar-summary-pill-warning">
-                    Total: <strong>{{ $rp($summary['total_asset_cost']) }}</strong>
+                    Total Aset: <strong>{{ $rp($summary['total_asset_cost']) }}</strong>
+                </span>
+                <span class="ar-summary-pill ar-summary-pill-primary">
+                    Total Stok: <strong>{{ number_format($summary['total_stock']) }} Unit</strong>
                 </span>
             </div>
         </div>
@@ -176,14 +160,13 @@
                     <thead>
                         <tr>
                             <th class="ps-3" style="width:40px;">No</th>
-                            <th>Grup Kategori</th>
-                            <th class="text-center" style="width:100px;">Kelompok</th>
-                            <th class="text-center" style="width:90px;">Jml Brg</th>
-                            <th class="text-center" style="width:90px;">Stok</th>
-                            <th class="text-end ar-col-asset" style="width:160px;">Uang Aset (HPP)</th>
-                            <th class="text-end" style="width:150px;">Est. Nilai Jual</th>
-                            <th class="text-end" style="width:140px;">Potensi Margin</th>
-                            <th class="text-center pe-3 no-print" style="width:80px;">Aksi</th>
+                            <th>Kategori Barang</th>
+                            <th class="text-center" style="width:100px;">Jml Variasi</th>
+                            <th class="text-center" style="width:100px;">Total Stok</th>
+                            <th class="text-end ar-col-asset" style="width:170px;">Uang Aset (HPP)</th>
+                            <th class="text-end" style="width:160px;">Est. Nilai Jual</th>
+                            <th class="text-end" style="width:150px;">Potensi Margin</th>
+                            <th class="text-center pe-3 no-print" style="width:90px;">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -196,15 +179,6 @@
                                         <span class="fw-semibold" style="color:var(--admin-text-heading);">{{ $cat['name'] }}</span>
                                         @if (! empty($cat['description']))
                                             <br><small style="color:var(--admin-text-muted);">{{ Str::limit($cat['description'], 55) }}</small>
-                                        @endif
-                                    </td>
-                                    <td class="text-center">
-                                        @if ($cat['group_type'] === 'etalase_depan')
-                                            <span class="badge" style="background:rgba(99,102,241,.12);color:#818cf8;border:1px solid rgba(99,102,241,.25);font-size:.7rem;">Etalase Toko</span>
-                                        @elseif ($cat['group_type'] === 'sparepart')
-                                            <span class="badge" style="background:rgba(6,182,212,.12);color:#22d3ee;border:1px solid rgba(6,182,212,.25);font-size:.7rem;">Sparepart</span>
-                                        @else
-                                            <span class="badge" style="background:rgba(148,163,184,.12);color:var(--admin-text-muted);border:1px solid var(--admin-border);font-size:.7rem;">Lainnya</span>
                                         @endif
                                     </td>
                                     <td class="text-center">
@@ -236,7 +210,7 @@
                             @endif
                         @empty
                             <tr>
-                                <td colspan="9" class="text-center py-4" style="color:var(--admin-text-muted);">
+                                <td colspan="8" class="text-center py-4" style="color:var(--admin-text-muted);">
                                     <i class="bi bi-inbox fs-3 d-block mb-2"></i>
                                     Tidak ada kategori yang dipilih.
                                 </td>
@@ -244,39 +218,9 @@
                         @endforelse
                     </tbody>
                     <tfoot>
-                        {{-- Sub-total: Etalase Toko --}}
-                        <tr class="ar-tfoot-row">
-                            <td colspan="3" class="ps-3 fw-bold" style="color:#818cf8;">
-                                <i class="bi bi-shop me-1"></i> TOTAL ETALASE TOKO
-                            </td>
-                            <td class="text-center fw-bold" style="color:#818cf8;">{{ number_format($summary['total_items_depan']) }}</td>
-                            <td class="text-center fw-bold" style="color:#818cf8;">{{ number_format($summary['total_stock_depan']) }}</td>
-                            <td class="text-end font-monospace fw-bold ar-col-asset" style="color:#a5b4fc !important;">
-                                {{ $rp($summary['total_asset_depan']) }}
-                            </td>
-                            <td class="text-end font-monospace" style="color:#818cf8;">{{ $rp($summary['total_asset_sale_depan']) }}</td>
-                            <td class="text-end font-monospace" style="color:#4ade80;">+{{ $rp($summary['total_margin_depan']) }}</td>
-                            <td class="no-print"></td>
-                        </tr>
-
-                        {{-- Sub-total: Sparepart --}}
-                        <tr class="ar-tfoot-row">
-                            <td colspan="3" class="ps-3 fw-bold" style="color:#22d3ee;">
-                                <i class="bi bi-tools me-1"></i> TOTAL SPAREPART
-                            </td>
-                            <td class="text-center fw-bold" style="color:#22d3ee;">{{ number_format($summary['total_items_sparepart']) }}</td>
-                            <td class="text-center fw-bold" style="color:#22d3ee;">{{ number_format($summary['total_stock_sparepart']) }}</td>
-                            <td class="text-end font-monospace fw-bold ar-col-asset" style="color:#67e8f9 !important;">
-                                {{ $rp($summary['total_sparepart']) }}
-                            </td>
-                            <td class="text-end font-monospace" style="color:#22d3ee;">{{ $rp($summary['total_asset_sale_sparepart']) }}</td>
-                            <td class="text-end font-monospace" style="color:#4ade80;">+{{ $rp($summary['total_margin_sparepart']) }}</td>
-                            <td class="no-print"></td>
-                        </tr>
-
                         {{-- Grand Total --}}
                         <tr class="ar-tfoot-grand">
-                            <td colspan="3" class="ps-3 fw-bold text-uppercase" style="color:var(--admin-text-heading);font-size:.9rem;">
+                            <td colspan="2" class="ps-3 fw-bold text-uppercase" style="color:var(--admin-text-heading);font-size:.9rem;">
                                 TOTAL KESELURUHAN ({{ $summary['selected_categories_count'] }} KATEGORI)
                             </td>
                             <td class="text-center fw-bold" style="color:var(--admin-text-heading);">{{ number_format($summary['total_items_count']) }}</td>
@@ -306,11 +250,6 @@
                             <div>
                                 <h5 class="modal-title fw-bold" style="color:var(--admin-text-heading);">
                                     {{ $cat['name'] }}
-                                    @if ($cat['group_type'] === 'etalase_depan')
-                                        <span class="badge ms-2" style="background:rgba(99,102,241,.12);color:#818cf8;border:1px solid rgba(99,102,241,.25);">Etalase Toko</span>
-                                    @elseif ($cat['group_type'] === 'sparepart')
-                                        <span class="badge ms-2" style="background:rgba(6,182,212,.12);color:#22d3ee;border:1px solid rgba(6,182,212,.25);">Sparepart</span>
-                                    @endif
                                 </h5>
                                 <small style="color:var(--admin-text-muted);">
                                     Total Aset: <strong class="text-warning">{{ $rp($cat['asset_cost']) }}</strong>
@@ -563,26 +502,6 @@
             // Kosongkan
             $('#btn-unselect-all').on('click', function () {
                 $('.category-checkbox').prop('checked', false).each(function () { syncChip(this); });
-                $form.submit();
-            });
-
-            // ★ Etalase Toko — auto submit
-            $('#btn-select-etalase').on('click', function () {
-                $('.category-checkbox').each(function () {
-                    var isEtalase = $(this).data('group') === 'etalase_depan';
-                    $(this).prop('checked', isEtalase);
-                    syncChip(this);
-                });
-                $form.submit();
-            });
-
-            // ★ Sparepart — auto submit
-            $('#btn-select-sparepart').on('click', function () {
-                $('.category-checkbox').each(function () {
-                    var isSparepart = $(this).data('group') === 'sparepart';
-                    $(this).prop('checked', isSparepart);
-                    syncChip(this);
-                });
                 $form.submit();
             });
         });

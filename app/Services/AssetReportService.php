@@ -22,11 +22,7 @@ class AssetReportService
     /**
      * Kategori yang termasuk ke grup 'Sparepart'.
      */
-    public const SPAREPART_NAMES = [
-        'lcd',
-        'sparepart hp',
-        'baterai',
-    ];
+    public const SPAREPART_NAMES = [];
 
     /**
      * Pastikan kategori standar ada di database.
@@ -39,9 +35,6 @@ class AssetReportService
             'Kabel Data',
             'Perdana',
             'Voucher',
-            'LCD',
-            'Sparepart HP',
-            'Baterai',
         ];
 
         foreach ($standards as $name) {

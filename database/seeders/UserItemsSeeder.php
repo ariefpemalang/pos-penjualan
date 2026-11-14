@@ -249,7 +249,6 @@ class UserItemsSeeder extends Seeder
         );
 
         $categories = [
-            'Sparepart HP' => 'LCD, baterai, flex, kamera, dan sparepart smartphone',
             'Charger' => 'Charger smartphone dan adapter',
             'Voucher' => 'Voucher paket data dan pulsa',
             'Aksesoris' => 'Casing, tempered glass, kabel, dan aksesoris',
