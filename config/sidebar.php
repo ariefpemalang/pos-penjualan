@@ -125,7 +125,7 @@ return [
                     ],
                     'submenus' => [
                         [
-                            'label' => 'Laba Rugi',
+                            'label' => 'Laporan Keuangan',
                             'route' => 'financial-reports.index',
                             'permission' => 'financial report view',
                         ],
