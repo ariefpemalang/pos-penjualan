@@ -28,12 +28,6 @@ return [
                     'route' => 'suppliers.index',
                     'permission' => 'supplier view',
                 ],
-                [
-                    'label' => 'Teknisi',
-                    'icon' => 'bi-wrench-adjustable',
-                    'route' => 'technicians.index',
-                    'permission' => 'technician view',
-                ],
             ],
         ],
         [
@@ -84,23 +78,11 @@ return [
                         ],
                     ],
                 ],
-                [
-                    'label' => 'Master Jasa',
-                    'icon' => 'bi-tools',
-                    'route' => 'workshop-services.index',
-                    'permission' => 'workshop service view',
-                ],
             ],
         ],
         [
             'title' => 'Transaksi',
             'items' => [
-                [
-                    'label' => 'Tiket Servis',
-                    'icon' => 'bi-phone',
-                    'route' => 'service-tickets.index',
-                    'permission' => 'service ticket view',
-                ],
                 [
                     'label' => 'Transaksi',
                     'icon' => 'bi-receipt-cutoff',
@@ -123,8 +105,6 @@ return [
                     'icon' => 'bi-wallet2',
                     'permissions' => [
                         'financial report view',
-                        'service report view',
-                        'technician report view',
                         'asset report view',
                         'manual income view',
                         'manual expense view',
@@ -134,16 +114,6 @@ return [
                             'label' => 'Laporan Keuangan',
                             'route' => 'financial-reports.index',
                             'permission' => 'financial report view',
-                        ],
-                        [
-                            'label' => 'Laporan Servis',
-                            'route' => 'service-reports.index',
-                            'permission' => 'service report view',
-                        ],
-                        [
-                            'label' => 'Laporan Teknisi',
-                            'route' => 'technician-reports.index',
-                            'permission' => 'technician report view',
                         ],
                         [
                             'label' => 'Laporan Aset Kategori',
