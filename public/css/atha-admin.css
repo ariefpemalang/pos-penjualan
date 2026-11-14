@@ -1106,6 +1106,22 @@ table.dataTable thead th {
   border-color: var(--admin-border);
 }
 
+div.dataTables_processing {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: var(--admin-surface) !important;
+  color: var(--admin-text) !important;
+  border: 1px solid var(--admin-border) !important;
+  border-radius: 10px !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15) !important;
+  padding: 0.65rem 1.4rem !important;
+  z-index: 1050;
+  font-size: 0.86rem;
+  backdrop-filter: blur(4px);
+}
+
 /* ── Forms ── */
 .form-control,
 .form-select {

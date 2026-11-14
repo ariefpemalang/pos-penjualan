@@ -51,8 +51,10 @@
     $.extend(true, $.fn.dataTable.defaults, {
         pageLength: 25,
         lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, 'Semua']],
+        searchDelay: 500, // Debounce: Tunggu 500ms setelah user selesai mengetik agar tidak membombardir query ke database
+        deferRender: true, // Optimasi performa render baris tabel
         language: {
-            processing: 'Memproses...',
+            processing: '<div class="d-flex align-items-center justify-content-center gap-2 py-2 text-primary"><div class="spinner-border spinner-border-sm" role="status"></div><span class="fw-medium text-body">Memuat data...</span></div>',
             search: 'Cari:',
             lengthMenu: 'Tampilkan _MENU_ data',
             info: 'Menampilkan _START_ sampai _END_ dari _TOTAL_ data',
