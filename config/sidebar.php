@@ -27,7 +27,7 @@ return [
                             'permission' => 'transaction view',
                         ],
                         [
-                            'label' => 'Data Pembelian',
+                            'label' => 'Transaksi Pembelian',
                             'route' => 'purchases.index',
                             'permission' => 'purchase view',
                         ],
