@@ -17,7 +17,6 @@ class SettingSeeder extends Seeder
             'app_tagline' => config('branding.tagline'),
             'app_description' => config('branding.description'),
             'company_logo' => $this->seedBrandLogo(),
-            'hiwa_enabled' => false,
         ]);
     }
 

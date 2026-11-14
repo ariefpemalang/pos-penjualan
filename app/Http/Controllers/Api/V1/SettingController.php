@@ -36,8 +36,6 @@ class SettingController extends Controller
             'app_description' => ['nullable', 'string', 'max:2000'],
             'company_address' => ['nullable', 'string', 'max:500'],
             'company_whatsapp' => ['nullable', 'string', 'max:30'],
-            'hiwa_enabled' => ['nullable', 'boolean'],
-            'hiwa_token_device' => ['nullable', 'string', 'max:500'],
         ], $this->photoRules()));
 
         $currentLogo = $this->settings->getString('company_logo') ?: null;
@@ -50,12 +48,7 @@ class SettingController extends Controller
             'company_address' => trim((string) ($validated['company_address'] ?? '')),
             'company_whatsapp' => trim((string) ($validated['company_whatsapp'] ?? '')),
             'company_logo' => $logoPath ?? '',
-            'hiwa_enabled' => $request->boolean('hiwa_enabled'),
         ];
-
-        if ($request->exists('hiwa_token_device')) {
-            $payload['hiwa_token_device'] = trim((string) ($validated['hiwa_token_device'] ?? ''));
-        }
 
         $this->settings->setMany($payload);
 
@@ -85,8 +78,6 @@ class SettingController extends Controller
             'app_description' => (string) ($all['app_description'] ?? ''),
             'company_address' => (string) ($all['company_address'] ?? ''),
             'company_whatsapp' => (string) ($all['company_whatsapp'] ?? ''),
-            'hiwa_enabled' => (bool) ($all['hiwa_enabled'] ?? false),
-            'hiwa_token_device' => (string) ($all['hiwa_token_device'] ?? ''),
             'logo_url' => $logoUrl,
         ];
     }

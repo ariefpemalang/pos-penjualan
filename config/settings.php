@@ -8,15 +8,9 @@ return [
         'company_address' => '',
         'company_whatsapp' => '',
         'company_logo' => '',
-        'hiwa_enabled' => false,
-        'hiwa_token_device' => env('HIWA_TOKEN_DEVICE', ''),
-        'fonnte_enabled' => false,
-        'fonnte_token' => env('FONNTE_TOKEN', ''),
     ],
 
     'encrypted_keys' => [
-        'hiwa_token_device',
-        'fonnte_token',
     ],
 
     'json_array_keys' => [

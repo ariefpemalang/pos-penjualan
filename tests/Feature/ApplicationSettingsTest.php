@@ -3,7 +3,6 @@
 namespace Tests\Feature;
 
 use App\Models\User;
-use App\Services\HiwaWhatsAppService;
 use App\Services\SettingService;
 use Database\Seeders\RoleAndPermissionSeeder;
 use Illuminate\Http\UploadedFile;
@@ -32,7 +31,7 @@ class ApplicationSettingsTest extends TestCase
             ->get(route('settings.edit'))
             ->assertOk()
             ->assertSee('Pengaturan Aplikasi')
-            ->assertSee('Gateway WhatsApp')
+            ->assertDontSee('Gateway WhatsApp')
             ->assertSee('Alamat Toko')
             ->assertSee('WhatsApp Toko')
             ->assertSee('Logo Toko')
@@ -121,35 +120,5 @@ class ApplicationSettingsTest extends TestCase
         $this->assertSame('Alamat Baru', $settings->getString('company_address'));
         $this->assertSame('082222222222', $settings->getString('company_whatsapp'));
         $this->assertSame($logoPath, $settings->getString('company_logo'));
-    }
-
-    #[Test]
-    public function hiwa_service_sends_message_to_api(): void
-    {
-        Http::fake([
-            'hiwa.my.id/*' => Http::response([
-                'ok' => true,
-                'job_id' => 'test-job-123',
-                'message' => 'Pesan sudah masuk antrian pengiriman.',
-                'quota' => ['messages_remaining' => 99, 'messages_limit_per_month' => 100],
-            ], 200),
-        ]);
-
-        app(SettingService::class)->setMany([
-            'hiwa_enabled' => true,
-            'hiwa_token_device' => 'secret-token',
-        ]);
-
-        $result = app(HiwaWhatsAppService::class)->send('081234567890', 'Halo test');
-
-        $this->assertTrue($result['ok']);
-        $this->assertSame('test-job-123', $result['job_id']);
-
-        Http::assertSent(function ($request) {
-            return $request->url() === 'https://hiwa.my.id/api/v1/messages'
-                && $request['token_device'] === 'secret-token'
-                && $request['to'] === '6281234567890'
-                && $request['message'] === 'Halo test';
-        });
     }
 }

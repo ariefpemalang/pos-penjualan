@@ -117,12 +117,6 @@ class SettingService
             }
         }
 
-        if (in_array($key, [
-            'hiwa_enabled',
-        ], true)) {
-            return $raw === '1' || $raw === 1 || $raw === true;
-        }
-
         if (in_array($key, config('settings.json_array_keys', []), true)) {
             if (is_string($raw)) {
                 $decoded = json_decode($raw, true);
