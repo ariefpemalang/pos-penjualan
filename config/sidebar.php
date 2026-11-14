@@ -158,11 +158,6 @@ return [
                             'label' => 'Pembelian',
                             'submenus' => [
                                 [
-                                    'label' => 'Pembelian',
-                                    'route' => 'purchases.create',
-                                    'permission' => 'purchase create',
-                                ],
-                                [
                                     'label' => 'Data Pembelian',
                                     'route' => 'purchases.index',
                                     'permission' => 'purchase view',
