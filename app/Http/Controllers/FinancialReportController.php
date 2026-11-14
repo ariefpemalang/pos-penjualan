@@ -54,7 +54,7 @@ class FinancialReportController extends Controller
             'to' => ['nullable', 'date'],
         ]);
 
-        $from = Carbon::parse($validated['from'] ?? now()->startOfMonth()->toDateString());
+        $from = Carbon::parse($validated['from'] ?? now()->toDateString());
         $to = Carbon::parse($validated['to'] ?? now()->toDateString());
 
         if ($from->gt($to)) {

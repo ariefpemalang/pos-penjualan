@@ -47,6 +47,19 @@
                     </a>
                 </div>
             </form>
+
+            {{-- Preset Cepat Periode --}}
+            <div class="d-flex flex-wrap gap-1 mt-3 pt-2 border-top">
+                <span class="text-muted small me-2 align-self-center">Pilihan Cepat:</span>
+                <a href="{{ route('financial-reports.index', ['from' => now()->toDateString(), 'to' => now()->toDateString()]) }}"
+                   class="btn btn-xs {{ $from === now()->toDateString() && $to === now()->toDateString() ? 'btn-primary' : 'btn-outline-secondary' }}">Hari Ini</a>
+                <a href="{{ route('financial-reports.index', ['from' => now()->startOfWeek()->toDateString(), 'to' => now()->endOfWeek()->toDateString()]) }}"
+                   class="btn btn-xs {{ $from === now()->startOfWeek()->toDateString() && $to === now()->endOfWeek()->toDateString() ? 'btn-primary' : 'btn-outline-secondary' }}">Minggu Ini</a>
+                <a href="{{ route('financial-reports.index', ['from' => now()->startOfMonth()->toDateString(), 'to' => now()->endOfMonth()->toDateString()]) }}"
+                   class="btn btn-xs {{ $from === now()->startOfMonth()->toDateString() && $to === now()->endOfMonth()->toDateString() ? 'btn-primary' : 'btn-outline-secondary' }}">Bulan Ini</a>
+                <a href="{{ route('financial-reports.index', ['from' => now()->startOfYear()->toDateString(), 'to' => now()->endOfYear()->toDateString()]) }}"
+                   class="btn btn-xs {{ $from === now()->startOfYear()->toDateString() && $to === now()->endOfYear()->toDateString() ? 'btn-primary' : 'btn-outline-secondary' }}">Tahun Ini</a>
+            </div>
         </div>
     </div>
 
