@@ -6,7 +6,7 @@
 [data-bs-theme="light"],
 [data-theme="normal"] {
   /* Sidebar width */
-  --sidebar-w: 200px;
+  --sidebar-w: 235px;
   --sidebar-w-mini: 62px;
 
   /* Brand accent — gold premium */
@@ -933,13 +933,14 @@ body {
 
 .sidebar-submenu-link {
   display: block;
-  padding: 0.45rem 0.85rem 0.45rem 2.65rem;
+  padding: 0.45rem 0.85rem 0.45rem 2.25rem;
   margin: 2px 0.5rem;
   border-radius: 6px;
   color: rgba(255, 255, 255, 0.8);
   font-size: 0.81rem;
   font-weight: 450;
   text-decoration: none;
+  white-space: nowrap;
   transition: all 0.15s;
 }
 
@@ -964,7 +965,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.5rem 0.85rem 0.5rem 2.65rem;
+  padding: 0.5rem 0.85rem 0.5rem 2.25rem;
   margin: 2px 0.5rem;
   border-radius: 6px;
   color: #FFFFFF;
@@ -972,6 +973,7 @@ body {
   font-weight: 700;
   text-decoration: none;
   cursor: pointer;
+  white-space: nowrap;
   transition: all 0.15s ease-in-out;
 }
 
@@ -1002,13 +1004,14 @@ body {
 
 .sidebar-nested-link {
   display: block;
-  padding: 0.42rem 0.85rem 0.42rem 3.45rem;
+  padding: 0.42rem 0.85rem 0.42rem 3rem;
   margin: 2px 0.5rem;
   border-radius: 6px;
   color: rgba(255, 255, 255, 0.78);
   font-size: 0.81rem;
   font-weight: 450;
   text-decoration: none;
+  white-space: nowrap;
   transition: all 0.15s;
 }
 
