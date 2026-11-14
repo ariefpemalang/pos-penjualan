@@ -55,13 +55,13 @@
                     <div class="dropdown theme-dropdown" id="theme-dropdown-wrap">
                         <button type="button" class="btn btn-icon theme-toggle-btn dropdown-toggle"
                             id="btn-theme-dropdown" data-bs-toggle="dropdown" aria-expanded="false"
-                            aria-label="Pilih Tema Tampilan" title="Pilih Tema (Normal, Dark, Hijau, Biru)">
+                            aria-label="Pilih Tema Tampilan" title="Pilih Tema Warna Sidebar & Aplikasi">
                             <i class="bi bi-palette2"></i>
                             <span class="theme-current-dot" id="theme-current-dot"></span>
                         </button>
-                        <ul class="dropdown-menu dropdown-menu-end border-0 shadow-lg mt-2 p-2 theme-menu-dropdown" style="min-width: 220px;">
+                        <ul class="dropdown-menu dropdown-menu-end border-0 shadow-lg mt-2 p-2 theme-menu-dropdown" style="min-width: 240px; max-height: 460px; overflow-y: auto;">
                             <li class="dropdown-header px-2 py-1 text-uppercase fw-bold" style="font-size: 0.68rem; letter-spacing: 0.06em; color: var(--admin-text-muted);">
-                                <i class="bi bi-paint-bucket me-1"></i> Tema Tampilan
+                                <i class="bi bi-paint-bucket me-1"></i> 10 Tema Warna
                             </li>
                             <li><hr class="dropdown-divider my-1"></li>
                             <li>
@@ -96,6 +96,60 @@
                                     <span class="d-flex align-items-center gap-2">
                                         <span class="theme-swatch theme-swatch-biru"></span>
                                         <span class="theme-label fw-medium">Biru (Sapphire)</span>
+                                    </span>
+                                    <i class="bi bi-check2 theme-check-icon text-primary d-none fs-6"></i>
+                                </button>
+                            </li>
+                            <li>
+                                <button type="button" class="dropdown-item d-flex align-items-center justify-content-between rounded-2 px-2 py-2 theme-choice-btn" data-theme-value="ungu">
+                                    <span class="d-flex align-items-center gap-2">
+                                        <span class="theme-swatch theme-swatch-ungu"></span>
+                                        <span class="theme-label fw-medium">Ungu (Amethyst)</span>
+                                    </span>
+                                    <i class="bi bi-check2 theme-check-icon text-primary d-none fs-6"></i>
+                                </button>
+                            </li>
+                            <li>
+                                <button type="button" class="dropdown-item d-flex align-items-center justify-content-between rounded-2 px-2 py-2 theme-choice-btn" data-theme-value="merah">
+                                    <span class="d-flex align-items-center gap-2">
+                                        <span class="theme-swatch theme-swatch-merah"></span>
+                                        <span class="theme-label fw-medium">Merah (Ruby)</span>
+                                    </span>
+                                    <i class="bi bi-check2 theme-check-icon text-primary d-none fs-6"></i>
+                                </button>
+                            </li>
+                            <li>
+                                <button type="button" class="dropdown-item d-flex align-items-center justify-content-between rounded-2 px-2 py-2 theme-choice-btn" data-theme-value="teal">
+                                    <span class="d-flex align-items-center gap-2">
+                                        <span class="theme-swatch theme-swatch-teal"></span>
+                                        <span class="theme-label fw-medium">Teal (Turquoise)</span>
+                                    </span>
+                                    <i class="bi bi-check2 theme-check-icon text-primary d-none fs-6"></i>
+                                </button>
+                            </li>
+                            <li>
+                                <button type="button" class="dropdown-item d-flex align-items-center justify-content-between rounded-2 px-2 py-2 theme-choice-btn" data-theme-value="oranye">
+                                    <span class="d-flex align-items-center gap-2">
+                                        <span class="theme-swatch theme-swatch-oranye"></span>
+                                        <span class="theme-label fw-medium">Oranye (Sunset)</span>
+                                    </span>
+                                    <i class="bi bi-check2 theme-check-icon text-primary d-none fs-6"></i>
+                                </button>
+                            </li>
+                            <li>
+                                <button type="button" class="dropdown-item d-flex align-items-center justify-content-between rounded-2 px-2 py-2 theme-choice-btn" data-theme-value="rose">
+                                    <span class="d-flex align-items-center gap-2">
+                                        <span class="theme-swatch theme-swatch-rose"></span>
+                                        <span class="theme-label fw-medium">Rose (Pink Gold)</span>
+                                    </span>
+                                    <i class="bi bi-check2 theme-check-icon text-primary d-none fs-6"></i>
+                                </button>
+                            </li>
+                            <li>
+                                <button type="button" class="dropdown-item d-flex align-items-center justify-content-between rounded-2 px-2 py-2 theme-choice-btn" data-theme-value="slate">
+                                    <span class="d-flex align-items-center gap-2">
+                                        <span class="theme-swatch theme-swatch-slate"></span>
+                                        <span class="theme-label fw-medium">Slate (Titanium)</span>
                                     </span>
                                     <i class="bi bi-check2 theme-check-icon text-primary d-none fs-6"></i>
                                 </button>

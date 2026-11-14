@@ -3,7 +3,7 @@
 return [
     'menus' => [
         [
-            'title' => 'Menu Utama',
+            'title' => 'Dashboard',
             'items' => [
                 [
                     'label' => 'Dashboard',
@@ -14,7 +14,29 @@ return [
             ],
         ],
         [
-            'title' => 'Master Data',
+            'title' => 'Transaksi',
+            'items' => [
+                [
+                    'label' => 'Transaksi',
+                    'icon' => 'bi-receipt-cutoff',
+                    'permissions' => ['transaction view', 'purchase view'],
+                    'submenus' => [
+                        [
+                            'label' => 'Transaksi Penjualan',
+                            'route' => 'transactions.index',
+                            'permission' => 'transaction view',
+                        ],
+                        [
+                            'label' => 'Pembelian Barang',
+                            'route' => 'purchases.index',
+                            'permission' => 'purchase view',
+                        ],
+                    ],
+                ],
+            ],
+        ],
+        [
+            'title' => 'Supplier',
             'items' => [
                 [
                     'label' => 'Supplier',
@@ -33,6 +55,7 @@ return [
                     'permissions' => [
                         'item view', 'item category view', 'item unit view',
                         'stock in view', 'stock out view', 'stock report view',
+                        'stock opname view',
                     ],
                     'submenus' => [
                         [
@@ -75,25 +98,8 @@ return [
             ],
         ],
         [
-            'title' => 'Transaksi',
+            'title' => 'Keuangan',
             'items' => [
-                [
-                    'label' => 'Transaksi',
-                    'icon' => 'bi-receipt-cutoff',
-                    'permissions' => ['transaction view', 'purchase view'],
-                    'submenus' => [
-                        [
-                            'label' => 'Transaksi Penjualan',
-                            'route' => 'transactions.index',
-                            'permission' => 'transaction view',
-                        ],
-                        [
-                            'label' => 'Pembelian Barang',
-                            'route' => 'purchases.index',
-                            'permission' => 'purchase view',
-                        ],
-                    ],
-                ],
                 [
                     'label' => 'Keuangan',
                     'icon' => 'bi-wallet2',

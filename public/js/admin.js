@@ -3,7 +3,7 @@
  */
 (function () {
     const THEME_KEY = 'atha-theme';
-    const VALID_THEMES = ['normal', 'dark', 'hijau', 'biru'];
+    const VALID_THEMES = ['normal', 'dark', 'hijau', 'biru', 'ungu', 'merah', 'teal', 'oranye', 'rose', 'slate'];
     const SIDEBAR_COLLAPSED_KEY = 'atha-sidebar-collapsed';
     const DESKTOP_BP = 992;
 
@@ -50,7 +50,13 @@
                 normal: '#D4A017',
                 dark: '#0F172A',
                 hijau: '#10B981',
-                biru: '#2563EB'
+                biru: '#2563EB',
+                ungu: '#8B5CF6',
+                merah: '#E11D48',
+                teal: '#0D9488',
+                oranye: '#EA580C',
+                rose: '#DB2777',
+                slate: '#0284C7'
             };
             metaThemeColor.setAttribute('content', themeColors[theme] || '#D4A017');
         }
