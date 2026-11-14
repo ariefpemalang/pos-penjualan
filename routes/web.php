@@ -16,6 +16,7 @@ use App\Http\Controllers\ManualExpenseController;
 use App\Http\Controllers\ManualIncomeController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PurchaseController;
+use App\Http\Controllers\PurchaseReportController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SalesReportController;
 use App\Http\Controllers\ServiceReportController;
@@ -100,6 +101,9 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('transactions', TransactionController::class)->only(['index', 'create', 'store', 'show', 'edit', 'update', 'destroy']);
 
     Route::resource('purchases', PurchaseController::class)->only(['index', 'create', 'store', 'show', 'edit', 'update', 'destroy']);
+
+    Route::get('purchase-reports', [PurchaseReportController::class, 'index'])->name('purchase-reports.index');
+    Route::get('purchase-reports/export-pdf', [PurchaseReportController::class, 'exportPdf'])->name('purchase-reports.export-pdf');
 
     Route::get('sales-reports', [SalesReportController::class, 'index'])->name('sales-reports.index');
     Route::get('sales-reports/export-pdf', [SalesReportController::class, 'exportPdf'])->name('sales-reports.export-pdf');

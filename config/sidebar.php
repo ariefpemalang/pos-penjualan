@@ -149,8 +149,8 @@ return [
                             'submenus' => [
                                 [
                                     'label' => 'Data Pembelian',
-                                    'route' => 'purchases.index',
-                                    'permission' => 'purchase view',
+                                    'route' => 'purchase-reports.index',
+                                    'permission' => 'financial report view',
                                 ],
                             ],
                         ],
