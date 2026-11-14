@@ -143,11 +143,6 @@ return [
                                     'permission' => 'financial report view',
                                 ],
                                 [
-                                    'label' => 'Data Transaksi',
-                                    'route' => 'transactions.index',
-                                    'permission' => 'transaction view',
-                                ],
-                                [
                                     'label' => 'Penjualan Barang',
                                     'route' => 'item-sales-reports.index',
                                     'permission' => 'financial report view',
