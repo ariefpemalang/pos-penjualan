@@ -1,0 +1,114 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <!-- Background Gradient -->
+    <radialGradient id="bgGlow" cx="50%" cy="40%" r="65%">
+      <stop offset="0%" stop-color="#1A2232"/>
+      <stop offset="60%" stop-color="#0E131D"/>
+      <stop offset="100%" stop-color="#070A0F"/>
+    </radialGradient>
+
+    <!-- Luxury Gold Gradient -->
+    <linearGradient id="goldRibbon" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFF5BE"/>
+      <stop offset="22%" stop-color="#F3C648"/>
+      <stop offset="50%" stop-color="#D4A017"/>
+      <stop offset="80%" stop-color="#A6730E"/>
+      <stop offset="100%" stop-color="#F7D369"/>
+    </linearGradient>
+
+    <linearGradient id="goldAccent" x1="100%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FFE899"/>
+      <stop offset="50%" stop-color="#E2AE24"/>
+      <stop offset="100%" stop-color="#8F5E05"/>
+    </linearGradient>
+
+    <linearGradient id="badgeBorder" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="rgba(255, 230, 150, 0.5)"/>
+      <stop offset="50%" stop-color="rgba(212, 160, 23, 0.15)"/>
+      <stop offset="100%" stop-color="rgba(255, 230, 150, 0.4)"/>
+    </linearGradient>
+
+    <!-- Drop Shadows -->
+    <filter id="softShadow" x="-15%" y="-15%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#000" flood-opacity="0.5"/>
+    </filter>
+    <filter id="goldGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="8" result="glow"/>
+      <feComposite in="SourceGraphic" in2="glow" operator="over"/>
+    </filter>
+  </defs>
+
+  <!-- Squircle Base Frame -->
+  <rect x="24" y="24" width="464" height="464" rx="112" fill="url(#bgGlow)" stroke="url(#badgeBorder)" stroke-width="3" filter="url(#softShadow)"/>
+
+  <!-- Inner Subtle Hexagon Ring -->
+  <circle cx="256" cy="256" r="210" fill="none" stroke="rgba(212, 160, 23, 0.08)" stroke-width="1.5" stroke-dasharray="6 6"/>
+
+  <!-- Main Monogram "AR" -->
+  <g filter="url(#goldGlow)">
+    <!-- 1. LEFT DIAGONAL OF 'A' -->
+    <path d="M 120 384
+             L 220 128
+             C 224 118, 236 112, 248 112
+             L 264 112
+             C 276 112, 288 118, 292 128
+             L 326 216
+             L 278 216
+             L 256 160
+             L 168 384
+             Z"
+          fill="url(#goldRibbon)"/>
+
+    <!-- 2. 'R' MAIN STEM & UPPER BOWL -->
+    <!-- Continuous stem through A's right slope -->
+    <path d="M 232 232
+             L 276 232
+             L 276 384
+             L 232 384
+             Z"
+          fill="url(#goldAccent)"/>
+
+    <!-- R Upper Round Bowl -->
+    <path d="M 276 128
+             L 348 128
+             C 396 128, 428 156, 428 200
+             C 428 244, 396 272, 348 272
+             L 276 272
+             Z
+             M 276 168
+             L 344 168
+             C 370 168, 386 180, 386 200
+             C 386 220, 370 232, 344 232
+             L 276 232
+             Z"
+          fill="url(#goldRibbon)"/>
+
+    <!-- 3. 'R' FORWARD DYNAMIC LEG (Retail Growth Arrow / Leg) -->
+    <path d="M 324 256
+             L 396 376
+             C 402 386, 412 388, 424 388
+             L 436 388
+             L 358 256
+             Z"
+          fill="url(#goldRibbon)"/>
+
+    <!-- 4. A-CROSSBAR / STORE HORIZONTAL STABILITY BAR -->
+    <path d="M 184 292
+             L 276 292
+             L 276 324
+             L 171 324
+             Z"
+          fill="url(#goldAccent)"/>
+
+    <!-- 5. ELEGANT SPARKLE ACCENT (Top Right) -->
+    <path d="M 408 92
+             C 408 108, 416 116, 432 116
+             C 416 116, 408 124, 408 140
+             C 408 124, 400 116, 384 116
+             C 400 116, 408 108, 408 92 Z"
+          fill="#FFF6C8"/>
+  </g>
+
+  <!-- Subtle Brand Subtitle Inside Icon -->
+  <text x="256" y="442" text-anchor="middle" font-family="'Inter', sans-serif" font-size="19" font-weight="700" letter-spacing="8" fill="rgba(255, 235, 170, 0.75)">RETAIL POS</text>
+</svg>

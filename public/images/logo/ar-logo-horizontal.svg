@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 160" width="640" height="160">
+  <defs>
+    <!-- Emblem Background Gradient -->
+    <radialGradient id="emblemBg" cx="50%" cy="35%" r="65%">
+      <stop offset="0%" stop-color="#1E2430"/>
+      <stop offset="60%" stop-color="#111620"/>
+      <stop offset="100%" stop-color="#090C12"/>
+    </radialGradient>
+
+    <!-- Luxury Gold Gradient -->
+    <linearGradient id="goldRibbonH" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFF5BE"/>
+      <stop offset="25%" stop-color="#F3C648"/>
+      <stop offset="60%" stop-color="#D4A017"/>
+      <stop offset="90%" stop-color="#A6730E"/>
+      <stop offset="100%" stop-color="#F7D369"/>
+    </linearGradient>
+
+    <linearGradient id="goldAccentH" x1="100%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FFE899"/>
+      <stop offset="50%" stop-color="#E2AE24"/>
+      <stop offset="100%" stop-color="#8F5E05"/>
+    </linearGradient>
+
+    <linearGradient id="borderH" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="rgba(255, 230, 150, 0.45)"/>
+      <stop offset="100%" stop-color="rgba(212, 160, 23, 0.2)"/>
+    </linearGradient>
+
+    <filter id="glowH" x="-15%" y="-15%" width="130%" height="130%">
+      <feGaussianBlur stdDeviation="3" result="glow"/>
+      <feComposite in="SourceGraphic" in2="glow" operator="over"/>
+    </filter>
+  </defs>
+
+  <!-- Left Icon Emblem (120x120 within 160 height) -->
+  <g transform="translate(16, 20)">
+    <!-- Base Squircle -->
+    <rect x="0" y="0" width="120" height="120" rx="30" fill="url(#emblemBg)" stroke="url(#borderH)" stroke-width="2"/>
+
+    <!-- Monogram AR scaled (factor ~0.24) -->
+    <g transform="translate(4, -8) scale(0.22)" filter="url(#glowH)">
+      <!-- A left -->
+      <path d="M 120 384 L 220 128 C 224 118, 236 112, 248 112 L 264 112 C 276 112, 288 118, 292 128 L 326 216 L 278 216 L 256 160 L 168 384 Z" fill="url(#goldRibbonH)"/>
+      <!-- R stem -->
+      <path d="M 232 232 L 276 232 L 276 384 L 232 384 Z" fill="url(#goldAccentH)"/>
+      <!-- R bowl -->
+      <path d="M 276 128 L 348 128 C 396 128, 428 156, 428 200 C 428 244, 396 272, 348 272 L 276 272 Z M 276 168 L 344 168 C 370 168, 386 180, 386 200 C 386 220, 370 232, 344 232 L 276 232 Z" fill="url(#goldRibbonH)"/>
+      <!-- R leg -->
+      <path d="M 324 256 L 396 376 C 402 386, 412 388, 424 388 L 436 388 L 358 256 Z" fill="url(#goldRibbonH)"/>
+      <!-- A bar -->
+      <path d="M 184 292 L 276 292 L 276 324 L 171 324 Z" fill="url(#goldAccentH)"/>
+      <!-- Sparkle -->
+      <path d="M 408 92 C 408 108, 416 116, 432 116 C 416 116, 408 124, 408 140 C 408 124, 400 116, 384 116 C 400 116, 408 108, 408 92 Z" fill="#FFF6C8"/>
+    </g>
+  </g>
+
+  <!-- Typography Right Side -->
+  <g transform="translate(156, 36)">
+    <!-- Main Brand Name: AR STORE -->
+    <text x="0" y="44" font-family="'Inter', -apple-system, sans-serif" font-size="44" font-weight="800" letter-spacing="2">
+      <tspan fill="url(#goldRibbonH)">AR</tspan>
+      <tspan fill="#1F2937" dx="8">STORE</tspan>
+    </text>
+
+    <!-- Tagline: POINT OF SALE & RETAIL SYSTEM -->
+    <text x="2" y="76" font-family="'Inter', -apple-system, sans-serif" font-size="13" font-weight="600" letter-spacing="4.5" fill="#6B7280">
+      POINT OF SALE &amp; RETAIL SYSTEM
+    </text>
+
+    <!-- Decorative Bottom Accent Line -->
+    <rect x="2" y="90" width="64" height="3" rx="1.5" fill="url(#goldRibbonH)"/>
+  </g>
+</svg>
