@@ -320,14 +320,14 @@
   function renderProductGrid() {
     const grid = document.getElementById('product-grid');
     if (state.filteredProducts.length === 0) {
-      grid.innerHTML = '<div style="grid-column: 1/-1; text-align:center; padding: 40px; color: var(--text-muted);">Tidak ada barang yang ditemukan.</div>';
+      grid.innerHTML = '<div style="text-align:center; padding: 40px; color: var(--text-muted);">Tidak ada barang yang ditemukan.</div>';
       return;
     }
 
     grid.innerHTML = '';
     state.filteredProducts.forEach(item => {
-      const card = document.createElement('div');
-      card.className = 'product-card';
+      const row = document.createElement('div');
+      row.className = 'product-row-item';
       
       const stock = Number(item.stock || 0);
       let stockClass = 'in-stock';
@@ -340,32 +340,41 @@
         stockText = `Sisa ${stock}`;
       }
 
+      const cartItem = state.cart.find(c => c.id === item.id);
+      const inCartQty = cartItem ? cartItem.qty : 0;
+      const inCartBadge = inCartQty > 0 
+        ? `<span style="background:var(--primary); color:#121212; font-size:0.72rem; font-weight:800; padding:2px 7px; border-radius:var(--radius-full); margin-right:4px;">${inCartQty}x</span>` 
+        : '';
+
       const imgHtml = item.photo_url 
         ? `<img src="${item.photo_url}" alt="${item.name}" loading="lazy" onerror="this.src='icon.png'">`
-        : `<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="rgba(212,160,23,0.4)" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>`;
+        : `<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="rgba(212,160,23,0.6)" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>`;
 
-      card.innerHTML = `
-        <div class="product-img-box">
+      row.innerHTML = `
+        <div class="product-row-img-box">
           ${imgHtml}
-          <span class="product-stock-tag ${stockClass}">${stockText}</span>
         </div>
-        <div class="product-details">
-          <div>
-            <div class="product-name">${item.name}</div>
-            <div class="product-code">${item.code || ''}</div>
+        <div class="product-row-info">
+          <div class="product-row-name">${item.name}</div>
+          <div class="product-row-meta">
+            <span class="product-row-code">${item.code || '-'}</span>
+            <span class="product-stock-tag ${stockClass}">${stockText}</span>
           </div>
-          <div class="product-price-row">
-            <span class="product-price">${formatRupiah(item.selling_price || item.price)}</span>
-            <button class="btn-add-mini" title="Tambah ke keranjang">+</button>
-          </div>
+        </div>
+        <div class="product-row-action">
+          <div class="product-row-price">${formatRupiah(item.selling_price || item.price)}</div>
+          <button class="btn-add-row" title="Tambah ke keranjang">
+            ${inCartBadge}
+            <span>+ Tambah</span>
+          </button>
         </div>
       `;
 
-      card.addEventListener('click', () => {
+      row.addEventListener('click', () => {
         addToCart(item);
       });
 
-      grid.appendChild(card);
+      grid.appendChild(row);
     });
   }
 

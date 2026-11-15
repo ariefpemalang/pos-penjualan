@@ -298,76 +298,131 @@ body {
   color: var(--text-muted);
 }
 
-/* Product Grid */
+/* Product List (Tampilan Baris) */
 .product-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
-@media (min-width: 500px) {
-  .product-grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
-@media (min-width: 768px) {
-  .product-grid {
-    grid-template-columns: repeat(4, 1fr);
-  }
-}
-
-.product-card {
+.product-row-item {
   background: var(--bg-card);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
-  overflow: hidden;
+  padding: 10px 14px;
   display: flex;
-  flex-direction: column;
-  transition: all 0.2s;
+  align-items: center;
+  gap: 12px;
+  transition: all 0.2s ease;
   cursor: pointer;
   position: relative;
 }
 
-.product-card:active {
-  transform: scale(0.96);
+.product-row-item:active {
+  transform: scale(0.98);
   border-color: var(--primary);
+  background: var(--bg-surface);
 }
 
-.product-img-box {
-  width: 100%;
-  aspect-ratio: 1 / 1;
+.product-row-img-box {
+  width: 50px;
+  height: 50px;
+  min-width: 50px;
   background: var(--bg-surface);
+  border-radius: var(--radius-sm);
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
   position: relative;
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-.product-img-box img {
+.product-row-img-box img {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
+.product-row-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.product-row-name {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--text-main);
+  line-height: 1.25;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.product-row-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.72rem;
+}
+
+.product-row-code {
+  color: var(--text-muted);
+}
+
+.product-row-action {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.product-row-price {
+  font-size: 0.96rem;
+  font-weight: 800;
+  color: var(--primary-light);
+}
+
+.btn-add-row {
+  background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary) 100%);
+  color: #121212;
+  border: none;
+  border-radius: var(--radius-full);
+  padding: 4px 12px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(212, 160, 23, 0.3);
+}
+
+.btn-add-row:active {
+  transform: scale(0.94);
+}
+
 .product-stock-tag {
-  position: absolute;
-  top: 6px;
-  right: 6px;
-  background: rgba(0, 0, 0, 0.7);
-  backdrop-filter: blur(4px);
   padding: 2px 7px;
   border-radius: var(--radius-full);
   font-size: 0.68rem;
   font-weight: 600;
+  display: inline-block;
 }
 .product-stock-tag.in-stock {
+  background: rgba(16, 185, 129, 0.15);
   color: #34D399;
 }
 .product-stock-tag.low-stock {
+  background: rgba(245, 158, 11, 0.15);
   color: #FBBF24;
 }
 .product-stock-tag.out-stock {
+  background: rgba(239, 68, 68, 0.15);
   color: #F87171;
 }
 
