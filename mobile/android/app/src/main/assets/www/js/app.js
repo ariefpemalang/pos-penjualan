@@ -767,7 +767,6 @@
         }
 
         if (target === 'view-history') fetchHistory();
-        if (target === 'view-services') fetchServiceTickets();
         if (target === 'view-inventory') renderInventoryList();
       });
     });
