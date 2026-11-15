@@ -1724,11 +1724,20 @@
     push(ESC, 0x40);
 
     // Center header
-    push(ESC, 0x61, 1);
-    push(ESC, 0x45, 1); // bold on
+    push(ESC, 0x61, 1); // Center align
+
+    // Huruf Judul AR Cell Sangat Besar (Double Height + Double Width + Bold)
+    push(GS, 0x21, 0x11); // Double width & Double height
+    push(ESC, 0x45, 1);   // Bold ON
     pushText(tpl.shopName || 'AR Cell');
-    push(ESC, 0x45, 0); // bold off
-    if (tpl.slogan) pushText(tpl.slogan);
+    push(GS, 0x21, 0x00); // Normal size
+    push(ESC, 0x45, 0);   // Bold OFF
+
+    if (tpl.slogan) {
+      push(ESC, 0x45, 1);
+      pushText(tpl.slogan);
+      push(ESC, 0x45, 0);
+    }
     if (tpl.address) pushText(tpl.address);
     if (tpl.phone) pushText('Telp/WA: ' + tpl.phone);
     pushText('='.repeat(lineWidth));
@@ -1744,7 +1753,9 @@
     // Items
     (tx.items || []).forEach(it => {
       const name = (it.name || it.item?.name || 'Barang').substring(0, lineWidth);
+      push(ESC, 0x45, 1);
       pushText(name);
+      push(ESC, 0x45, 0);
       const qtyPrice = ` ${it.qty || it.quantity} x ${formatRupiah(it.price || it.unit_price)}`;
       const subtotal = formatRupiah((it.price || it.unit_price) * (it.qty || it.quantity));
       const spaces = Math.max(1, lineWidth - qtyPrice.length - subtotal.length);
@@ -1753,12 +1764,14 @@
 
     pushText('='.repeat(lineWidth));
 
-    // Totals
+    // Totals - Double Height & Bold
     push(ESC, 0x45, 1);
+    push(GS, 0x21, 0x01); // Double height for grand total
     const totalLabel = 'TOTAL';
     const totalVal = formatRupiah(tx.total_amount);
-    const totalSpaces = Math.max(1, lineWidth - totalLabel.length - totalVal.length);
-    pushText(totalLabel + ' '.repeat(totalSpaces) + totalVal);
+    const totalSpaces = Math.max(1, (lineWidth / 2) - totalLabel.length - totalVal.length);
+    pushText(totalLabel + ' '.repeat(Math.max(1, totalSpaces)) + totalVal);
+    push(GS, 0x21, 0x00); // Normal size
     push(ESC, 0x45, 0);
 
     const payLabel = `BAYAR (${(tx.payment_method || 'TUNAI').toUpperCase()})`;
