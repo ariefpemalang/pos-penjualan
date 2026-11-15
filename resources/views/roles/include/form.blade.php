@@ -18,6 +18,16 @@
             </div>
         </div>
 
+        @php
+            $permissionLabels = [
+                'financial report view' => 'Laporan Keuangan',
+                'asset report view' => 'Laporan Kategori',
+                'sales report view' => 'Laporan Transaksi',
+                'item sales report view' => 'Laporan Penjualan Barang',
+                'category sales report view' => 'Laporan Penjualan Kategori',
+                'purchase report view' => 'Laporan Data Pembelian',
+            ];
+        @endphp
         <label class="form-label d-block mb-2">Permission</label>
         @error('permissions')<div class="text-danger small mb-3">{{ $message }}</div>@enderror
         <div class="row g-3">
@@ -31,7 +41,7 @@
                                     id="perm_{{ str()->slug($access) }}" value="{{ $access }}"
                                     @checked(isset($role) ? $role->permissions->contains('name', $access) : in_array($access, old('permissions', [])))>
                                 <label class="form-check-label" for="perm_{{ str()->slug($access) }}">
-                                    {{ ucwords($access) }}
+                                    {{ $permissionLabels[$access] ?? ucwords($access) }}
                                 </label>
                             </div>
                         @endforeach

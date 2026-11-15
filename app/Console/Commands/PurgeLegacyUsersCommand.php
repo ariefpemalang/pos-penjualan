@@ -53,8 +53,11 @@ class PurgeLegacyUsersCommand extends Command
             'dashboard view',
             'dashboard finance view',
             'financial report view',
-            'sales report view',
             'asset report view',
+            'sales report view',
+            'item sales report view',
+            'category sales report view',
+            'purchase report view',
         ];
         foreach ($laporanPermissions as $p) {
             \Spatie\Permission\Models\Permission::firstOrCreate(['name' => $p]);

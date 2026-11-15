@@ -63,16 +63,15 @@ return [
         'access' => ['purchase view', 'purchase create', 'purchase edit', 'purchase delete'],
     ],
     [
-        'group' => 'Laporan Penjualan',
-        'access' => ['sales report view'],
-    ],
-    [
-        'group' => 'Laporan Keuangan',
-        'access' => ['financial report view'],
-    ],
-    [
-        'group' => 'Laporan Aset Kategori',
-        'access' => ['asset report view'],
+        'group' => 'Laporan & Analisis',
+        'access' => [
+            'financial report view',
+            'asset report view',
+            'sales report view',
+            'item sales report view',
+            'category sales report view',
+            'purchase report view',
+        ],
     ],
     [
         'group' => 'Pemasukan Manual',

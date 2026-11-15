@@ -13,7 +13,7 @@ class CategorySalesReportController extends Controller
 {
     public function __construct(private SalesReportService $reportService)
     {
-        $this->middleware('permission:financial report view|sales report view');
+        $this->middleware('permission:category sales report view');
     }
 
     public function index(Request $request): View

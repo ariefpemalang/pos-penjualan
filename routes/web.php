@@ -41,6 +41,10 @@ Route::get('/', function () {
         : redirect()->route('login');
 });
 
+Route::get('/mobile', function () {
+    return redirect('/mobile/index.html');
+})->name('mobile.index');
+
 Route::get('/lacak/{token}', [ServiceTicketTrackingController::class, 'show'])
     ->name('service-tickets.track');
 
@@ -53,7 +57,7 @@ Route::middleware(['auth'])->group(function () {
         ->middleware('permission:dashboard view');
 
     Route::resource('users', UserController::class);
-    Route::resource('roles', RoleController::class);
+    Route::resource('roles', RoleController::class)->middleware('role:Super Admin');
 
     Route::get('entity-codes/suggest', [EntityCodeController::class, 'suggest'])->name('entity-codes.suggest');
 

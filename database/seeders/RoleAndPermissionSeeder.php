@@ -38,9 +38,13 @@ class RoleAndPermissionSeeder extends Seeder
             'transaction view', 'transaction create', 'transaction edit', 'transaction delete',
             'purchase view', 'purchase create', 'purchase edit', 'purchase delete',
             'financial report view',
+            'asset report view',
+            'sales report view',
+            'item sales report view',
+            'category sales report view',
+            'purchase report view',
             'service report view',
             'technician report view',
-            'asset report view',
             'manual income view', 'manual income create', 'manual income cancel',
             'manual expense view', 'manual expense create', 'manual expense cancel',
             'bank account view', 'bank account create', 'bank account edit', 'bank account delete',
@@ -85,8 +89,11 @@ class RoleAndPermissionSeeder extends Seeder
             'dashboard view',
             'dashboard finance view',
             'financial report view',
-            'sales report view',
             'asset report view',
+            'sales report view',
+            'item sales report view',
+            'category sales report view',
+            'purchase report view',
         ]);
 
         Role::where('name', 'Teknisi')->each(function (Role $role) {

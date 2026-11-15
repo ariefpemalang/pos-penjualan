@@ -23,10 +23,10 @@
                                 $visibleSubmenus = collect($item['submenus'])->filter(function ($sub) {
                                     if (! empty($sub['submenus'])) {
                                         return collect($sub['submenus'])->some(
-                                            fn ($c) => user_can_menu($c['permission'] ?? null)
+                                            fn ($c) => user_can_menu($c['permission'] ?? null, $c['role'] ?? null)
                                         );
                                     }
-                                    return user_can_menu($sub['permission'] ?? null);
+                                    return user_can_menu($sub['permission'] ?? null, $sub['role'] ?? null);
                                 });
                                 $submenuId = 'submenu-' . str()->slug($item['label']);
                                 $isOpen = is_active_submenu($item['submenus']) === ' active';
@@ -49,7 +49,7 @@
                                                 @if (! empty($submenu['submenus']))
                                                     @php
                                                         $visibleNested = collect($submenu['submenus'])->filter(
-                                                            fn ($child) => user_can_menu($child['permission'] ?? null)
+                                                            fn ($child) => user_can_menu($child['permission'] ?? null, $child['role'] ?? null)
                                                         );
                                                         $nestedId = 'nested-' . str()->slug($item['label'] . '-' . $submenu['label']);
                                                         $isNestedOpen = is_active_submenu($submenu['submenus']) === ' active';
@@ -89,7 +89,7 @@
                                     </div>
                                 </li>
                             @endif
-                        @elseif (user_can_menu($item['permission'] ?? null))
+                        @elseif (user_can_menu($item['permission'] ?? null, $item['role'] ?? null))
                             <li class="sidebar-menu-item">
                                 <a href="{{ route($item['route']) }}"
                                     class="sidebar-menu-link{{ is_active_menu($item['route']) }}"

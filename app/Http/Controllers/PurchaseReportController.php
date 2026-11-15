@@ -14,7 +14,7 @@ class PurchaseReportController extends Controller
 {
     public function __construct(private PurchaseReportService $reportService)
     {
-        $this->middleware('permission:financial report view|purchase view');
+        $this->middleware('permission:purchase report view');
     }
 
     public function index(Request $request): View

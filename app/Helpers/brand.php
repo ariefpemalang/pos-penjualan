@@ -95,16 +95,22 @@ if (! function_exists('brand_has_custom_logo')) {
 }
 
 if (! function_exists('user_can_menu')) {
-    function user_can_menu(?string $permission): bool
+    function user_can_menu(?string $permission, ?string $role = null): bool
     {
-        if ($permission === null || $permission === '') {
-            return true;
-        }
-
         $user = auth()->user();
 
         if (! $user) {
             return false;
+        }
+
+        if ($role !== null && $role !== '') {
+            if (! $user->hasRole($role)) {
+                return false;
+            }
+        }
+
+        if ($permission === null || $permission === '') {
+            return true;
         }
 
         if (! \Spatie\Permission\Models\Permission::query()->where('name', $permission)->exists()) {

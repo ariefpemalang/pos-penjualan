@@ -17,6 +17,14 @@
     <div class="form-panel form-panel-clean">
         <div class="form-panel-body">
             @php
+                $permissionLabels = [
+                    'financial report view' => 'Laporan Keuangan',
+                    'asset report view' => 'Laporan Kategori',
+                    'sales report view' => 'Laporan Transaksi',
+                    'item sales report view' => 'Laporan Penjualan Barang',
+                    'category sales report view' => 'Laporan Penjualan Kategori',
+                    'purchase report view' => 'Laporan Data Pembelian',
+                ];
                 $validPermissions = $role->permissions->filter(fn($p) => in_array($p->name, \App\Support\PermissionGroups::names()));
             @endphp
             @if ($validPermissions->isEmpty())
@@ -24,7 +32,7 @@
             @else
                 <div class="perm-tag-list">
                     @foreach ($validPermissions as $permission)
-                        <span class="perm-tag">{{ ucwords($permission->name) }}</span>
+                        <span class="perm-tag">{{ $permissionLabels[$permission->name] ?? ucwords($permission->name) }}</span>
                     @endforeach
                 </div>
             @endif
