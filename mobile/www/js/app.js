@@ -183,11 +183,31 @@
 
   function updateUserInfo() {
     if (state.user) {
-      document.getElementById('cashier-name').textContent = state.user.name || 'Kasir';
-      document.getElementById('profile-user-name').textContent = state.user.name || '-';
-      document.getElementById('profile-user-email').textContent = state.user.email || '-';
+      const name = state.user.name || 'Kasir';
+      const email = state.user.email || '-';
       const roles = state.user.roles ? state.user.roles.map(r => r.name).join(', ') : 'Kasir';
-      document.getElementById('profile-user-role').textContent = roles;
+
+      const cashierNameEl = document.getElementById('cashier-name');
+      if (cashierNameEl) cashierNameEl.textContent = name;
+
+      const profileNameEl = document.getElementById('profile-user-name');
+      if (profileNameEl) profileNameEl.textContent = name;
+
+      const profileEmailEl = document.getElementById('profile-user-email');
+      if (profileEmailEl) profileEmailEl.textContent = email;
+
+      const profileRoleEl = document.getElementById('profile-user-role');
+      if (profileRoleEl) profileRoleEl.textContent = roles;
+
+      // Sidebar info
+      const sbName = document.getElementById('sidebar-user-name');
+      if (sbName) sbName.textContent = name;
+
+      const sbEmail = document.getElementById('sidebar-user-email');
+      if (sbEmail) sbEmail.textContent = email;
+
+      const sbRole = document.getElementById('sidebar-user-role');
+      if (sbRole) sbRole.textContent = roles;
     }
   }
 
@@ -757,28 +777,84 @@
 
   // --- Navigation & Event Listeners ---
   function setupEvents() {
-    // Nav Items
+    function switchTab(target) {
+      state.activeTab = target;
+
+      // Update bottom nav
+      document.querySelectorAll('.nav-item').forEach(i => {
+        i.classList.toggle('active', i.dataset.target === target);
+      });
+
+      // Update sidebar nav
+      document.querySelectorAll('.sidebar-nav-item').forEach(i => {
+        i.classList.toggle('active', i.dataset.target === target);
+      });
+
+      // Show view
+      document.querySelectorAll('.app-view').forEach(v => v.style.display = 'none');
+      const targetEl = document.getElementById(target);
+      if (targetEl) targetEl.style.display = 'block';
+
+      if (target === 'view-pos') {
+        if (getCartCount() > 0) document.getElementById('floating-cart-bar').classList.add('visible');
+      } else {
+        document.getElementById('floating-cart-bar').classList.remove('visible');
+      }
+
+      if (target === 'view-history') fetchHistory();
+      if (target === 'view-inventory') renderInventoryList();
+    }
+
+    // Nav Items (Bottom)
     document.querySelectorAll('.nav-item').forEach(item => {
       item.addEventListener('click', () => {
         vibrateTouch(15);
-        document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-        item.classList.add('active');
-
-        const target = item.dataset.target;
-        state.activeTab = target;
-        document.querySelectorAll('.app-view').forEach(v => v.style.display = 'none');
-        document.getElementById(target).style.display = 'block';
-
-        if (target === 'view-pos') {
-          if (getCartCount() > 0) document.getElementById('floating-cart-bar').classList.add('visible');
-        } else {
-          document.getElementById('floating-cart-bar').classList.remove('visible');
-        }
-
-        if (target === 'view-history') fetchHistory();
-        if (target === 'view-inventory') renderInventoryList();
+        switchTab(item.dataset.target);
       });
     });
+
+    // Sidebar triggers & events
+    const sidebarOverlay = document.getElementById('sidebar-overlay');
+    const btnToggleSidebar = document.getElementById('btn-toggle-sidebar');
+    const btnCloseSidebar = document.getElementById('btn-close-sidebar');
+
+    function openSidebar() {
+      vibrateTouch(15);
+      if (sidebarOverlay) sidebarOverlay.classList.add('open');
+    }
+
+    function closeSidebar() {
+      if (sidebarOverlay) sidebarOverlay.classList.remove('open');
+    }
+
+    if (btnToggleSidebar) btnToggleSidebar.addEventListener('click', openSidebar);
+    if (btnCloseSidebar) btnCloseSidebar.addEventListener('click', closeSidebar);
+    if (sidebarOverlay) {
+      sidebarOverlay.addEventListener('click', (e) => {
+        if (e.target === sidebarOverlay) closeSidebar();
+      });
+    }
+
+    // Sidebar nav items
+    document.querySelectorAll('.sidebar-nav-item').forEach(item => {
+      item.addEventListener('click', () => {
+        vibrateTouch(15);
+        closeSidebar();
+        if (item.id === 'sidebar-item-server') {
+          showServerModal();
+        } else if (item.dataset.target) {
+          switchTab(item.dataset.target);
+        }
+      });
+    });
+
+    const sidebarBtnLogout = document.getElementById('sidebar-btn-logout');
+    if (sidebarBtnLogout) {
+      sidebarBtnLogout.addEventListener('click', () => {
+        closeSidebar();
+        logout();
+      });
+    }
 
     // Category click
     document.getElementById('category-bar').addEventListener('click', (e) => {
