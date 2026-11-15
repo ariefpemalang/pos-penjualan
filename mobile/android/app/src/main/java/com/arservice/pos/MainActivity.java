@@ -69,6 +69,15 @@ public class MainActivity extends AppCompatActivity {
                         Toast.makeText(MainActivity.this, "WhatsApp tidak terpasang", Toast.LENGTH_SHORT).show();
                         return true;
                     }
+                } else if (url.startsWith("rawbt:") || url.startsWith("intent:")) {
+                    try {
+                        Intent intent = Intent.parseUri(url, Intent.URI_INTENT_SCHEME);
+                        startActivity(intent);
+                        return true;
+                    } catch (Exception e) {
+                        Toast.makeText(MainActivity.this, "Aplikasi cetak tidak tersedia", Toast.LENGTH_SHORT).show();
+                        return true;
+                    }
                 }
                 return false;
             }

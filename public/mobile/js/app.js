@@ -1379,6 +1379,18 @@
   }
 
   async function connectBluetoothPrinter() {
+    if (window.AndroidBridge) {
+      alert(
+        '✓ Mode Aplikasi Android (APK) Aktif\n\n' +
+        'Pencetakan struk di aplikasi APK sudah otomatis terhubung ke Layanan Cetak Android (Print Spooler bawaan HP).\n\n' +
+        'Cara mencetak struk di APK:\n' +
+        '1. Pastikan printer Bluetooth Anda sudah di-Pairing di menu Pengaturan Bluetooth HP Android Anda.\n' +
+        '2. Tekan tombol "Tes Cetak" atau tombol "Cetak Struk" pada setiap transaksi kasir.\n' +
+        '3. Pilih printer kasir Anda pada jendela cetak yang muncul.'
+      );
+      return;
+    }
+
     if (!navigator.bluetooth) {
       const isHttps = window.location.protocol === 'https:' || window.location.hostname === 'localhost';
       const msg = 'Browser ini belum mendukung Web Bluetooth secara langsung.\n\n' +
@@ -1914,7 +1926,16 @@
     });
     applyTheme(state.theme);
 
-    // Bluetooth Printer
+    // Bluetooth / Android Printer
+    if (window.AndroidBridge) {
+      updatePrinterStatus(true, 'Layanan Cetak Android (APK)');
+      const badge = document.getElementById('printer-status-badge');
+      if (badge) {
+        badge.className = 'printer-badge connected';
+        badge.textContent = 'Siap Cetak';
+      }
+    }
+
     const btnConnectBt = document.getElementById('btn-connect-bluetooth');
     if (btnConnectBt) {
       btnConnectBt.addEventListener('click', () => {
@@ -1927,19 +1948,28 @@
     if (btnTestPrint) {
       btnTestPrint.addEventListener('click', async () => {
         vibrateTouch(15);
-        const sampleTx = {
-          invoice_no: 'TES-STRUK',
-          cashier: state.user?.name || 'Kasir AR POS',
-          customer: 'Pelanggan Tes',
-          payment_method: 'TUNAI',
-          total_amount: 50000,
-          paid_amount: 50000,
-          change: 0,
-          items: [
-            { name: 'Tes Cetak Printer Bluetooth', qty: 1, price: 50000 }
-          ]
-        };
-        await printThermalReceipt(sampleTx);
+        if (state.bluetoothPrinter.connected && state.bluetoothPrinter.characteristic) {
+          const sampleTx = {
+            invoice_no: 'TES-STRUK',
+            cashier: state.user?.name || 'Kasir AR POS',
+            customer: 'Pelanggan Umum',
+            payment_method: 'TUNAI',
+            total_amount: 50000,
+            paid_amount: 50000,
+            change: 0,
+            items: [
+              { name: 'Tes Cetak Printer Thermal', qty: 1, price: 50000 }
+            ]
+          };
+          await printThermalReceipt(sampleTx);
+        } else if (window.AndroidBridge && window.AndroidBridge.printHtml) {
+          showToast('Membuka Layanan Cetak Android...');
+          const receiptEl = document.getElementById('printable-receipt');
+          const html = receiptEl ? receiptEl.outerHTML : '<div style="font-family:monospace; padding:10px;"><h3>AR Cell</h3><p>Tes Cetak Berhasil!</p></div>';
+          window.AndroidBridge.printHtml(html);
+        } else {
+          window.print();
+        }
       });
     }
 
