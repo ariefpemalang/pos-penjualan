@@ -356,9 +356,11 @@
 
       const cartItem = state.cart.find(c => c.id === item.id);
       const inCartQty = cartItem ? cartItem.qty : 0;
-      const inCartBadge = inCartQty > 0 
-        ? `<span style="background:var(--primary); color:#121212; font-size:0.72rem; font-weight:800; padding:2px 7px; border-radius:var(--radius-full); margin-right:4px;">${inCartQty}x</span>` 
-        : '';
+      const inCartClass = inCartQty > 0 ? 'in-cart' : '';
+      const badgeVisibleClass = inCartQty > 0 ? 'visible' : '';
+
+      row.className = `product-row-item ${inCartClass}`;
+      row.dataset.id = item.id;
 
       const imgHtml = item.photo_url 
         ? `<img src="${item.photo_url}" alt="${item.name}" loading="lazy" onerror="this.src='icon.png'">`
@@ -375,10 +377,12 @@
             <span class="product-stock-tag ${stockClass}">${stockText}</span>
           </div>
         </div>
+        <div class="product-row-qty-badge ${badgeVisibleClass}" id="product-qty-badge-${item.id}">
+          <span class="product-qty-num">${inCartQty > 0 ? inCartQty : ''}</span>
+        </div>
         <div class="product-row-action">
           <div class="product-row-price">${formatRupiah(item.selling_price || item.price)}</div>
           <button class="btn-add-row" title="Tambah ke keranjang">
-            ${inCartBadge}
             <span>+ Tambah</span>
           </button>
         </div>
@@ -421,23 +425,27 @@
       });
     }
 
-    updateCartUI();
+    updateCartUI(product.id);
     showToast(`Ditambah: ${product.name}`);
   }
 
   function changeCartQty(index, delta) {
     vibrateTouch(20);
+    const item = state.cart[index];
+    const itemId = item ? item.id : null;
     state.cart[index].qty += delta;
     if (state.cart[index].qty <= 0) {
       state.cart.splice(index, 1);
     }
-    updateCartUI();
+    updateCartUI(itemId);
   }
 
   function removeCartItem(index) {
     vibrateTouch(25);
+    const item = state.cart[index];
+    const itemId = item ? item.id : null;
     state.cart.splice(index, 1);
-    updateCartUI();
+    updateCartUI(itemId);
   }
 
   function getCartTotal() {
@@ -448,9 +456,43 @@
     return state.cart.reduce((sum, item) => sum + item.qty, 0);
   }
 
-  function updateCartUI() {
+  function updateProductRowQuantities(popProductId = null) {
+    const rows = document.querySelectorAll('.product-row-item');
+    rows.forEach(row => {
+      const id = Number(row.dataset.id);
+      if (!id) return;
+
+      const cartItem = state.cart.find(c => c.id === id);
+      const qty = cartItem ? cartItem.qty : 0;
+      const badge = document.getElementById(`product-qty-badge-${id}`);
+
+      if (qty > 0) {
+        row.classList.add('in-cart');
+        if (badge) {
+          badge.classList.add('visible');
+          badge.innerHTML = `<span class="product-qty-num">${qty}</span>`;
+          if (popProductId === id) {
+            badge.classList.remove('pop');
+            void badge.offsetWidth;
+            badge.classList.add('pop');
+          }
+        }
+      } else {
+        row.classList.remove('in-cart');
+        if (badge) {
+          badge.classList.remove('visible');
+          badge.innerHTML = '';
+        }
+      }
+    });
+  }
+
+  function updateCartUI(popProductId = null) {
     const count = getCartCount();
     const total = getCartTotal();
+
+    // Update individual product row badges in Kasir grid
+    updateProductRowQuantities(popProductId);
 
     // Floating Cart Bar
     const floatingBar = document.getElementById('floating-cart-bar');
