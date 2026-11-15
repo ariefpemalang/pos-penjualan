@@ -12,8 +12,14 @@
 
   const DEFAULT_API_KEY = 'pos-service-mobile-dev-key';
 
+  let savedServerUrl = localStorage.getItem('ar_pos_server_url');
+  if (!savedServerUrl || savedServerUrl === 'http://192.168.66.22') {
+    savedServerUrl = DEFAULT_SERVER_URL;
+    localStorage.setItem('ar_pos_server_url', savedServerUrl);
+  }
+
   const state = {
-    serverUrl: localStorage.getItem('ar_pos_server_url') || DEFAULT_SERVER_URL,
+    serverUrl: savedServerUrl,
     apiKey: localStorage.getItem('ar_pos_api_key') || DEFAULT_API_KEY,
     token: localStorage.getItem('ar_pos_token') || null,
     user: JSON.parse(localStorage.getItem('ar_pos_user') || 'null'),
@@ -57,6 +63,20 @@
       navigator.vibrate(ms);
     }
   };
+
+  function showServerModal() {
+    const modal = document.getElementById('server-modal');
+    if (modal) {
+      const input = document.getElementById('modal-server-url');
+      if (input) input.value = state.serverUrl || DEFAULT_SERVER_URL;
+      modal.classList.add('open');
+    }
+  }
+
+  function hideServerModal() {
+    const modal = document.getElementById('server-modal');
+    if (modal) modal.classList.remove('open');
+  }
 
   // --- API Client ---
   function getApiBaseUrl() {
@@ -871,19 +891,6 @@
         alert('Gagal terhubung ke server: ' + err.message);
       }
     });
-
-    function showServerModal() {
-      const modal = document.getElementById('server-modal');
-      if (modal) {
-        document.getElementById('modal-server-url').value = state.serverUrl;
-        modal.classList.add('open');
-      }
-    }
-
-    function hideServerModal() {
-      const modal = document.getElementById('server-modal');
-      if (modal) modal.classList.remove('open');
-    }
 
     // Modal server config triggers
     document.getElementById('link-config-server').addEventListener('click', (e) => {
