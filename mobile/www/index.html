@@ -10,7 +10,7 @@
   <link rel="manifest" href="manifest.json">
   <link rel="icon" type="image/png" href="icon.png">
   <link rel="apple-touch-icon" href="icon.png">
-  <link rel="stylesheet" href="css/app.css?v=8">
+  <link rel="stylesheet" href="css/app.css?v=9">
 </head>
 <body>
   <div class="app-container">
@@ -240,14 +240,14 @@
           <div style="display:flex; gap:8px;">
             <button class="btn-primary-action" id="btn-connect-bluetooth" style="flex:1.4; margin-top:0;">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6.5 6.5l11 11L12 23V1l5.5 5.5-11 11"></path></svg>
-              Sambungkan Printer
+              Cari Printer di Sekitar
             </button>
             <button class="btn-primary-action" id="btn-test-print" style="flex:1; margin-top:0; background:var(--bg-surface); border:1px solid var(--border-gold); color:var(--primary-light);">
               Tes Cetak
             </button>
           </div>
           <div style="font-size:0.72rem; color:var(--text-muted); margin-top:10px; line-height:1.4; background:var(--bg-card); padding:8px 10px; border-radius:var(--radius-sm); border:1px solid var(--border-subtle);">
-            💡 <b>Tips Bluetooth di Android:</b> Buka lewat aplikasi <b>Google Chrome</b> resmi via <code>https://</code>, dan pastikan <b>Bluetooth</b> serta <b>Lokasi (GPS)</b> HP sudah aktif. Anda juga tetap bisa mencetak struk langsung tanpa Bluetooth via jendela cetak sistem.
+            💡 <b>Tips:</b> Tekan <b>"Cari Printer di Sekitar"</b> untuk mencari dan menyambungkan printer kasir secara langsung tanpa beralih ke aplikasi lain.
           </div>
         </div>
 
@@ -520,6 +520,41 @@
     </div>
   </div>
 
+  <!-- MODAL: CARI PRINTER BLUETOOTH DI SEKITAR -->
+  <div class="modal-overlay" id="printer-scan-modal">
+    <div class="bottom-sheet" style="max-height:86vh;">
+      <div class="sheet-handle"></div>
+      <div class="sheet-header">
+        <div class="sheet-title" style="display:flex; align-items:center; gap:8px;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6.5 6.5l11 11L12 23V1l5.5 5.5-11 11"></path></svg>
+          <span>Cari Printer Bluetooth</span>
+        </div>
+        <button class="icon-btn" id="btn-close-printer-scan">✕</button>
+      </div>
+      <div class="sheet-body">
+        <div class="printer-scan-status-box" id="printer-scan-status-box">
+          <div class="scan-spinner" id="printer-scan-spinner"></div>
+          <div id="printer-scan-status-text" style="font-size:0.85rem; font-weight:600;">Memindai printer Bluetooth di sekitar...</div>
+        </div>
+
+        <div style="margin-top:14px; margin-bottom:8px; font-size:0.75rem; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px;">
+          Daftar Perangkat Ditemukan:
+        </div>
+        <div class="printer-device-list" id="printer-device-list">
+          <!-- devices injected here -->
+        </div>
+      </div>
+      <div class="cart-footer" style="display:flex; gap:10px;">
+        <button class="btn-primary-action" id="btn-rescan-printers" style="margin-top:0; flex:1; background:var(--bg-surface); border:1px solid var(--border-gold); color:var(--primary-light);">
+          🔄 Pindai Ulang
+        </button>
+        <button class="btn-primary-action" id="btn-disconnect-active-printer" style="margin-top:0; flex:1; background:var(--danger-bg); border:1px solid var(--danger); color:var(--danger); display:none;">
+          Putuskan Printer
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- MODAL: ATUR SERVER -->
   <div class="modal-overlay" id="server-modal">
     <div class="bottom-sheet" style="max-height:85vh;">
@@ -643,6 +678,6 @@
     <span id="toast-text">Pemberitahuan</span>
   </div>
 
-  <script src="js/app.js?v=8"></script>
+  <script src="js/app.js?v=9"></script>
 </body>
 </html>

@@ -76,6 +76,13 @@
       characteristic: null,
       connected: false
     },
+    nativePrinter: {
+      connected: false,
+      name: localStorage.getItem('ar_pos_native_printer_name') || '',
+      address: localStorage.getItem('ar_pos_native_printer_mac') || ''
+    },
+    discoveredDevices: [],
+    pendingPrintTx: null,
     financialPeriod: 'today',
     historyPeriod: 'all'
   };
@@ -773,17 +780,11 @@
   }
 
   async function printReceipt() {
-    if (state.bluetoothPrinter.connected && state.bluetoothPrinter.characteristic && state.lastTransaction) {
-      await printThermalReceipt(state.lastTransaction);
+    if (!state.lastTransaction) {
+      showToast('Tidak ada data transaksi untuk dicetak');
       return;
     }
-
-    if (window.AndroidBridge && window.AndroidBridge.printHtml) {
-      const html = document.getElementById('printable-receipt').outerHTML;
-      window.AndroidBridge.printHtml(html);
-    } else {
-      window.print();
-    }
+    await printThermalDirect(state.lastTransaction);
   }
 
   function shareReceiptWhatsApp() {
@@ -1361,46 +1362,230 @@
     }
   }
 
-  // --- Bluetooth Thermal Printer & ESC/POS ---
-  function updatePrinterStatus(connected, deviceName = '') {
+  // --- Bluetooth Thermal Printer & ESC/POS Manager ---
+  function uint8ArrayToBase64(bytes) {
+    let binary = '';
+    const len = bytes.byteLength;
+    for (let i = 0; i < len; i++) {
+      binary += String.fromCharCode(bytes[i]);
+    }
+    return window.btoa(binary);
+  }
+
+  function updatePrinterStatus(connected, deviceName = '', deviceAddress = '') {
     const badge = document.getElementById('printer-status-badge');
     const nameEl = document.getElementById('printer-device-name');
-    if (!badge || !nameEl) return;
+    const detailEl = document.getElementById('printer-device-detail');
+    const btnDisconnect = document.getElementById('btn-disconnect-active-printer');
 
     if (connected) {
-      badge.className = 'printer-badge connected';
-      badge.textContent = 'Terhubung';
-      nameEl.textContent = deviceName || 'Printer Bluetooth';
+      if (badge) {
+        badge.className = 'printer-badge connected';
+        badge.textContent = 'Terhubung';
+      }
+      if (nameEl) nameEl.textContent = deviceName || deviceAddress || 'Printer Bluetooth';
+      if (detailEl) detailEl.textContent = deviceAddress ? `MAC: ${deviceAddress}` : 'Bluetooth ESC/POS Thermal';
+      if (btnDisconnect) btnDisconnect.style.display = 'block';
     } else {
-      badge.className = 'printer-badge disconnected';
-      badge.textContent = 'Terputus';
-      nameEl.textContent = 'Belum Terhubung';
+      if (badge) {
+        badge.className = 'printer-badge disconnected';
+        badge.textContent = 'Terputus';
+      }
+      if (nameEl) nameEl.textContent = 'Belum Terhubung';
+      if (detailEl) detailEl.textContent = 'Bluetooth ESC/POS Thermal';
+      if (btnDisconnect) btnDisconnect.style.display = 'none';
     }
   }
 
-  async function connectBluetoothPrinter() {
-    if (window.AndroidBridge) {
-      alert(
-        '✓ Mode Aplikasi Android (APK) Aktif\n\n' +
-        'Pencetakan struk di aplikasi APK sudah otomatis terhubung ke Layanan Cetak Android (Print Spooler bawaan HP).\n\n' +
-        'Cara mencetak struk di APK:\n' +
-        '1. Pastikan printer Bluetooth Anda sudah di-Pairing di menu Pengaturan Bluetooth HP Android Anda.\n' +
-        '2. Tekan tombol "Tes Cetak" atau tombol "Cetak Struk" pada setiap transaksi kasir.\n' +
-        '3. Pilih printer kasir Anda pada jendela cetak yang muncul.'
-      );
+  function openPrinterScanModal(pendingTx = null) {
+    state.pendingPrintTx = pendingTx;
+    state.discoveredDevices = [];
+    document.getElementById('printer-scan-modal').classList.add('open');
+    rescanPrinters();
+  }
+
+  function closePrinterScanModal() {
+    document.getElementById('printer-scan-modal').classList.remove('open');
+    if (window.AndroidBridge && window.AndroidBridge.stopDiscovery) {
+      window.AndroidBridge.stopDiscovery();
+    }
+  }
+
+  function rescanPrinters() {
+    state.discoveredDevices = [];
+    const statusText = document.getElementById('printer-scan-status-text');
+    const spinner = document.getElementById('printer-scan-spinner');
+
+    if (statusText) statusText.textContent = 'Memindai printer Bluetooth di sekitar...';
+    if (spinner) spinner.style.display = 'block';
+    renderDiscoveredDevices();
+
+    // 1. Android APK Native Bridge
+    if (window.AndroidBridge && window.AndroidBridge.getPairedDevices) {
+      try {
+        const paired = JSON.parse(window.AndroidBridge.getPairedDevices() || '[]');
+        paired.forEach(p => {
+          state.discoveredDevices.push({
+            name: p.name || 'Printer Bluetooth',
+            address: p.address,
+            type: 'paired'
+          });
+        });
+        renderDiscoveredDevices();
+      } catch (err) {
+        console.warn('Gagal membaca daftar perangkat paired:', err);
+      }
+
+      if (window.AndroidBridge.startDiscovery) {
+        window.AndroidBridge.startDiscovery();
+      }
       return;
     }
 
+    // 2. Web Bluetooth on Google Chrome
+    if (navigator.bluetooth) {
+      if (statusText) statusText.textContent = 'Tekan "Pindai Web Bluetooth" di bawah:';
+      if (spinner) spinner.style.display = 'none';
+      connectWebBluetooth();
+      return;
+    }
+
+    // 3. Unsupported fallback
+    if (statusText) {
+      statusText.textContent = 'Web Bluetooth tidak didukung browser ini. Silakan gunakan aplikasi APK atau Google Chrome.';
+    }
+    if (spinner) spinner.style.display = 'none';
+  }
+
+  function renderDiscoveredDevices() {
+    const list = document.getElementById('printer-device-list');
+    if (!list) return;
+
+    if (state.discoveredDevices.length === 0) {
+      list.innerHTML = `
+        <div style="text-align:center; padding:24px 10px; color:var(--text-muted); font-size:0.8rem;">
+          Belum ada printer terdeteksi.<br>
+          Pastikan printer thermal Bluetooth Anda sudah <b>ON</b>.
+        </div>
+      `;
+      return;
+    }
+
+    list.innerHTML = '';
+    state.discoveredDevices.forEach(dev => {
+      const isCurr = state.nativePrinter.connected && state.nativePrinter.address === dev.address;
+      const card = document.createElement('div');
+      card.className = `printer-device-card ${isCurr ? 'connected' : ''}`;
+      card.innerHTML = `
+        <div style="display:flex; align-items:center;">
+          <div class="printer-dev-icon">🖨️</div>
+          <div>
+            <div class="printer-dev-name">${dev.name}</div>
+            <div class="printer-dev-addr">${dev.address} ${dev.type === 'paired' ? '• Terpasang di HP' : '• Terdeteksi'}</div>
+          </div>
+        </div>
+        <div>
+          <span class="printer-connect-btn-badge ${isCurr ? 'is-connected' : ''}">
+            ${isCurr ? '✓ Terhubung' : 'Hubungkan'}
+          </span>
+        </div>
+      `;
+
+      card.addEventListener('click', () => {
+        vibrateTouch(15);
+        connectToPrinterDevice(dev);
+      });
+
+      list.appendChild(card);
+    });
+  }
+
+  function connectToPrinterDevice(device) {
+    if (window.AndroidBridge && window.AndroidBridge.connectPrinter) {
+      const statusText = document.getElementById('printer-scan-status-text');
+      const spinner = document.getElementById('printer-scan-spinner');
+      if (statusText) statusText.textContent = `Menyambungkan ke ${device.name}...`;
+      if (spinner) spinner.style.display = 'block';
+      showToast(`Menghubungkan ke ${device.name}...`);
+      window.AndroidBridge.connectPrinter(device.address);
+      return;
+    }
+
+    if (navigator.bluetooth) {
+      connectWebBluetooth();
+    }
+  }
+
+  function disconnectPrinter() {
+    vibrateTouch(15);
+    if (window.AndroidBridge && window.AndroidBridge.disconnectPrinter) {
+      window.AndroidBridge.disconnectPrinter();
+    }
+    if (state.bluetoothPrinter.device && state.bluetoothPrinter.device.gatt?.connected) {
+      state.bluetoothPrinter.device.gatt.disconnect();
+    }
+    state.nativePrinter.connected = false;
+    state.bluetoothPrinter.connected = false;
+    localStorage.removeItem('ar_pos_native_printer_mac');
+    localStorage.removeItem('ar_pos_native_printer_name');
+    updatePrinterStatus(false);
+    showToast('Printer berhasil diputuskan.');
+    renderDiscoveredDevices();
+  }
+
+  // Global callbacks for AndroidBridge
+  window.onAndroidBluetoothDeviceFound = function (name, address) {
+    const cleanName = (!name || name === 'null') ? 'Printer Bluetooth' : name;
+    const exists = state.discoveredDevices.some(d => d.address === address);
+    if (!exists) {
+      state.discoveredDevices.push({
+        name: cleanName,
+        address: address,
+        type: 'nearby'
+      });
+      renderDiscoveredDevices();
+    }
+  };
+
+  window.onAndroidBluetoothDiscoveryFinished = function () {
+    const statusText = document.getElementById('printer-scan-status-text');
+    const spinner = document.getElementById('printer-scan-spinner');
+    if (statusText) statusText.textContent = `Ditemukan ${state.discoveredDevices.length} perangkat Bluetooth.`;
+    if (spinner) spinner.style.display = 'none';
+  };
+
+  window.onAndroidBluetoothConnected = function (success, name, info) {
+    const spinner = document.getElementById('printer-scan-spinner');
+    if (spinner) spinner.style.display = 'none';
+
+    if (success) {
+      state.nativePrinter.connected = true;
+      state.nativePrinter.name = name || 'Printer Kasir';
+      state.nativePrinter.address = info || state.nativePrinter.address;
+
+      localStorage.setItem('ar_pos_native_printer_name', state.nativePrinter.name);
+      localStorage.setItem('ar_pos_native_printer_mac', state.nativePrinter.address);
+
+      updatePrinterStatus(true, state.nativePrinter.name, state.nativePrinter.address);
+      showToast(`✓ Terhubung ke ${state.nativePrinter.name}!`);
+      closePrinterScanModal();
+
+      if (state.pendingPrintTx) {
+        const tx = state.pendingPrintTx;
+        state.pendingPrintTx = null;
+        printThermalDirect(tx);
+      }
+    } else {
+      state.nativePrinter.connected = false;
+      updatePrinterStatus(false);
+      showToast(`Gagal menyambung: ${info || 'Periksa koneksi printer'}`);
+      renderDiscoveredDevices();
+    }
+  };
+
+  async function connectWebBluetooth() {
     if (!navigator.bluetooth) {
-      const isHttps = window.location.protocol === 'https:' || window.location.hostname === 'localhost';
-      const msg = 'Browser ini belum mendukung Web Bluetooth secara langsung.\n\n' +
-        'Penyebab umum & solusi:\n' +
-        '1. Jika membuka dari WhatsApp/chat: Ketuk titik tiga (⋮) di pojok kanan atas > pilih "Buka di Chrome".\n' +
-        '2. Pastikan menggunakan aplikasi Google Chrome resmi di Android.\n' +
-        '3. Pastikan Bluetooth dan Lokasi (GPS) HP sudah AKTIF.\n' +
-        (!isHttps ? '4. Pastikan alamat diawali https:// (keamanan browser mewajibkan HTTPS).\n\n' : '\n') +
-        'Tips: Anda tetap bisa mencetak struk langsung menggunakan tombol "Cetak Struk" pada nota transaksi tanpa perlu menyambungkan Bluetooth di sini.';
-      alert(msg);
+      alert('Browser Anda belum mendukung Web Bluetooth. Silakan gunakan Google Chrome di Android atau gunakan aplikasi APK.');
       return;
     }
     showToast('Mencari printer Bluetooth...');
@@ -1444,11 +1629,78 @@
 
       updatePrinterStatus(true, device.name || 'Printer Bluetooth');
       showToast(`Printer terhubung: ${device.name || 'Bluetooth'}`);
+      closePrinterScanModal();
+
+      if (state.pendingPrintTx) {
+        const tx = state.pendingPrintTx;
+        state.pendingPrintTx = null;
+        printThermalDirect(tx);
+      }
     } catch (err) {
       console.warn('Bluetooth connect cancelled:', err);
       if (!err.message?.includes('User cancelled')) {
         alert('Gagal menyambung printer: ' + err.message);
       }
+    }
+  }
+
+  async function printThermalDirect(tx) {
+    if (!tx) tx = state.lastTransaction;
+    if (!tx) {
+      showToast('Tidak ada data transaksi untuk dicetak');
+      return;
+    }
+
+    // 1. Android APK Native Bridge (Raw ESC/POS directly to printer!)
+    if (window.AndroidBridge && window.AndroidBridge.printEscPos) {
+      const isConnected = window.AndroidBridge.isPrinterConnected && window.AndroidBridge.isPrinterConnected();
+      if (!isConnected) {
+        if (state.nativePrinter.address) {
+          showToast(`Menghubungkan ke ${state.nativePrinter.name || 'printer'}...`);
+          state.pendingPrintTx = tx;
+          window.AndroidBridge.connectPrinter(state.nativePrinter.address);
+          return;
+        } else {
+          showToast('Silakan pilih printer Bluetooth Anda');
+          openPrinterScanModal(tx);
+          return;
+        }
+      }
+
+      showToast('Mencetak struk kasir...');
+      const bytes = generateEscPosBytes(tx);
+      const b64 = uint8ArrayToBase64(bytes);
+      const ok = window.AndroidBridge.printEscPos(b64);
+      if (ok) {
+        showToast('✓ Struk kasir berhasil dicetak!');
+      } else {
+        showToast('Gagal mencetak, sambungkan ulang printer.');
+        openPrinterScanModal(tx);
+      }
+      return;
+    }
+
+    // 2. Web Bluetooth GATT Write
+    if (state.bluetoothPrinter.connected && state.bluetoothPrinter.characteristic) {
+      try {
+        showToast('Mengirim struk ke printer Bluetooth...');
+        const bytes = generateEscPosBytes(tx);
+        for (let i = 0; i < bytes.length; i += 512) {
+          const chunk = bytes.slice(i, i + 512);
+          await state.bluetoothPrinter.characteristic.writeValue(chunk);
+        }
+        showToast('✓ Struk kasir berhasil dicetak!');
+        return;
+      } catch (err) {
+        console.warn('Bluetooth direct print error:', err);
+      }
+    }
+
+    // 3. Fallback on browser without Bluetooth
+    if (navigator.bluetooth) {
+      openPrinterScanModal(tx);
+    } else {
+      window.print();
     }
   }
 
@@ -1926,13 +2178,11 @@
     });
     applyTheme(state.theme);
 
-    // Bluetooth / Android Printer
-    if (window.AndroidBridge) {
-      updatePrinterStatus(true, 'Layanan Cetak Android (APK)');
-      const badge = document.getElementById('printer-status-badge');
-      if (badge) {
-        badge.className = 'printer-badge connected';
-        badge.textContent = 'Siap Cetak';
+    // Bluetooth Printer Setup & Auto-reconnect
+    if (state.nativePrinter.address) {
+      updatePrinterStatus(false, state.nativePrinter.name || 'Printer Kasir', state.nativePrinter.address);
+      if (window.AndroidBridge && window.AndroidBridge.connectPrinter) {
+        window.AndroidBridge.connectPrinter(state.nativePrinter.address);
       }
     }
 
@@ -1940,7 +2190,30 @@
     if (btnConnectBt) {
       btnConnectBt.addEventListener('click', () => {
         vibrateTouch(15);
-        connectBluetoothPrinter();
+        openPrinterScanModal();
+      });
+    }
+
+    const btnCloseScan = document.getElementById('btn-close-printer-scan');
+    if (btnCloseScan) {
+      btnCloseScan.addEventListener('click', () => {
+        vibrateTouch(15);
+        closePrinterScanModal();
+      });
+    }
+
+    const btnRescan = document.getElementById('btn-rescan-printers');
+    if (btnRescan) {
+      btnRescan.addEventListener('click', () => {
+        vibrateTouch(15);
+        rescanPrinters();
+      });
+    }
+
+    const btnDisconnectPrn = document.getElementById('btn-disconnect-active-printer');
+    if (btnDisconnectPrn) {
+      btnDisconnectPrn.addEventListener('click', () => {
+        disconnectPrinter();
       });
     }
 
@@ -1948,28 +2221,19 @@
     if (btnTestPrint) {
       btnTestPrint.addEventListener('click', async () => {
         vibrateTouch(15);
-        if (state.bluetoothPrinter.connected && state.bluetoothPrinter.characteristic) {
-          const sampleTx = {
-            invoice_no: 'TES-STRUK',
-            cashier: state.user?.name || 'Kasir AR POS',
-            customer: 'Pelanggan Umum',
-            payment_method: 'TUNAI',
-            total_amount: 50000,
-            paid_amount: 50000,
-            change: 0,
-            items: [
-              { name: 'Tes Cetak Printer Thermal', qty: 1, price: 50000 }
-            ]
-          };
-          await printThermalReceipt(sampleTx);
-        } else if (window.AndroidBridge && window.AndroidBridge.printHtml) {
-          showToast('Membuka Layanan Cetak Android...');
-          const receiptEl = document.getElementById('printable-receipt');
-          const html = receiptEl ? receiptEl.outerHTML : '<div style="font-family:monospace; padding:10px;"><h3>AR Cell</h3><p>Tes Cetak Berhasil!</p></div>';
-          window.AndroidBridge.printHtml(html);
-        } else {
-          window.print();
-        }
+        const sampleTx = {
+          invoice_no: 'TES-STRUK',
+          cashier: state.user?.name || 'Kasir AR POS',
+          customer: 'Pelanggan Umum',
+          payment_method: 'TUNAI',
+          total_amount: 50000,
+          paid_amount: 50000,
+          change: 0,
+          items: [
+            { name: 'Tes Cetak Printer Thermal', qty: 1, price: 50000 }
+          ]
+        };
+        await printThermalDirect(sampleTx);
       });
     }
 
