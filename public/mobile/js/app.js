@@ -6,14 +6,14 @@
   'use strict';
 
   // --- Configuration & State ---
-  const DEFAULT_SERVER_URL = window.location.protocol.startsWith('http') 
-    ? window.location.origin 
-    : 'http://192.168.100.218';
+  const DEFAULT_SERVER_URL = window.location.protocol.startsWith('http') && window.location.hostname.includes('arcell.store')
+    ? window.location.origin
+    : 'https://www.arcell.store';
 
   const DEFAULT_API_KEY = 'pos-service-mobile-dev-key';
 
   let savedServerUrl = localStorage.getItem('ar_pos_server_url');
-  if (!savedServerUrl || savedServerUrl === 'http://192.168.66.22') {
+  if (!savedServerUrl || savedServerUrl.includes('192.168.') || savedServerUrl.includes('localhost') || savedServerUrl.includes('10.0.2.2')) {
     savedServerUrl = DEFAULT_SERVER_URL;
     localStorage.setItem('ar_pos_server_url', savedServerUrl);
   }
@@ -82,7 +82,7 @@
   function getApiBaseUrl() {
     let base = (state.serverUrl || '').trim().replace(/\/+$/, '');
     if (!base) {
-      base = window.location.protocol.startsWith('http') ? window.location.origin : 'http://192.168.100.218';
+      base = DEFAULT_SERVER_URL;
     }
     if (!base.endsWith('/api')) {
       base += '/api';

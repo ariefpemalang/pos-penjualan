@@ -111,7 +111,7 @@
         <div class="settings-group">
           <h3 style="font-size:0.95rem; font-weight:600; margin-bottom:12px; color:var(--primary-light);">Koneksi Server AR POS</h3>
           <label class="settings-label">URL Backend API</label>
-          <input type="url" id="setting-server-url" class="settings-input" placeholder="http://192.168.66.22 atau http://localhost:8000">
+          <input type="url" id="setting-server-url" class="settings-input" placeholder="https://www.arcell.store">
           
           <label class="settings-label">API Key External</label>
           <input type="text" id="setting-api-key" class="settings-input" placeholder="pos-service-mobile-dev-key">
@@ -352,14 +352,14 @@
           Pastikan HP Android dan Server berada di jaringan WiFi yang sama.
         </p>
         <label class="settings-label">URL Server POS Backend</label>
-        <input type="url" id="modal-server-url" class="settings-input" placeholder="http://192.168.100.218 atau http://192.168.66.22">
+        <input type="url" id="modal-server-url" class="settings-input" value="https://www.arcell.store" placeholder="https://www.arcell.store">
 
         <div class="settings-label">Pilihan Cepat Server:</div>
         <div style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:14px;">
-          <button type="button" class="category-pill btn-preset-ip" data-url="http://192.168.100.218">WiFi (192.168.100.218)</button>
-          <button type="button" class="category-pill btn-preset-ip" data-url="http://192.168.100.218:8000">WiFi :8000</button>
+          <button type="button" class="category-pill active btn-preset-ip" data-url="https://www.arcell.store">🌐 www.arcell.store (HTTPS)</button>
+          <button type="button" class="category-pill btn-preset-ip" data-url="http://www.arcell.store">🌐 www.arcell.store (HTTP)</button>
+          <button type="button" class="category-pill btn-preset-ip" data-url="http://192.168.100.218">WiFi Lokal (192.168.100.218)</button>
           <button type="button" class="category-pill btn-preset-ip" data-url="http://192.168.66.22">Proxmox (192.168.66.22)</button>
-          <button type="button" class="category-pill btn-preset-ip" data-url="http://10.0.2.2:8000">Emulator Android</button>
           <button type="button" class="category-pill btn-preset-ip" data-url="http://localhost:8000">Localhost :8000</button>
         </div>
 
