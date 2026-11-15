@@ -80,6 +80,15 @@ class RoleAndPermissionSeeder extends Seeder
             'manual expense view', 'manual expense create', 'manual expense cancel',
         ]);
 
+        $laporan = Role::firstOrCreate(['name' => 'Laporan']);
+        $laporan->syncPermissions([
+            'dashboard view',
+            'dashboard finance view',
+            'financial report view',
+            'sales report view',
+            'asset report view',
+        ]);
+
         Role::where('name', 'Teknisi')->each(function (Role $role) {
             foreach ($role->users as $user) {
                 $user->removeRole($role);

@@ -47,6 +47,21 @@ class PurgeLegacyUsersCommand extends Command
         }
         $this->info("Super Admin aktif: {$admin->name} ({$admin->email}) [ID: {$admin->id}]");
 
+        // Pastikan Role Laporan tersedia
+        $laporanRole = Role::firstOrCreate(['name' => 'Laporan']);
+        $laporanPermissions = [
+            'dashboard view',
+            'dashboard finance view',
+            'financial report view',
+            'sales report view',
+            'asset report view',
+        ];
+        foreach ($laporanPermissions as $p) {
+            \Spatie\Permission\Models\Permission::firstOrCreate(['name' => $p]);
+        }
+        $laporanRole->syncPermissions($laporanPermissions);
+        $this->info("Role Laporan siap digunakan dengan akses: " . implode(', ', $laporanPermissions));
+
         // 3. Hapus Role Teknisi
         $teknisi = Role::where('name', 'Teknisi')->first();
         if ($teknisi) {
