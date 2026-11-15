@@ -282,26 +282,12 @@
     container.innerHTML = '<div style="text-align:center; padding:30px; color:var(--text-muted);">Memuat riwayat...</div>';
 
     try {
-      const res = await apiRequest('/transactions?per_page=30');
-      if (res && res.data && res.data.transactions) {
-        renderHistoryList(res.data.transactions);
-      }
+      const res = await apiRequest('/transactions?per_page=50');
+      const list = res?.data?.items || res?.data?.transactions || [];
+      state.historyList = list;
+      renderHistoryList(list);
     } catch (err) {
       container.innerHTML = `<div style="text-align:center; color:var(--danger); padding:20px;">Gagal memuat riwayat: ${err.message}</div>`;
-    }
-  }
-
-  async function fetchServiceTickets() {
-    const container = document.getElementById('service-list');
-    container.innerHTML = '<div style="text-align:center; padding:30px; color:var(--text-muted);">Memuat tiket servis...</div>';
-
-    try {
-      const res = await apiRequest('/service-tickets?per_page=30');
-      if (res && res.data && res.data.tickets) {
-        renderServiceList(res.data.tickets);
-      }
-    } catch (err) {
-      container.innerHTML = `<div style="text-align:center; color:var(--danger); padding:20px;">Gagal memuat servis: ${err.message}</div>`;
     }
   }
 
@@ -664,7 +650,7 @@
     window.open(url, '_blank');
   }
 
-  // --- History & Services Rendering ---
+  // --- History Rendering ---
   function renderHistoryList(transactions) {
     const container = document.getElementById('history-list');
     if (!transactions || transactions.length === 0) {
@@ -676,68 +662,50 @@
     transactions.forEach(t => {
       const card = document.createElement('div');
       card.className = 'ticket-card';
+      const invoiceNo = t.transaction_no || t.invoice_no || t.code || 'TRX';
+      const custName = t.customer?.name || t.customer_name || 'Umum';
+      const totalAmount = t.total ?? t.total_amount ?? 0;
+      const paymentMethod = t.payment_label || t.payment_method || 'Tunai';
+      const isCancelled = t.status === 'cancelled';
+      const statusText = t.status_label || (isCancelled ? 'Batal' : 'Selesai');
+      const statusStyle = isCancelled 
+        ? 'background:var(--danger-bg); color:var(--danger);' 
+        : 'background:var(--success-bg); color:var(--success);';
+
+      const itemsList = t.items || [];
+      const itemsCount = itemsList.length > 0 ? itemsList.length : (t.items_count || 1);
+
       card.innerHTML = `
         <div class="ticket-header">
-          <span class="ticket-no">${t.invoice_no || t.code || 'TRX'}</span>
-          <span class="ticket-status" style="background:var(--success-bg); color:var(--success);">Selesai</span>
+          <span class="ticket-no">${invoiceNo}</span>
+          <span class="ticket-status" style="${statusStyle}">${statusText}</span>
         </div>
-        <div class="ticket-device">${t.customer?.name || 'Umum'}</div>
-        <div class="ticket-complaint">${t.items_count || 1} item barang • ${t.payment_method || 'Tunai'}</div>
+        <div class="ticket-device">${custName}</div>
+        <div class="ticket-complaint">${itemsCount} item barang • ${paymentMethod}</div>
         <div class="ticket-footer">
-          <span>${t.created_at ? new Date(t.created_at).toLocaleDateString('id-ID') : '-'}</span>
-          <strong style="color:var(--primary-light);">${formatRupiah(t.total_amount)}</strong>
+          <span>${t.created_at ? new Date(t.created_at).toLocaleString('id-ID') : '-'}</span>
+          <strong style="color:var(--primary-light);">${formatRupiah(totalAmount)}</strong>
         </div>
       `;
       card.addEventListener('click', () => {
+        const mappedItems = itemsList.map(it => ({
+          name: it.item_name || it.name || 'Barang',
+          qty: it.quantity || it.qty || 1,
+          price: it.unit_price || it.price || 0
+        }));
+
         state.lastTransaction = {
-          invoice_no: t.invoice_no || t.code,
+          invoice_no: invoiceNo,
           cashier: t.user?.name || 'Kasir',
-          customer: t.customer?.name || 'Umum',
-          total_amount: t.total_amount,
-          paid_amount: t.paid_amount || t.total_amount,
-          change: 0,
-          payment_method: t.payment_method,
-          items: t.items || []
+          customer: custName,
+          total_amount: totalAmount,
+          paid_amount: t.cash_received || t.paid_amount || totalAmount,
+          change: t.cash_change || 0,
+          payment_method: paymentMethod,
+          items: mappedItems
         };
         openReceiptModal(state.lastTransaction);
       });
-      container.appendChild(card);
-    });
-  }
-
-  function renderServiceList(tickets) {
-    const container = document.getElementById('service-list');
-    document.getElementById('service-count').textContent = `${tickets.length} Tiket`;
-
-    if (!tickets || tickets.length === 0) {
-      container.innerHTML = '<div style="text-align:center; padding:30px; color:var(--text-muted);">Belum ada tiket servis.</div>';
-      return;
-    }
-
-    container.innerHTML = '';
-    tickets.forEach(tk => {
-      const card = document.createElement('div');
-      card.className = 'ticket-card';
-      
-      let badgeStyle = 'background:rgba(59,130,246,0.15); color:#60A5FA;';
-      if (tk.status === 'completed' || tk.status === 'picked_up') {
-        badgeStyle = 'background:var(--success-bg); color:var(--success);';
-      } else if (tk.status === 'cancelled') {
-        badgeStyle = 'background:var(--danger-bg); color:var(--danger);';
-      }
-
-      card.innerHTML = `
-        <div class="ticket-header">
-          <span class="ticket-no">${tk.ticket_no}</span>
-          <span class="ticket-status" style="${badgeStyle}">${tk.status_label || tk.status}</span>
-        </div>
-        <div class="ticket-device">${tk.device_summary || `${tk.brand || ''} ${tk.model || ''}`}</div>
-        <div class="ticket-complaint">Keluhan: ${tk.complaint || '-'}</div>
-        <div class="ticket-footer">
-          <span>${tk.customer?.name || '-'} (${tk.customer?.phone || '-'})</span>
-          <strong style="color:var(--primary-light);">${tk.estimated_cost ? formatRupiah(tk.estimated_cost) : 'Estimasi: -'}</strong>
-        </div>
-      `;
       container.appendChild(card);
     });
   }
@@ -878,12 +846,28 @@
       clearBtn.style.display = state.searchQuery ? 'flex' : 'none';
       applyProductFilter();
     });
+
     clearBtn.addEventListener('click', () => {
       searchInput.value = '';
       state.searchQuery = '';
       clearBtn.style.display = 'none';
       applyProductFilter();
     });
+
+    // History search input
+    const historySearch = document.getElementById('history-search');
+    if (historySearch) {
+      historySearch.addEventListener('input', (e) => {
+        const q = e.target.value.toLowerCase().trim();
+        if (!state.historyList) return;
+        const filtered = state.historyList.filter(t => {
+          const no = (t.transaction_no || t.invoice_no || '').toLowerCase();
+          const cust = (t.customer?.name || t.customer_name || '').toLowerCase();
+          return no.includes(q) || cust.includes(q);
+        });
+        renderHistoryList(filtered);
+      });
+    }
 
     // Refresh button
     document.getElementById('btn-refresh').addEventListener('click', () => {
