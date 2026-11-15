@@ -36,7 +36,15 @@
     selectedBankId: null,
     activeTab: 'view-pos',
     lastTransaction: null,
-    lowStockFilter: false
+    lowStockFilter: false,
+    stockOpname: {
+      canAdjust: false,
+      pending: null,
+      recent: [],
+      items: {},
+      filterSearch: '',
+      filterDiffOnly: false
+    }
   };
 
   // --- Utility Functions ---
@@ -743,6 +751,456 @@
     });
   }
 
+  // --- Stock Opname ---
+  async function fetchStockOpname() {
+    const itemsListContainer = document.getElementById('opname-items-list');
+    if (itemsListContainer) {
+      itemsListContainer.innerHTML = '<div style="text-align:center; padding:30px; color:var(--text-muted);">Memuat data stok opname...</div>';
+    }
+
+    try {
+      const res = await apiRequest('/stock-opnames');
+      if (res && res.data) {
+        state.stockOpname.canAdjust = !!res.data.can_adjust;
+        state.stockOpname.pending = res.data.pending_opname;
+        state.stockOpname.recent = res.data.recent_opnames || [];
+
+        // Pre-fill state.stockOpname.items from pending draft if available
+        if (state.stockOpname.pending && Array.isArray(state.stockOpname.pending.items)) {
+          state.stockOpname.pending.items.forEach(it => {
+            state.stockOpname.items[it.id] = {
+              physicalStock: it.physical_stock,
+              notes: it.notes || ''
+            };
+          });
+        }
+
+        renderOpnamePendingCard();
+        renderOpnameItemsList();
+        renderOpnameRecentHistory();
+        updateOpnameCountedBadge();
+      }
+    } catch (err) {
+      console.error('Gagal mengambil stock opname:', err);
+      if (itemsListContainer) {
+        itemsListContainer.innerHTML = `<div style="text-align:center; padding:30px; color:var(--danger);">Gagal memuat data: ${err.message}</div>`;
+      }
+    }
+  }
+
+  function updateOpnameCountedBadge() {
+    const badge = document.getElementById('opname-counted-count');
+    if (!badge) return;
+    const count = Object.keys(state.stockOpname.items).length;
+    badge.textContent = `${count} diisi`;
+  }
+
+  function renderOpnamePendingCard() {
+    const container = document.getElementById('opname-pending-container');
+    if (!container) return;
+
+    const pending = state.stockOpname.pending;
+    if (!pending) {
+      container.style.display = 'none';
+      container.innerHTML = '';
+      return;
+    }
+
+    container.style.display = 'block';
+
+    const canAdjust = state.stockOpname.canAdjust;
+    const lossUnits = pending.total_loss_units || 0;
+    const lossCost = pending.total_loss_cost || 0;
+    const gainUnits = pending.total_gain_units || 0;
+    const gainCost = pending.total_gain_cost || 0;
+    const totalItems = pending.total_items || (pending.items ? pending.items.length : 0);
+    const dateFormatted = pending.created_at ? new Date(pending.created_at).toLocaleString('id-ID') : '-';
+
+    let diffItemsHtml = '';
+    if (pending.items && pending.items.length > 0) {
+      const diffList = pending.items.filter(it => it.difference !== 0);
+      if (diffList.length > 0) {
+        diffItemsHtml = `
+          <div style="margin-top:10px; font-size:0.75rem; background:rgba(0,0,0,0.25); border-radius:var(--radius-sm); padding:8px 10px;">
+            <div style="font-weight:700; color:var(--text-secondary); margin-bottom:6px;">Daftar Barang Selisih (${diffList.length}):</div>
+            ${diffList.slice(0, 10).map(it => {
+              const diffText = it.difference > 0 ? `+${it.difference}` : `${it.difference}`;
+              const diffColor = it.difference > 0 ? 'var(--success)' : 'var(--danger)';
+              return `
+                <div style="display:flex; justify-content:space-between; padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.05);">
+                  <span style="color:var(--text-main);">${it.name}</span>
+                  <span style="font-weight:700; color:${diffColor};">Fisik: ${it.physical_stock} (${diffText})</span>
+                </div>
+              `;
+            }).join('')}
+            ${diffList.length > 10 ? `<div style="text-align:center; color:var(--text-muted); padding-top:4px;">...dan ${diffList.length - 10} barang lainnya</div>` : ''}
+          </div>
+        `;
+      }
+    }
+
+    let ownerActionHtml = '';
+    if (canAdjust) {
+      ownerActionHtml = `
+        <div style="margin-top:14px; padding-top:12px; border-top:1px solid var(--border-subtle); display:flex; flex-direction:column; gap:8px;">
+          <div style="font-size:0.82rem; font-weight:700; color:var(--primary-light); display:flex; align-items:center; gap:6px;">
+            👑 Aksi Persetujuan Owner
+          </div>
+          <p style="font-size:0.72rem; color:var(--text-muted); margin-bottom:4px;">
+            Sebagai Owner / Super Admin, Anda dapat menyetujui penyesuaian stok ini untuk langsung memperbarui stok di sistem.
+          </p>
+          <div style="display:flex; gap:8px;">
+            <button class="btn-primary-action" id="btn-owner-approve-opname" style="flex:1.5; margin-top:0; background:#10B981; color:#fff; font-weight:700;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              Setujui Stok
+            </button>
+            <button class="btn-primary-action" id="btn-owner-reject-opname" style="flex:1; margin-top:0; background:transparent; border:1px solid var(--danger); color:var(--danger); font-weight:700;">
+              ✕ Tolak
+            </button>
+          </div>
+        </div>
+      `;
+    } else {
+      ownerActionHtml = `
+        <div style="margin-top:12px; padding:10px; background:rgba(245,158,11,0.1); border:1px dashed var(--warning); border-radius:var(--radius-sm); font-size:0.75rem; color:#fcd34d;">
+          ⏳ <strong>Menunggu Persetujuan Owner:</strong> Hasil stok opname telah diajukan ke Owner. Menunggu disetujui untuk penyesuaian stok.
+        </div>
+      `;
+    }
+
+    container.innerHTML = `
+      <div class="opname-card">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+          <span class="opname-status-badge pending">⏳ MENUNGGU PERSETUJUAN OWNER</span>
+          <span style="font-size:0.72rem; color:var(--text-muted);">${pending.opname_number}</span>
+        </div>
+        <div style="font-size:0.82rem; color:var(--text-secondary); margin-bottom:6px;">
+          Dibuat oleh: <strong style="color:var(--primary-light);">${pending.creator}</strong> • ${dateFormatted}
+        </div>
+        ${pending.notes ? `<div style="font-size:0.75rem; color:var(--text-muted); font-style:italic;">Catatan: "${pending.notes}"</div>` : ''}
+
+        <div class="opname-metrics-grid">
+          <div class="opname-metric-box">
+            <div class="label">Barang Dicek</div>
+            <div class="val">${totalItems}</div>
+          </div>
+          <div class="opname-metric-box">
+            <div class="label">Kurang/Hilang</div>
+            <div class="val loss">-${lossUnits}</div>
+            <div style="font-size:0.62rem; color:var(--danger);">${formatRupiah(lossCost)}</div>
+          </div>
+          <div class="opname-metric-box">
+            <div class="label">Lebih/Temuan</div>
+            <div class="val gain">+${gainUnits}</div>
+            <div style="font-size:0.62rem; color:var(--success);">${formatRupiah(gainCost)}</div>
+          </div>
+        </div>
+
+        ${diffItemsHtml}
+        ${ownerActionHtml}
+      </div>
+    `;
+
+    // Bind owner actions
+    if (canAdjust) {
+      const btnApprove = document.getElementById('btn-owner-approve-opname');
+      const btnReject = document.getElementById('btn-owner-reject-opname');
+      if (btnApprove) {
+        btnApprove.addEventListener('click', () => {
+          approveStockOpname();
+        });
+      }
+      if (btnReject) {
+        btnReject.addEventListener('click', () => {
+          rejectStockOpname(pending.id);
+        });
+      }
+    }
+  }
+
+  function renderOpnameItemsList() {
+    const container = document.getElementById('opname-items-list');
+    if (!container) return;
+
+    let items = [...state.products];
+    const search = (state.stockOpname.filterSearch || '').toLowerCase().trim();
+    if (search) {
+      items = items.filter(i => 
+        (i.name && i.name.toLowerCase().includes(search)) ||
+        (i.code && i.code.toLowerCase().includes(search))
+      );
+    }
+
+    if (state.stockOpname.filterDiffOnly) {
+      items = items.filter(i => {
+        const entry = state.stockOpname.items[i.id];
+        if (!entry || entry.physicalStock === undefined || entry.physicalStock === '') return false;
+        return Number(entry.physicalStock) !== Number(i.stock || 0);
+      });
+    }
+
+    if (items.length === 0) {
+      container.innerHTML = '<div style="text-align:center; padding:30px; color:var(--text-muted);">Tidak ada barang yang cocok.</div>';
+      return;
+    }
+
+    container.innerHTML = '';
+    items.forEach(it => {
+      const row = document.createElement('div');
+      const sysStock = Number(it.stock || 0);
+      const savedEntry = state.stockOpname.items[it.id];
+      const hasCount = savedEntry && savedEntry.physicalStock !== undefined && savedEntry.physicalStock !== '';
+      const physStock = hasCount ? Number(savedEntry.physicalStock) : '';
+      const diff = hasCount ? (physStock - sysStock) : 0;
+      const notes = savedEntry ? (savedEntry.notes || '') : '';
+
+      const hasDiff = hasCount && diff !== 0;
+      row.className = `opname-item-row ${hasDiff ? 'has-diff' : ''}`;
+
+      let diffPillClass = 'zero';
+      let diffPillText = 'Sama';
+      if (hasCount) {
+        if (diff < 0) {
+          diffPillClass = 'loss';
+          diffPillText = `${diff}`;
+        } else if (diff > 0) {
+          diffPillClass = 'gain';
+          diffPillText = `+${diff}`;
+        }
+      } else {
+        diffPillText = '-';
+      }
+
+      row.innerHTML = `
+        <div class="opname-item-header">
+          <div>
+            <div class="opname-item-name">${it.name}</div>
+            <div class="opname-item-code">${it.code || '-'} • HPP: ${formatRupiah(it.purchase_price || 0)}</div>
+          </div>
+          <button type="button" class="btn-sync-stock btn-sync-single" data-id="${it.id}" data-sys="${sysStock}" title="Samakan fisik dengan stok sistem">
+            = Sistem (${sysStock})
+          </button>
+        </div>
+
+        <div class="opname-inputs-row">
+          <div class="opname-stock-pill">
+            Sistem: <strong>${sysStock}</strong>
+          </div>
+          <div class="opname-phys-input-wrap">
+            <input type="number" min="0" step="1" class="opname-phys-input opname-input-field" 
+              data-id="${it.id}" 
+              data-sys="${sysStock}" 
+              placeholder="Fisik..." 
+              value="${physStock !== '' ? physStock : ''}">
+          </div>
+          <div class="opname-diff-pill ${diffPillClass}" id="diff-pill-${it.id}">
+            ${diffPillText}
+          </div>
+        </div>
+
+        <input type="text" class="opname-note-input opname-notes-field" 
+          data-id="${it.id}" 
+          placeholder="Catatan jika ada selisih (misal: barang rusak, terselip)..." 
+          value="${notes}">
+      `;
+
+      container.appendChild(row);
+    });
+
+    // Attach row events
+    container.querySelectorAll('.opname-input-field').forEach(inp => {
+      inp.addEventListener('input', (e) => {
+        const id = e.target.dataset.id;
+        const sys = Number(e.target.dataset.sys || 0);
+        const val = e.target.value.trim();
+        const diffPill = document.getElementById(`diff-pill-${id}`);
+        const parentRow = e.target.closest('.opname-item-row');
+
+        if (val === '') {
+          delete state.stockOpname.items[id];
+          if (diffPill) {
+            diffPill.className = 'opname-diff-pill zero';
+            diffPill.textContent = '-';
+          }
+          if (parentRow) parentRow.classList.remove('has-diff');
+        } else {
+          const phys = Number(val);
+          const diff = phys - sys;
+          if (!state.stockOpname.items[id]) {
+            state.stockOpname.items[id] = { physicalStock: phys, notes: '' };
+          } else {
+            state.stockOpname.items[id].physicalStock = phys;
+          }
+
+          if (diffPill) {
+            if (diff < 0) {
+              diffPill.className = 'opname-diff-pill loss';
+              diffPill.textContent = `${diff}`;
+            } else if (diff > 0) {
+              diffPill.className = 'opname-diff-pill gain';
+              diffPill.textContent = `+${diff}`;
+            } else {
+              diffPill.className = 'opname-diff-pill zero';
+              diffPill.textContent = 'Sama';
+            }
+          }
+
+          if (parentRow) {
+            parentRow.classList.toggle('has-diff', diff !== 0);
+          }
+        }
+        updateOpnameCountedBadge();
+      });
+    });
+
+    container.querySelectorAll('.opname-notes-field').forEach(inp => {
+      inp.addEventListener('change', (e) => {
+        const id = e.target.dataset.id;
+        const notes = e.target.value.trim();
+        if (state.stockOpname.items[id]) {
+          state.stockOpname.items[id].notes = notes;
+        }
+      });
+    });
+
+    container.querySelectorAll('.btn-sync-single').forEach(btn => {
+      btn.addEventListener('click', () => {
+        vibrateTouch(10);
+        const id = btn.dataset.id;
+        const sys = Number(btn.dataset.sys || 0);
+        const inputField = container.querySelector(`.opname-input-field[data-id="${id}"]`);
+        if (inputField) {
+          inputField.value = sys;
+          inputField.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+      });
+    });
+  }
+
+  function renderOpnameRecentHistory() {
+    const container = document.getElementById('opname-recent-list');
+    if (!container) return;
+
+    const recent = state.stockOpname.recent || [];
+    if (recent.length === 0) {
+      container.innerHTML = '<div style="text-align:center; padding:16px; color:var(--text-muted); font-size:0.75rem;">Belum ada riwayat opname yang selesai.</div>';
+      return;
+    }
+
+    container.innerHTML = '';
+    recent.forEach(op => {
+      const card = document.createElement('div');
+      card.className = 'cart-item-row';
+      const isApproved = op.status === 'approved';
+      const statusBadge = isApproved 
+        ? '<span class="opname-status-badge approved">Disetujui Owner</span>' 
+        : '<span class="opname-status-badge rejected">Ditolak</span>';
+      
+      const dateStr = op.approved_at 
+        ? new Date(op.approved_at).toLocaleDateString('id-ID') 
+        : (op.created_at ? new Date(op.created_at).toLocaleDateString('id-ID') : '-');
+
+      card.innerHTML = `
+        <div class="cart-item-info">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+            <strong style="font-size:0.85rem; color:var(--text-main);">${op.opname_number}</strong>
+            ${statusBadge}
+          </div>
+          <div style="font-size:0.75rem; color:var(--text-muted);">
+            Oleh: ${op.creator} • Owner: ${op.approver || '-'} • ${dateStr}
+          </div>
+          <div style="font-size:0.75rem; color:var(--text-secondary); margin-top:2px;">
+            ${op.total_items} barang • Kurang: -${op.total_loss_units} • Lebih: +${op.total_gain_units}
+          </div>
+        </div>
+      `;
+      container.appendChild(card);
+    });
+  }
+
+  async function saveStockOpnameDraft() {
+    const countedEntries = Object.entries(state.stockOpname.items);
+    if (countedEntries.length === 0) {
+      showToast('Silakan isi kolom fisik minimal 1 barang terlebih dahulu.');
+      return;
+    }
+
+    const payloadItems = countedEntries.map(([id, entry]) => ({
+      id: parseInt(id),
+      physical_stock: parseInt(entry.physicalStock),
+      notes: entry.notes || null
+    }));
+
+    showToast('Menyimpan dan mengajukan ke Owner...');
+    try {
+      const res = await apiRequest('/stock-opnames/draft', {
+        method: 'POST',
+        body: JSON.stringify({
+          items: payloadItems,
+          general_notes: 'Stok Opname dari Mobile POS'
+        })
+      });
+
+      showToast(res.message || 'Stok opname berhasil diajukan ke Owner!');
+      await fetchStockOpname();
+    } catch (err) {
+      showToast('Gagal menyimpan opname: ' + err.message);
+    }
+  }
+
+  async function approveStockOpname() {
+    if (!state.stockOpname.pending) {
+      showToast('Tidak ada pengajuan opname yang aktif.');
+      return;
+    }
+
+    const confirmApprove = confirm('Konfirmasi persetujuan Owner:\n\nSetujui hasil stok opname ini? Stok di database toko akan langsung disesuaikan secara otomatis.');
+    if (!confirmApprove) return;
+
+    showToast('Menyetujui & menyesuaikan stok toko...');
+    try {
+      const pendingItems = state.stockOpname.pending.items || [];
+      const payloadItems = pendingItems.map(it => ({
+        id: it.id,
+        physical_stock: it.physical_stock,
+        notes: it.notes || null
+      }));
+
+      const res = await apiRequest('/stock-opnames/approve', {
+        method: 'POST',
+        body: JSON.stringify({
+          stock_opname_id: state.stockOpname.pending.id,
+          items: payloadItems
+        })
+      });
+
+      showToast(res.message || 'Stok opname disetujui! Stok toko berhasil diperbarui.');
+      state.stockOpname.items = {};
+      await Promise.allSettled([
+        fetchProducts(),
+        fetchStockOpname()
+      ]);
+    } catch (err) {
+      showToast('Gagal menyetujui opname: ' + err.message);
+    }
+  }
+
+  async function rejectStockOpname(id) {
+    const confirmReject = confirm('Konfirmasi penolakan:\n\nTolak pengajuan stok opname ini?');
+    if (!confirmReject) return;
+
+    showToast('Menolak pengajuan...');
+    try {
+      const res = await apiRequest(`/stock-opnames/${id}/reject`, {
+        method: 'POST'
+      });
+      showToast(res.message || 'Pengajuan stok opname telah ditolak.');
+      await fetchStockOpname();
+    } catch (err) {
+      showToast('Gagal menolak opname: ' + err.message);
+    }
+  }
+
   // --- Navigation & Event Listeners ---
   function setupEvents() {
     function switchTab(target) {
@@ -771,6 +1229,7 @@
 
       if (target === 'view-history') fetchHistory();
       if (target === 'view-inventory') renderInventoryList();
+      if (target === 'view-stock-opname') fetchStockOpname();
     }
 
     // Nav Items (Bottom)
@@ -1007,6 +1466,57 @@
       state.lowStockFilter = e.target.checked;
       renderInventoryList();
     });
+
+    // Stock Opname Controls
+    const btnRefreshOpname = document.getElementById('btn-refresh-opname');
+    if (btnRefreshOpname) {
+      btnRefreshOpname.addEventListener('click', () => {
+        vibrateTouch(15);
+        showToast('Memuat ulang data opname...');
+        fetchStockOpname();
+      });
+    }
+
+    const opnameSearch = document.getElementById('opname-search');
+    if (opnameSearch) {
+      opnameSearch.addEventListener('input', (e) => {
+        state.stockOpname.filterSearch = e.target.value;
+        renderOpnameItemsList();
+      });
+    }
+
+    const filterOpnameDiff = document.getElementById('filter-opname-diff');
+    if (filterOpnameDiff) {
+      filterOpnameDiff.addEventListener('change', (e) => {
+        state.stockOpname.filterDiffOnly = e.target.checked;
+        renderOpnameItemsList();
+      });
+    }
+
+    const btnCopyAllSys = document.getElementById('btn-copy-all-system-stock');
+    if (btnCopyAllSys) {
+      btnCopyAllSys.addEventListener('click', () => {
+        vibrateTouch(20);
+        state.products.forEach(p => {
+          const sys = Number(p.stock || 0);
+          state.stockOpname.items[p.id] = {
+            physicalStock: sys,
+            notes: state.stockOpname.items[p.id]?.notes || ''
+          };
+        });
+        renderOpnameItemsList();
+        updateOpnameCountedBadge();
+        showToast('Semua fisik barang disamakan dengan sistem.');
+      });
+    }
+
+    const btnSaveOpnameDraft = document.getElementById('btn-save-opname-draft');
+    if (btnSaveOpnameDraft) {
+      btnSaveOpnameDraft.addEventListener('click', () => {
+        vibrateTouch(20);
+        saveStockOpnameDraft();
+      });
+    }
   }
 
   // --- Initialize Service Worker (PWA) ---

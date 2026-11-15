@@ -1,9 +1,9 @@
-const CACHE_NAME = 'ar-pos-v3';
+const CACHE_NAME = 'ar-pos-v4';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
-  './css/app.css?v=3',
-  './js/app.js?v=3',
+  './css/app.css?v=4',
+  './js/app.js?v=4',
   './manifest.json',
   './icon.png',
   './logo.svg'

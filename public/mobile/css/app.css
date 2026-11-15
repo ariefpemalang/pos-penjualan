@@ -1073,3 +1073,225 @@ body {
 .settings-input:focus {
   border-color: var(--primary);
 }
+
+/* Stock Opname Styles */
+.opname-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-gold);
+  border-radius: var(--radius-md);
+  padding: 14px;
+  margin-bottom: 14px;
+  position: relative;
+  overflow: hidden;
+}
+
+.opname-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: var(--primary);
+}
+
+.opname-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+}
+
+.opname-status-badge.pending {
+  background: rgba(245, 158, 11, 0.2);
+  color: #fbbf24;
+  border: 1px solid rgba(245, 158, 11, 0.4);
+}
+
+.opname-status-badge.approved {
+  background: var(--success-bg);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.4);
+}
+
+.opname-status-badge.rejected {
+  background: var(--danger-bg);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.4);
+}
+
+.opname-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin: 12px 0;
+}
+
+.opname-metric-box {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+  text-align: center;
+}
+
+.opname-metric-box .label {
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  margin-bottom: 2px;
+}
+
+.opname-metric-box .val {
+  font-size: 0.95rem;
+  font-weight: 800;
+}
+
+.opname-metric-box .val.loss {
+  color: var(--danger);
+}
+
+.opname-metric-box .val.gain {
+  color: var(--success);
+}
+
+.opname-item-row {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: border-color 0.2s;
+}
+
+.opname-item-row.has-diff {
+  border-color: var(--border-gold);
+}
+
+.opname-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.opname-item-name {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--text-main);
+  line-height: 1.3;
+}
+
+.opname-item-code {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+.opname-inputs-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.opname-stock-pill {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 6px 8px;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.opname-stock-pill strong {
+  color: var(--text-main);
+  font-size: 0.85rem;
+}
+
+.opname-phys-input-wrap {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.opname-phys-input {
+  width: 100%;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--primary-light);
+  text-align: center;
+  outline: none;
+}
+
+.opname-phys-input:focus {
+  border-color: var(--primary);
+  background: var(--bg-elevated);
+}
+
+.opname-diff-pill {
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  white-space: nowrap;
+  min-width: 65px;
+  text-align: center;
+}
+
+.opname-diff-pill.zero {
+  background: var(--bg-surface);
+  color: var(--text-muted);
+}
+
+.opname-diff-pill.loss {
+  background: var(--danger-bg);
+  color: var(--danger);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+}
+
+.opname-diff-pill.gain {
+  background: var(--success-bg);
+  color: var(--success);
+  border: 1px solid rgba(16, 185, 129, 0.4);
+}
+
+.opname-note-input {
+  width: 100%;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px dashed var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 6px 10px;
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  outline: none;
+}
+
+.opname-note-input:focus {
+  border-color: var(--primary);
+  border-style: solid;
+}
+
+.btn-sync-stock {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-muted);
+  font-size: 0.7rem;
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.btn-sync-stock:active {
+  background: var(--primary-glow);
+  color: var(--primary-light);
+}

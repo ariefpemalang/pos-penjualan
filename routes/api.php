@@ -14,6 +14,7 @@ use App\Http\Controllers\Api\V1\ItemUnitController;
 use App\Http\Controllers\Api\V1\ServiceTicketController;
 use App\Http\Controllers\Api\V1\SettingController;
 use App\Http\Controllers\Api\V1\StockInController;
+use App\Http\Controllers\Api\V1\StockOpnameController;
 use App\Http\Controllers\Api\V1\StockOutController;
 use App\Http\Controllers\Api\V1\StockReportController;
 use App\Http\Controllers\Api\V1\SupplierController;
@@ -84,6 +85,11 @@ Route::middleware('api.key')->group(function () {
         Route::get('stock-ins/{batchNo}', [StockInController::class, 'show'])->name('api.stock-ins.show');
 
         Route::get('stock-reports', [StockReportController::class, 'show'])->name('api.stock-reports.show');
+
+        Route::get('stock-opnames', [StockOpnameController::class, 'index'])->name('api.stock-opnames.index');
+        Route::post('stock-opnames/draft', [StockOpnameController::class, 'saveDraft'])->name('api.stock-opnames.draft');
+        Route::post('stock-opnames/approve', [StockOpnameController::class, 'approve'])->name('api.stock-opnames.approve');
+        Route::post('stock-opnames/{stockOpname}/reject', [StockOpnameController::class, 'reject'])->name('api.stock-opnames.reject');
 
         Route::get('transactions/options', [TransactionController::class, 'options'])->name('api.transactions.options');
         Route::apiResource('transactions', TransactionController::class)->names('api.transactions');
