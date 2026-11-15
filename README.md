@@ -23,7 +23,7 @@ php artisan serve
 
 | Field | Value |
 |-------|-------|
-| Email | `saepulramdan244@gmail.com` |
+| Email | `admin@arcell.store` |
 | Password | `password` |
 
 ## Palette Warna (AR Service)

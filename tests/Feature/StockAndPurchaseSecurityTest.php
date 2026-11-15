@@ -34,6 +34,7 @@ class StockAndPurchaseSecurityTest extends TestCase
         $this->kasir = User::factory()->create(['email' => 'kasir-stock@test.local']);
         $this->kasir->assignRole('Kasir');
 
+        \Spatie\Permission\Models\Role::firstOrCreate(['name' => 'Teknisi']);
         $this->teknisi = User::factory()->create(['email' => 'teknisi-stock@test.local']);
         $this->teknisi->assignRole('Teknisi');
 

@@ -161,6 +161,7 @@ class ManualCashEntryTest extends TestCase
     #[Test]
     public function teknisi_cannot_access_manual_income_pages(): void
     {
+        \Spatie\Permission\Models\Role::firstOrCreate(['name' => 'Teknisi']);
         $teknisi = User::factory()->create();
         $teknisi->assignRole('Teknisi');
 

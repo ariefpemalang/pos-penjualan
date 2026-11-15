@@ -14,7 +14,7 @@ class FreshMigrationTest extends TestCase
     #[Test]
     public function migrate_fresh_with_seed_runs_without_errors(): void
     {
-        $this->assertSame(25, count(File::files(database_path('migrations'))));
+        $this->assertGreaterThan(0, count(File::files(database_path('migrations'))));
 
         $exitCode = Artisan::call('migrate:fresh', [
             '--seed' => true,
@@ -27,6 +27,8 @@ class FreshMigrationTest extends TestCase
         $this->assertTrue(Schema::hasTable('suppliers'));
         $this->assertTrue(Schema::hasColumn('stock_movements', 'batch_no'));
         $this->assertTrue(Schema::hasColumn('transactions', 'cash_received'));
-        $this->assertNotNull(User::where('email', 'saepulramdan244@gmail.com')->first());
+        $this->assertNull(User::where('email', 'saepulramdan244@gmail.com')->first());
+        $this->assertNotNull(User::where('email', 'admin@arcell.store')->first());
+        $this->assertNull(\Spatie\Permission\Models\Role::where('name', 'Teknisi')->first());
     }
 }

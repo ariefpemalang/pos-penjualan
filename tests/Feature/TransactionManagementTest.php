@@ -44,6 +44,7 @@ class TransactionManagementTest extends TestCase
         $this->kasir = User::factory()->create();
         $this->kasir->assignRole('Kasir');
 
+        \Spatie\Permission\Models\Role::firstOrCreate(['name' => 'Teknisi']);
         $this->teknisi = User::factory()->create();
         $this->teknisi->assignRole('Teknisi');
 

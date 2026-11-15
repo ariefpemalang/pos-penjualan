@@ -50,6 +50,7 @@ class CoreFlowIntegrityTest extends TestCase
         $this->kasir = User::factory()->create(['email' => 'kasir-core@test.local']);
         $this->kasir->assignRole('Kasir');
 
+        \Spatie\Permission\Models\Role::firstOrCreate(['name' => 'Teknisi']);
         $this->teknisi = User::factory()->create(['email' => 'teknisi-core@test.local']);
         $this->teknisi->assignRole('Teknisi');
 

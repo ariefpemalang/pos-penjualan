@@ -141,6 +141,7 @@ class PurchaseAndFinancialReportTest extends TestCase
     #[Test]
     public function financial_report_requires_permission(): void
     {
+        \Spatie\Permission\Models\Role::firstOrCreate(['name' => 'Teknisi']);
         $teknisi = User::factory()->create();
         $teknisi->assignRole('Teknisi');
 

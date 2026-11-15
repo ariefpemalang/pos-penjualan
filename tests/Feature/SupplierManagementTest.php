@@ -59,6 +59,7 @@ class SupplierManagementTest extends TestCase
     #[Test]
     public function teknisi_cannot_manage_suppliers(): void
     {
+        \Spatie\Permission\Models\Role::firstOrCreate(['name' => 'Teknisi']);
         $teknisi = User::factory()->create();
         $teknisi->assignRole('Teknisi');
 

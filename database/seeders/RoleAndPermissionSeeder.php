@@ -80,15 +80,12 @@ class RoleAndPermissionSeeder extends Seeder
             'manual expense view', 'manual expense create', 'manual expense cancel',
         ]);
 
-        Role::firstOrCreate(['name' => 'Teknisi'])->syncPermissions([
-            'dashboard view',
-            'customer view',
-            'technician view',
-            'item view',
-            'stock report view',
-            'service ticket view', 'service ticket edit',
-            'transaction view',
-        ]);
+        Role::where('name', 'Teknisi')->each(function (Role $role) {
+            foreach ($role->users as $user) {
+                $user->removeRole($role);
+            }
+            $role->delete();
+        });
     }
 
     public function run(): void
@@ -103,10 +100,12 @@ class RoleAndPermissionSeeder extends Seeder
             $role->delete();
         });
 
+        User::where('email', 'saepulramdan244@gmail.com')->delete();
+
         $user = User::updateOrCreate(
-            ['email' => 'saepulramdan244@gmail.com'],
+            ['email' => 'admin@arcell.store'],
             [
-                'name' => 'Saepul Ramdan',
+                'name' => 'Super Admin',
                 'password' => Hash::make('password'),
             ]
         );
