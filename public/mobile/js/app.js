@@ -827,6 +827,9 @@
       if (sidebarOverlay) sidebarOverlay.classList.remove('open');
     }
 
+    window.openSidebar = openSidebar;
+    window.closeSidebar = closeSidebar;
+
     if (btnToggleSidebar) btnToggleSidebar.addEventListener('click', openSidebar);
     if (btnCloseSidebar) btnCloseSidebar.addEventListener('click', closeSidebar);
     if (sidebarOverlay) {

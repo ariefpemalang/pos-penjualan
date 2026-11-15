@@ -167,13 +167,15 @@ body {
   inset: 0;
   background: rgba(0, 0, 0, 0.75);
   backdrop-filter: blur(4px);
-  z-index: 150;
+  z-index: 9999;
+  visibility: hidden;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.28s ease;
+  transition: opacity 0.25s ease, visibility 0.25s ease;
 }
 
 .sidebar-overlay.open {
+  visibility: visible;
   opacity: 1;
   pointer-events: auto;
 }
@@ -185,17 +187,19 @@ body {
   left: 0;
   width: 285px;
   max-width: 84vw;
+  height: 100%;
   background: #131722;
   border-right: 1px solid var(--border-gold);
   display: flex;
   flex-direction: column;
   transform: translateX(-100%);
-  transition: transform 0.3s cubic-bezier(0.1, 0.9, 0.2, 1);
+  transition: transform 0.28s cubic-bezier(0.1, 0.9, 0.2, 1);
   box-shadow: 6px 0 28px rgba(0, 0, 0, 0.65);
+  z-index: 10000;
 }
 
 .sidebar-overlay.open .sidebar-drawer {
-  transform: translateX(0);
+  transform: translateX(0) !important;
 }
 
 .sidebar-header {

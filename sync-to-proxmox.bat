@@ -20,7 +20,7 @@ echo.
   "open sftp://root:%PASS%@192.168.66.22/ -hostkey=*" ^
   "option batch abort" ^
   "option confirm off" ^
-  "synchronize remote -delete -criteria=time -filemask=""| .env; vendor/; storage/; node_modules/; .git/; sync-to-proxmox.bat; sync-to-proxmox.bat"" ""C:\laragon\www\pos-and-service"" ""/var/www/pos-and-service""" ^
+  "synchronize remote -delete -criteria=time -filemask=""| .env; vendor/; storage/; node_modules/; .git/; sync-to-proxmox.bat"" ""%~dp0\"" ""/var/www/pos-and-service""" ^
   "exit"
 
 echo.
