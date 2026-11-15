@@ -10,6 +10,11 @@ class EnsureApiKey
 {
     public function handle(Request $request, Closure $next): Response
     {
+        // Lewati pengecekan untuk preflight CORS request (OPTIONS)
+        if ($request->isMethod('OPTIONS')) {
+            return $next($request);
+        }
+
         $expected = (string) config('api.key');
         $provided = (string) $request->header('X-API-Key', '');
 

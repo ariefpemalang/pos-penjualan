@@ -8,7 +8,7 @@
   // --- Configuration & State ---
   const DEFAULT_SERVER_URL = window.location.protocol.startsWith('http') 
     ? window.location.origin 
-    : 'http://192.168.66.22';
+    : 'http://192.168.100.218';
 
   const DEFAULT_API_KEY = 'pos-service-mobile-dev-key';
 
@@ -59,8 +59,20 @@
   };
 
   // --- API Client ---
+  function getApiBaseUrl() {
+    let base = (state.serverUrl || '').trim().replace(/\/+$/, '');
+    if (!base) {
+      base = window.location.protocol.startsWith('http') ? window.location.origin : 'http://192.168.100.218';
+    }
+    if (!base.endsWith('/api')) {
+      base += '/api';
+    }
+    return base;
+  }
+
   async function apiRequest(endpoint, options = {}) {
-    let url = state.serverUrl.replace(/\/+$/, '') + '/api/v1' + endpoint;
+    const cleanEndpoint = endpoint.startsWith('/') ? endpoint : '/' + endpoint;
+    const url = getApiBaseUrl() + cleanEndpoint;
     const headers = {
       'Accept': 'application/json',
       'Content-Type': 'application/json',
@@ -89,7 +101,11 @@
 
       return data;
     } catch (err) {
-      console.error('API Request Error:', endpoint, err);
+      console.error('API Request Error:', url, err);
+      if (err.message && (err.message.includes('Failed to fetch') || err.message.includes('NetworkError'))) {
+        updateServerStatus(false);
+        showServerModal();
+      }
       throw err;
     }
   }
@@ -856,14 +872,55 @@
       }
     });
 
+    function showServerModal() {
+      const modal = document.getElementById('server-modal');
+      if (modal) {
+        document.getElementById('modal-server-url').value = state.serverUrl;
+        modal.classList.add('open');
+      }
+    }
+
+    function hideServerModal() {
+      const modal = document.getElementById('server-modal');
+      if (modal) modal.classList.remove('open');
+    }
+
+    // Modal server config triggers
     document.getElementById('link-config-server').addEventListener('click', (e) => {
       e.preventDefault();
-      const newUrl = prompt('Masukkan URL Server API POS:', state.serverUrl);
-      if (newUrl) {
-        state.serverUrl = newUrl.trim();
-        localStorage.setItem('ar_pos_server_url', state.serverUrl);
-        document.getElementById('setting-server-url').value = state.serverUrl;
-        showToast('URL server diperbarui.');
+      showServerModal();
+    });
+
+    document.getElementById('btn-close-server-modal').addEventListener('click', hideServerModal);
+
+    document.querySelectorAll('.btn-preset-ip').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.getElementById('modal-server-url').value = btn.dataset.url;
+      });
+    });
+
+    document.getElementById('btn-save-server-modal').addEventListener('click', async () => {
+      const url = document.getElementById('modal-server-url').value.trim();
+      if (!url) return;
+      state.serverUrl = url;
+      localStorage.setItem('ar_pos_server_url', url);
+      document.getElementById('setting-server-url').value = url;
+      showToast('Menguji koneksi server...');
+      try {
+        await apiRequest('/auth/login', { method: 'POST', body: JSON.stringify({}) }).catch(e => {
+          // 422 validation error means server is REACHABLE and API is responding!
+          if (e.message && (e.message.includes('422') || e.message.includes('email'))) {
+            return { reachable: true };
+          }
+          throw e;
+        });
+        updateServerStatus(true);
+        hideServerModal();
+        showToast('Koneksi server BERHASIL!');
+        if (state.token) loadInitialData();
+      } catch (err) {
+        updateServerStatus(false);
+        alert('Gagal terhubung ke server (' + url + '):\n' + err.message + '\n\nPastikan port dan alamat IP benar.');
       }
     });
 

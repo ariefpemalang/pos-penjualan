@@ -339,6 +339,37 @@
     </div>
   </div>
 
+  <!-- MODAL: ATUR SERVER -->
+  <div class="modal-overlay" id="server-modal">
+    <div class="bottom-sheet" style="max-height:85vh;">
+      <div class="sheet-handle"></div>
+      <div class="sheet-header">
+        <div class="sheet-title">Atur Koneksi Server</div>
+        <button class="icon-btn" id="btn-close-server-modal">✕</button>
+      </div>
+      <div class="sheet-body">
+        <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:12px;">
+          Pastikan HP Android dan Server berada di jaringan WiFi yang sama.
+        </p>
+        <label class="settings-label">URL Server POS Backend</label>
+        <input type="url" id="modal-server-url" class="settings-input" placeholder="http://192.168.100.218 atau http://192.168.66.22">
+
+        <div class="settings-label">Pilihan Cepat Server:</div>
+        <div style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:14px;">
+          <button type="button" class="category-pill btn-preset-ip" data-url="http://192.168.100.218">WiFi (192.168.100.218)</button>
+          <button type="button" class="category-pill btn-preset-ip" data-url="http://192.168.100.218:8000">WiFi :8000</button>
+          <button type="button" class="category-pill btn-preset-ip" data-url="http://192.168.66.22">Proxmox (192.168.66.22)</button>
+          <button type="button" class="category-pill btn-preset-ip" data-url="http://10.0.2.2:8000">Emulator Android</button>
+          <button type="button" class="category-pill btn-preset-ip" data-url="http://localhost:8000">Localhost :8000</button>
+        </div>
+
+        <button class="btn-primary-action" id="btn-save-server-modal">
+          Uji Koneksi & Simpan
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- MODAL: LOGIN -->
   <div class="modal-overlay" id="login-modal">
     <div class="bottom-sheet" style="max-height:100vh; height:100vh; border-radius:0;">
