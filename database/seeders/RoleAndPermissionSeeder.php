@@ -100,18 +100,36 @@ class RoleAndPermissionSeeder extends Seeder
             $role->delete();
         });
 
-        User::where('email', 'saepulramdan244@gmail.com')->delete();
-
-        $user = User::updateOrCreate(
+        $superAdminRole = Role::firstOrCreate(['name' => 'Super Admin']);
+        $admin = User::firstOrCreate(
             ['email' => 'admin@arcell.store'],
             [
                 'name' => 'Super Admin',
                 'password' => Hash::make('password'),
             ]
         );
+        if (! $admin->hasRole('Super Admin')) {
+            $admin->syncRoles([$superAdminRole]);
+        }
 
-        if (! $user->hasRole('Super Admin')) {
-            $user->syncRoles(['Super Admin']);
+        $saepul = User::where('email', 'saepulramdan244@gmail.com')->first();
+        if ($saepul) {
+            if ($saepul->id !== $admin->id) {
+                \Illuminate\Support\Facades\DB::table('stock_movements')->where('user_id', $saepul->id)->update(['user_id' => $admin->id]);
+                \Illuminate\Support\Facades\DB::table('transactions')->where('user_id', $saepul->id)->update(['user_id' => $admin->id]);
+                \Illuminate\Support\Facades\DB::table('purchases')->where('user_id', $saepul->id)->update(['user_id' => $admin->id]);
+                \Illuminate\Support\Facades\DB::table('manual_cash_entries')->where('user_id', $saepul->id)->update(['user_id' => $admin->id]);
+                \Illuminate\Support\Facades\DB::table('service_tickets')->where('user_id', $saepul->id)->update(['user_id' => $admin->id]);
+                \Illuminate\Support\Facades\DB::table('technicians')->where('user_id', $saepul->id)->update(['user_id' => null]);
+                \Illuminate\Support\Facades\DB::table('model_has_roles')->where('model_id', $saepul->id)->delete();
+                \Illuminate\Support\Facades\DB::table('model_has_permissions')->where('model_id', $saepul->id)->delete();
+                $saepul->delete();
+            } else {
+                $saepul->update([
+                    'name' => 'Super Admin',
+                    'email' => 'admin@arcell.store',
+                ]);
+            }
         }
     }
 }
