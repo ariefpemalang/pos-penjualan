@@ -1023,27 +1023,257 @@ body {
   cursor: pointer;
 }
 
-/* Thermal Receipt Styling */
+/* ============================================================
+   Attractive Thermal POS Receipt Styling
+   ============================================================ */
 .receipt-paper {
-  background: #FFF;
-  color: #111;
-  font-family: "Courier New", Courier, monospace;
-  padding: 18px 14px;
-  border-radius: 6px;
-  font-size: 0.82rem;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-  line-height: 1.4;
-  margin: 0 auto 16px auto;
+  background: #FCFCFD;
+  color: #1A1A1A;
+  font-family: 'SF Mono', 'Roboto Mono', 'Courier New', Courier, monospace;
+  padding: 22px 18px 18px;
+  border-radius: 8px 8px 0 0;
+  font-size: 0.8rem;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.45), 0 2px 6px rgba(0, 0, 0, 0.2);
+  line-height: 1.42;
+  margin: 0 auto 0 auto;
   max-width: 320px;
+  position: relative;
+  letter-spacing: -0.2px;
 }
 
-.receipt-paper .text-center {
+.receipt-header-brand {
   text-align: center;
+  margin-bottom: 6px;
 }
 
-.receipt-divider {
-  border-top: 1px dashed #444;
-  margin: 8px 0;
+.receipt-brand-badge {
+  width: 44px;
+  height: 44px;
+  border: 2px solid #1A1A1A;
+  border-radius: 50%;
+  margin: 0 auto 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  font-size: 1.15rem;
+  letter-spacing: 1px;
+  color: #1A1A1A;
+  background: #F3F3F5;
+}
+
+.receipt-shop-name {
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: #000;
+  margin-bottom: 2px;
+}
+
+.receipt-shop-slogan {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #555;
+  margin-bottom: 5px;
+  font-style: italic;
+}
+
+.receipt-shop-info {
+  font-size: 0.7rem;
+  color: #444;
+  line-height: 1.35;
+}
+
+.receipt-divider-dashed {
+  border-top: 1px dashed #777;
+  margin: 9px 0;
+}
+
+.receipt-divider-double {
+  border-top: 2px double #333;
+  margin: 9px 0;
+}
+
+.receipt-meta-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-size: 0.73rem;
+  color: #333;
+}
+
+.receipt-meta-row {
+  display: flex;
+  justify-content: space-between;
+}
+
+.receipt-meta-row .meta-label {
+  color: #666;
+}
+
+.receipt-meta-row .meta-val {
+  font-weight: 600;
+  color: #111;
+  text-align: right;
+}
+
+.receipt-items-table {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 2px 0;
+}
+
+.receipt-item-row {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.receipt-item-top {
+  display: flex;
+  justify-content: space-between;
+  font-weight: 700;
+  color: #111;
+  font-size: 0.78rem;
+}
+
+.receipt-item-sub {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.7rem;
+  color: #666;
+}
+
+.receipt-summary-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.77rem;
+}
+
+.receipt-summary-row {
+  display: flex;
+  justify-content: space-between;
+  color: #333;
+}
+
+.receipt-summary-row.receipt-grand-total {
+  font-size: 1.05rem;
+  font-weight: 900;
+  color: #000;
+  padding: 3px 0;
+  letter-spacing: 0.5px;
+}
+
+.receipt-summary-row.receipt-change-row {
+  font-weight: 700;
+  color: #0f6c2f;
+}
+
+.receipt-footer-prayer {
+  text-align: center;
+  font-size: 0.73rem;
+  line-height: 1.5;
+  color: #333;
+  font-style: italic;
+  margin: 8px 0 10px;
+  padding: 0 4px;
+  white-space: pre-line;
+}
+
+.receipt-barcode-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 6px;
+}
+
+.receipt-barcode-lines {
+  height: 26px;
+  width: 180px;
+  background: repeating-linear-gradient(
+    to right,
+    #111 0px, #111 2px,
+    transparent 2px, transparent 4px,
+    #111 4px, #111 5px,
+    transparent 5px, transparent 8px,
+    #111 8px, #111 11px,
+    transparent 11px, transparent 13px,
+    #111 13px, #111 15px,
+    transparent 15px, transparent 16px,
+    #111 16px, #111 18px,
+    transparent 18px, transparent 20px
+  );
+}
+
+.receipt-barcode-number {
+  font-size: 0.65rem;
+  letter-spacing: 2px;
+  color: #555;
+  margin-top: 3px;
+  font-weight: 600;
+}
+
+/* Sawtooth paper bottom */
+.receipt-sawtooth {
+  width: 320px;
+  height: 10px;
+  margin: 0 auto 16px auto;
+  background: linear-gradient(135deg, #FCFCFD 5px, transparent 0),
+              linear-gradient(-135deg, #FCFCFD 5px, transparent 0);
+  background-size: 10px 10px;
+  background-repeat: repeat-x;
+  filter: drop-shadow(0 3px 3px rgba(0, 0, 0, 0.2));
+}
+
+/* Print Media Query */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #receipt-modal,
+  #receipt-modal * {
+    visibility: visible;
+  }
+  #receipt-modal {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    background: transparent !important;
+    display: block !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+  .bottom-sheet {
+    position: static !important;
+    box-shadow: none !important;
+    border: none !important;
+    background: transparent !important;
+    padding: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+  .sheet-header,
+  .sheet-handle,
+  #btn-print-receipt,
+  #btn-whatsapp-receipt,
+  #btn-new-order,
+  .receipt-sawtooth {
+    display: none !important;
+  }
+  .receipt-paper {
+    box-shadow: none !important;
+    border: none !important;
+    margin: 0 !important;
+    padding: 4px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    background: #FFF !important;
+    color: #000 !important;
+  }
 }
 
 /* Service Ticket Cards */

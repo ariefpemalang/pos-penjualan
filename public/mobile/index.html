@@ -10,7 +10,7 @@
   <link rel="manifest" href="manifest.json">
   <link rel="icon" type="image/png" href="icon.png">
   <link rel="apple-touch-icon" href="icon.png">
-  <link rel="stylesheet" href="css/app.css?v=7">
+  <link rel="stylesheet" href="css/app.css?v=8">
 </head>
 <body>
   <div class="app-container">
@@ -253,16 +253,19 @@
           <h3 style="font-size:0.95rem; font-weight:700; margin-bottom:10px; color:var(--primary-light);">🧾 Template Struk Kasir</h3>
           
           <label class="settings-label">Nama Toko</label>
-          <input type="text" id="setting-receipt-shop-name" class="settings-input" placeholder="AR CELL & SERVICE">
+          <input type="text" id="setting-receipt-shop-name" class="settings-input" placeholder="AR Cell">
+
+          <label class="settings-label">Slogan Toko</label>
+          <input type="text" id="setting-receipt-slogan" class="settings-input" placeholder="Service HP , Kuota & Aksesoris">
 
           <label class="settings-label">Alamat Toko</label>
-          <input type="text" id="setting-receipt-address" class="settings-input" placeholder="Jl. Raya Utama No. 12, Pemalang">
+          <input type="text" id="setting-receipt-address" class="settings-input" placeholder="Jl. Perwira no.8 Kapangsari - Petarukan">
 
           <label class="settings-label">No. Telepon / WhatsApp</label>
-          <input type="text" id="setting-receipt-phone" class="settings-input" placeholder="0812-3456-7890">
+          <input type="text" id="setting-receipt-phone" class="settings-input" placeholder="082322872201">
 
-          <label class="settings-label">Catatan Kaki Struk (Footer)</label>
-          <textarea id="setting-receipt-footer" class="settings-input" rows="2" style="height:auto; resize:none;" placeholder="Terima kasih atas kunjungan Anda!\nBarang yang dibeli tidak dapat ditukar."></textarea>
+          <label class="settings-label">Pesan Penutup / Footer Struk</label>
+          <textarea id="setting-receipt-footer" class="settings-input" rows="3" style="height:auto; resize:none;" placeholder="Jazakumullah, Terima Kasih Sudah Belanja ditempat Kami.&#10;Semoga Rezekinya Lancar, Aamiin..."></textarea>
 
           <button class="btn-primary-action" id="btn-save-receipt-template" style="margin-top:2px;">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
@@ -337,7 +340,7 @@
         <div class="customer-picker" id="btn-choose-customer">
           <div>
             <div style="font-size:0.7rem; color:var(--text-muted);">Pelanggan:</div>
-            <div style="font-weight:700; color:var(--primary-light);" id="selected-customer-label">Umum (Walk-in)</div>
+            <div style="font-weight:700; color:var(--primary-light);" id="selected-customer-label">Pelanggan Umum</div>
           </div>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
         </div>
@@ -430,37 +433,72 @@
       </div>
       <div class="sheet-body">
         <div class="receipt-paper" id="printable-receipt">
-          <div class="text-center" style="font-weight:bold; font-size:1.05rem;" id="rec-header-title">AR SERVICE</div>
-          <div class="text-center" style="font-size:0.75rem;" id="rec-header-address">Jl. Pemalang No. 88 - Jawa Tengah</div>
-          <div class="text-center" style="font-size:0.75rem;" id="rec-header-phone">Telp / WA: 0852-xxxx-xxxx</div>
-          <div class="receipt-divider"></div>
-          <div>No. Faktur : <span id="rec-invoice-no">-</span></div>
-          <div>Tanggal    : <span id="rec-date">-</span></div>
-          <div>Kasir      : <span id="rec-cashier">-</span></div>
-          <div>Pelanggan  : <span id="rec-customer">-</span></div>
-          <div class="receipt-divider"></div>
-          <div id="rec-items-list">
-            <!-- items -->
+          <div class="receipt-header-brand">
+            <div class="receipt-brand-badge">AR</div>
+            <div class="receipt-shop-name" id="rec-header-title">AR Cell</div>
+            <div class="receipt-shop-slogan" id="rec-header-slogan">Service HP , Kuota & Aksesoris</div>
+            <div class="receipt-shop-info" id="rec-header-address">Jl. Perwira no.8 Kapangsari - Petarukan</div>
+            <div class="receipt-shop-info" id="rec-header-phone">Telp / WA: 082322872201</div>
           </div>
-          <div class="receipt-divider"></div>
-          <div style="display:flex; justify-content:space-between;">
-            <span>TOTAL:</span>
-            <span id="rec-total" style="font-weight:bold;">Rp 0</span>
+
+          <div class="receipt-divider-dashed"></div>
+
+          <div class="receipt-meta-grid">
+            <div class="receipt-meta-row">
+              <span class="meta-label">No. Faktur:</span>
+              <span class="meta-val" id="rec-invoice-no">-</span>
+            </div>
+            <div class="receipt-meta-row">
+              <span class="meta-label">Tanggal:</span>
+              <span class="meta-val" id="rec-date">-</span>
+            </div>
+            <div class="receipt-meta-row">
+              <span class="meta-label">Kasir:</span>
+              <span class="meta-val" id="rec-cashier">-</span>
+            </div>
+            <div class="receipt-meta-row">
+              <span class="meta-label">Pelanggan:</span>
+              <span class="meta-val" id="rec-customer">Pelanggan Umum</span>
+            </div>
           </div>
-          <div style="display:flex; justify-content:space-between;">
-            <span>BAYAR (<span id="rec-method">Tunai</span>):</span>
-            <span id="rec-paid">Rp 0</span>
+
+          <div class="receipt-divider-dashed"></div>
+
+          <div id="rec-items-list" class="receipt-items-table">
+            <!-- items injected here -->
           </div>
-          <div style="display:flex; justify-content:space-between;">
-            <span>KEMBALI:</span>
-            <span id="rec-change">Rp 0</span>
+
+          <div class="receipt-divider-double"></div>
+
+          <div class="receipt-summary-grid">
+            <div class="receipt-summary-row receipt-grand-total">
+              <span>TOTAL</span>
+              <span id="rec-total">Rp 0</span>
+            </div>
+            <div class="receipt-summary-row">
+              <span>BAYAR (<span id="rec-method">TUNAI</span>)</span>
+              <span id="rec-paid">Rp 0</span>
+            </div>
+            <div class="receipt-summary-row receipt-change-row">
+              <span>KEMBALI</span>
+              <span id="rec-change">Rp 0</span>
+            </div>
           </div>
-          <div class="receipt-divider"></div>
-          <div class="text-center" style="font-size:0.75rem; margin-top:6px; white-space:pre-line;" id="rec-footer-text">
-            Terima kasih atas kunjungan Anda!
-            Barang yang dibeli tidak dapat ditukar.
+
+          <div class="receipt-divider-dashed"></div>
+
+          <div class="receipt-footer-prayer" id="rec-footer-text">
+            Jazakumullah, Terima Kasih Sudah Belanja ditempat Kami.
+            Semoga Rezekinya Lancar, Aamiin...
+          </div>
+
+          <div class="receipt-barcode-box">
+            <div class="receipt-barcode-lines"></div>
+            <div class="receipt-barcode-number" id="rec-barcode-code">TRX-000000</div>
           </div>
         </div>
+
+        <div class="receipt-sawtooth"></div>
 
         <div style="display:flex; gap:10px; margin-top:14px;">
           <button class="btn-primary-action" id="btn-print-receipt" style="flex:1; margin-top:0; background:var(--bg-surface); border:1px solid var(--border-gold); color:var(--text-main);">
@@ -602,6 +640,6 @@
     <span id="toast-text">Pemberitahuan</span>
   </div>
 
-  <script src="js/app.js?v=7"></script>
+  <script src="js/app.js?v=8"></script>
 </body>
 </html>

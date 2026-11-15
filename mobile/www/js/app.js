@@ -18,6 +18,30 @@
     localStorage.setItem('ar_pos_server_url', savedServerUrl);
   }
 
+  const DEFAULT_RECEIPT_TEMPLATE = {
+    shopName: 'AR Cell',
+    slogan: 'Service HP , Kuota & Aksesoris',
+    address: 'Jl. Perwira no.8 Kapangsari - Petarukan',
+    phone: '082322872201',
+    footer: 'Jazakumullah, Terima Kasih Sudah Belanja ditempat Kami.\nSemoga Rezekinya Lancar, Aamiin...',
+    paperSize: '58'
+  };
+
+  let savedReceiptTemplate = null;
+  try {
+    savedReceiptTemplate = JSON.parse(localStorage.getItem('ar_pos_receipt_template') || 'null');
+  } catch (e) {}
+
+  if (!savedReceiptTemplate || savedReceiptTemplate.shopName === 'AR CELL & SERVICE' || savedReceiptTemplate.address?.includes('Jl. Raya Utama') || !savedReceiptTemplate.slogan) {
+    savedReceiptTemplate = { ...DEFAULT_RECEIPT_TEMPLATE, ...(savedReceiptTemplate || {}) };
+    savedReceiptTemplate.shopName = 'AR Cell';
+    savedReceiptTemplate.slogan = 'Service HP , Kuota & Aksesoris';
+    savedReceiptTemplate.address = 'Jl. Perwira no.8 Kapangsari - Petarukan';
+    savedReceiptTemplate.phone = '082322872201';
+    savedReceiptTemplate.footer = 'Jazakumullah, Terima Kasih Sudah Belanja ditempat Kami.\nSemoga Rezekinya Lancar, Aamiin...';
+    localStorage.setItem('ar_pos_receipt_template', JSON.stringify(savedReceiptTemplate));
+  }
+
   const state = {
     serverUrl: savedServerUrl,
     apiKey: localStorage.getItem('ar_pos_api_key') || DEFAULT_API_KEY,
@@ -29,7 +53,7 @@
     activeCategory: '',
     searchQuery: '',
     cart: [],
-    selectedCustomer: { id: null, name: 'Umum (Walk-in)', phone: '' },
+    selectedCustomer: { id: null, name: 'Pelanggan Umum', phone: '' },
     paymentMethod: 'cash',
     cashReceived: 0,
     bankAccounts: [],
@@ -46,13 +70,7 @@
       filterDiffOnly: false
     },
     theme: localStorage.getItem('ar_pos_theme') || 'dark-gold',
-    receiptTemplate: JSON.parse(localStorage.getItem('ar_pos_receipt_template') || 'null') || {
-      shopName: 'AR CELL & SERVICE',
-      address: 'Jl. Raya Utama No. 12, Pemalang',
-      phone: '0812-3456-7890',
-      footer: 'Terima kasih atas kunjungan Anda!\nBarang yang dibeli tidak dapat ditukar.',
-      paperSize: '58'
-    },
+    receiptTemplate: savedReceiptTemplate,
     bluetoothPrinter: {
       device: null,
       characteristic: null,
@@ -634,12 +652,17 @@
       return;
     }
 
+    const customerMode = (state.selectedCustomer && state.selectedCustomer.id) ? 'existing' : 'umum';
+    const amountPaid = state.paymentMethod === 'cash' ? received : total;
+
     const payload = {
-      customer_id: state.selectedCustomer.id,
+      customer_mode: customerMode,
+      customer_id: customerMode === 'existing' ? state.selectedCustomer.id : null,
       payment_method: state.paymentMethod,
       type: 'sale',
       notes: 'Penjualan via AR POS Mobile',
-      paid_amount: received,
+      amount_paid: amountPaid,
+      paid_amount: amountPaid,
       bank_account_id: state.paymentMethod === 'transfer' ? document.getElementById('checkout-bank-id').value : null,
       items: state.cart.map(item => ({
         item_id: item.id,
@@ -661,7 +684,7 @@
       const tx = res?.data?.transaction || {
         invoice_no: 'TRX-' + Date.now(),
         total_amount: total,
-        paid_amount: received,
+        paid_amount: amountPaid,
         payment_method: state.paymentMethod,
         created_at: new Date().toISOString()
       };
@@ -671,14 +694,17 @@
         items: [...state.cart],
         change: Math.max(0, received - total),
         cashier: state.user?.name || 'Kasir',
-        customer: state.selectedCustomer.name
+        customer: state.selectedCustomer?.name || 'Pelanggan Umum'
       };
 
       document.getElementById('checkout-modal').classList.remove('open');
       openReceiptModal(state.lastTransaction);
 
-      // Reset cart
+      // Reset cart & customer to default Pelanggan Umum
       state.cart = [];
+      state.selectedCustomer = { id: null, name: 'Pelanggan Umum', phone: '' };
+      const custLabel = document.getElementById('selected-customer-label');
+      if (custLabel) custLabel.textContent = 'Pelanggan Umum';
       updateCartUI();
       fetchProducts(); // Refresh stock
     } catch (err) {
@@ -693,19 +719,28 @@
   function openReceiptModal(tx) {
     const tpl = state.receiptTemplate || {};
     const headerTitleEl = document.getElementById('rec-header-title');
+    const headerSloganEl = document.getElementById('rec-header-slogan');
     const headerAddressEl = document.getElementById('rec-header-address');
     const headerPhoneEl = document.getElementById('rec-header-phone');
     const footerTextEl = document.getElementById('rec-footer-text');
+    const barcodeCodeEl = document.getElementById('rec-barcode-code');
 
-    if (headerTitleEl) headerTitleEl.textContent = tpl.shopName || 'AR CELL & SERVICE';
+    if (headerTitleEl) headerTitleEl.textContent = tpl.shopName || 'AR Cell';
+    if (headerSloganEl) {
+      headerSloganEl.textContent = tpl.slogan || 'Service HP , Kuota & Aksesoris';
+      headerSloganEl.style.display = tpl.slogan ? 'block' : 'none';
+    }
     if (headerAddressEl) headerAddressEl.textContent = tpl.address || '';
     if (headerPhoneEl) headerPhoneEl.textContent = tpl.phone ? `Telp / WA: ${tpl.phone}` : '';
-    if (footerTextEl) footerTextEl.textContent = tpl.footer || 'Terima kasih atas kunjungan Anda!\nBarang yang dibeli tidak dapat ditukar.';
+    if (footerTextEl) footerTextEl.textContent = tpl.footer || 'Jazakumullah, Terima Kasih Sudah Belanja ditempat Kami.\nSemoga Rezekinya Lancar, Aamiin...';
 
-    document.getElementById('rec-invoice-no').textContent = tx.invoice_no || tx.code || '-';
+    const invoiceNo = tx.invoice_no || tx.code || tx.transaction_no || ('TRX-' + Date.now());
+    document.getElementById('rec-invoice-no').textContent = invoiceNo;
+    if (barcodeCodeEl) barcodeCodeEl.textContent = invoiceNo;
+
     document.getElementById('rec-date').textContent = new Date().toLocaleString('id-ID');
     document.getElementById('rec-cashier').textContent = tx.cashier || state.user?.name || 'Kasir';
-    document.getElementById('rec-customer').textContent = tx.customer || 'Umum';
+    document.getElementById('rec-customer').textContent = tx.customer || 'Pelanggan Umum';
     document.getElementById('rec-total').textContent = formatRupiah(tx.total_amount || getCartTotal());
     document.getElementById('rec-paid').textContent = formatRupiah(tx.paid_amount);
     document.getElementById('rec-change').textContent = formatRupiah(tx.change || 0);
@@ -716,11 +751,20 @@
     const items = tx.items || [];
     items.forEach(it => {
       const row = document.createElement('div');
-      row.style.display = 'flex';
-      row.style.justifyContent = 'space-between';
+      row.className = 'receipt-item-row';
+      const name = it.name || it.item?.name || 'Barang';
+      const qty = it.qty || it.quantity || 1;
+      const price = it.price || it.unit_price || 0;
+      const subtotal = price * qty;
+
       row.innerHTML = `
-        <span>${it.name || it.item?.name} x${it.qty || it.quantity}</span>
-        <span>${formatRupiah((it.price || it.unit_price) * (it.qty || it.quantity))}</span>
+        <div class="receipt-item-top">
+          <span>${name}</span>
+          <span>${formatRupiah(subtotal)}</span>
+        </div>
+        <div class="receipt-item-sub">
+          <span>${qty} x ${formatRupiah(price)}</span>
+        </div>
       `;
       itemsContainer.appendChild(row);
     });
@@ -746,24 +790,29 @@
     if (!state.lastTransaction) return;
     const tx = state.lastTransaction;
     const tpl = state.receiptTemplate || {};
-    let text = `*NOTA PENJUALAN - ${tpl.shopName || 'AR SERVICE'}*\n`;
+    let text = `*${tpl.shopName || 'AR Cell'}*\n`;
+    if (tpl.slogan) text += `_${tpl.slogan}_\n`;
     if (tpl.address) text += `${tpl.address}\n`;
     if (tpl.phone) text += `Telp/WA: ${tpl.phone}\n`;
-    text += `--------------------------------\n`;
-    text += `No. Faktur: ${tx.invoice_no || tx.code}\n`;
-    text += `Tanggal   : ${new Date().toLocaleString('id-ID')}\n`;
-    text += `Kasir     : ${tx.cashier}\n`;
-    text += `Pelanggan : ${tx.customer}\n`;
+    text += `================================\n`;
+    text += `No. Faktur : ${tx.invoice_no || tx.code || '-'}\n`;
+    text += `Tanggal    : ${new Date().toLocaleString('id-ID')}\n`;
+    text += `Kasir      : ${tx.cashier || state.user?.name || 'Kasir'}\n`;
+    text += `Pelanggan  : ${tx.customer || 'Pelanggan Umum'}\n`;
     text += `--------------------------------\n`;
     (tx.items || []).forEach(it => {
-      text += `${it.name} x${it.qty} = ${formatRupiah(it.price * it.qty)}\n`;
+      const name = it.name || it.item?.name || 'Barang';
+      const qty = it.qty || it.quantity || 1;
+      const price = it.price || it.unit_price || 0;
+      text += `*${name}*\n`;
+      text += `  ${qty} x ${formatRupiah(price)} = ${formatRupiah(qty * price)}\n`;
     });
     text += `--------------------------------\n`;
-    text += `*TOTAL   : ${formatRupiah(tx.total_amount)}*\n`;
-    text += `Bayar   : ${formatRupiah(tx.paid_amount)} (${tx.payment_method})\n`;
-    text += `Kembali : ${formatRupiah(tx.change)}\n`;
-    text += `--------------------------------\n`;
-    text += `${tpl.footer || 'Terima kasih telah berbelanja di AR Service!'}`;
+    text += `*TOTAL     : ${formatRupiah(tx.total_amount)}*\n`;
+    text += `Bayar (${(tx.payment_method || 'TUNAI').toUpperCase()}) : ${formatRupiah(tx.paid_amount)}\n`;
+    text += `Kembali    : ${formatRupiah(tx.change || 0)}\n`;
+    text += `================================\n`;
+    text += `${tpl.footer || 'Jazakumullah, Terima Kasih Sudah Belanja ditempat Kami.\nSemoga Rezekinya Lancar, Aamiin...'}\n`;
 
     const url = `https://wa.me/?text=${encodeURIComponent(text)}`;
     window.open(url, '_blank');
@@ -1405,45 +1454,55 @@
     // Center header
     push(ESC, 0x61, 1);
     push(ESC, 0x45, 1); // bold on
-    pushText(tpl.shopName || 'AR CELL & SERVICE');
+    pushText(tpl.shopName || 'AR Cell');
     push(ESC, 0x45, 0); // bold off
+    if (tpl.slogan) pushText(tpl.slogan);
     if (tpl.address) pushText(tpl.address);
     if (tpl.phone) pushText('Telp/WA: ' + tpl.phone);
-    pushText('-'.repeat(lineWidth));
+    pushText('='.repeat(lineWidth));
 
     // Left align meta
     push(ESC, 0x61, 0);
     pushText(`No.Nota: ${tx.invoice_no || tx.code || '-'}`);
     pushText(`Waktu  : ${new Date().toLocaleString('id-ID')}`);
     pushText(`Kasir  : ${tx.cashier || state.user?.name || 'Kasir'}`);
-    pushText(`Cust   : ${tx.customer || 'Umum'}`);
+    pushText(`Cust   : ${tx.customer || 'Pelanggan Umum'}`);
     pushText('-'.repeat(lineWidth));
 
     // Items
     (tx.items || []).forEach(it => {
       const name = (it.name || it.item?.name || 'Barang').substring(0, lineWidth);
       pushText(name);
-      const qtyPrice = `${it.qty || it.quantity} x ${formatRupiah(it.price || it.unit_price)}`;
+      const qtyPrice = ` ${it.qty || it.quantity} x ${formatRupiah(it.price || it.unit_price)}`;
       const subtotal = formatRupiah((it.price || it.unit_price) * (it.qty || it.quantity));
       const spaces = Math.max(1, lineWidth - qtyPrice.length - subtotal.length);
       pushText(qtyPrice + ' '.repeat(spaces) + subtotal);
     });
 
-    pushText('-'.repeat(lineWidth));
+    pushText('='.repeat(lineWidth));
 
     // Totals
     push(ESC, 0x45, 1);
-    const totalStr = `TOTAL   : ${formatRupiah(tx.total_amount)}`;
-    pushText(totalStr);
+    const totalLabel = 'TOTAL';
+    const totalVal = formatRupiah(tx.total_amount);
+    const totalSpaces = Math.max(1, lineWidth - totalLabel.length - totalVal.length);
+    pushText(totalLabel + ' '.repeat(totalSpaces) + totalVal);
     push(ESC, 0x45, 0);
 
-    pushText(`BAYAR   : ${formatRupiah(tx.paid_amount)} (${tx.payment_method?.toUpperCase() || 'TUNAI'})`);
-    pushText(`KEMBALI : ${formatRupiah(tx.change || 0)}`);
-    pushText('-'.repeat(lineWidth));
+    const payLabel = `BAYAR (${(tx.payment_method || 'TUNAI').toUpperCase()})`;
+    const payVal = formatRupiah(tx.paid_amount);
+    const paySpaces = Math.max(1, lineWidth - payLabel.length - payVal.length);
+    pushText(payLabel + ' '.repeat(paySpaces) + payVal);
+
+    const changeLabel = 'KEMBALI';
+    const changeVal = formatRupiah(tx.change || 0);
+    const changeSpaces = Math.max(1, lineWidth - changeLabel.length - changeVal.length);
+    pushText(changeLabel + ' '.repeat(changeSpaces) + changeVal);
+    pushText('='.repeat(lineWidth));
 
     // Footer
     push(ESC, 0x61, 1);
-    const footerLines = (tpl.footer || 'Terima kasih!\nBarang tidak dapat ditukar.').split('\n');
+    const footerLines = (tpl.footer || 'Jazakumullah, Terima Kasih Sudah Belanja ditempat Kami.\nSemoga Rezekinya Lancar, Aamiin...').split('\n');
     footerLines.forEach(l => pushText(l));
     push(ESC, 0x61, 0);
 
@@ -1888,12 +1947,14 @@
 
     // Receipt Template
     const shopNameInp = document.getElementById('setting-receipt-shop-name');
+    const shopSloganInp = document.getElementById('setting-receipt-slogan');
     const shopAddressInp = document.getElementById('setting-receipt-address');
     const shopPhoneInp = document.getElementById('setting-receipt-phone');
     const shopFooterInp = document.getElementById('setting-receipt-footer');
     const btnSaveReceipt = document.getElementById('btn-save-receipt-template');
 
     if (shopNameInp) shopNameInp.value = state.receiptTemplate.shopName || '';
+    if (shopSloganInp) shopSloganInp.value = state.receiptTemplate.slogan || '';
     if (shopAddressInp) shopAddressInp.value = state.receiptTemplate.address || '';
     if (shopPhoneInp) shopPhoneInp.value = state.receiptTemplate.phone || '';
     if (shopFooterInp) shopFooterInp.value = state.receiptTemplate.footer || '';
@@ -1901,10 +1962,11 @@
     if (btnSaveReceipt) {
       btnSaveReceipt.addEventListener('click', () => {
         vibrateTouch(20);
-        state.receiptTemplate.shopName = shopNameInp.value.trim() || 'AR CELL & SERVICE';
-        state.receiptTemplate.address = shopAddressInp.value.trim();
-        state.receiptTemplate.phone = shopPhoneInp.value.trim();
-        state.receiptTemplate.footer = shopFooterInp.value.trim();
+        state.receiptTemplate.shopName = shopNameInp?.value.trim() || 'AR Cell';
+        state.receiptTemplate.slogan = shopSloganInp?.value.trim() || 'Service HP , Kuota & Aksesoris';
+        state.receiptTemplate.address = shopAddressInp?.value.trim() || '';
+        state.receiptTemplate.phone = shopPhoneInp?.value.trim() || '';
+        state.receiptTemplate.footer = shopFooterInp?.value.trim() || 'Jazakumullah, Terima Kasih Sudah Belanja ditempat Kami.\nSemoga Rezekinya Lancar, Aamiin...';
         localStorage.setItem('ar_pos_receipt_template', JSON.stringify(state.receiptTemplate));
         showToast('Template struk berhasil disimpan!');
       });
