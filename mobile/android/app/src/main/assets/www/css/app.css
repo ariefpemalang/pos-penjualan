@@ -37,6 +37,51 @@
   --safe-bottom: env(safe-area-inset-bottom, 0px);
 }
 
+/* Theme: Midnight Blue */
+[data-theme="midnight-blue"] {
+  --primary: #3B82F6;
+  --primary-light: #60A5FA;
+  --primary-dark: #1D4ED8;
+  --primary-glow: rgba(59, 130, 246, 0.25);
+  --bg-main: #0B132B;
+  --bg-card: #1C2541;
+  --bg-surface: #243056;
+  --bg-elevated: #2E3C6B;
+  --border-gold: rgba(59, 130, 246, 0.4);
+  --shadow-gold: 0 4px 16px rgba(59, 130, 246, 0.25);
+}
+
+/* Theme: Emerald Green */
+[data-theme="emerald-green"] {
+  --primary: #10B981;
+  --primary-light: #34D399;
+  --primary-dark: #047857;
+  --primary-glow: rgba(16, 185, 129, 0.25);
+  --bg-main: #062018;
+  --bg-card: #0D3328;
+  --bg-surface: #144738;
+  --bg-elevated: #1B5C49;
+  --border-gold: rgba(16, 185, 129, 0.4);
+  --shadow-gold: 0 4px 16px rgba(16, 185, 129, 0.25);
+}
+
+/* Theme: Light Mode */
+[data-theme="light"] {
+  --primary: #B8860B;
+  --primary-light: #996F08;
+  --primary-dark: #7A5706;
+  --primary-glow: rgba(184, 134, 11, 0.2);
+  --bg-main: #F3F4F6;
+  --bg-card: #FFFFFF;
+  --bg-surface: #E5E7EB;
+  --bg-elevated: #D1D5DB;
+  --text-main: #111827;
+  --text-secondary: #374151;
+  --text-muted: #6B7280;
+  --border-subtle: rgba(0, 0, 0, 0.1);
+  --border-gold: rgba(184, 134, 11, 0.4);
+}
+
 * {
   box-sizing: border-box;
   margin: 0;
@@ -1330,4 +1375,193 @@ body {
 .btn-sync-stock:active {
   background: var(--primary-glow);
   color: var(--primary-light);
+}
+
+/* Financial Report Styles */
+.finance-hero-card {
+  background: linear-gradient(135deg, rgba(212, 160, 23, 0.15) 0%, rgba(20, 24, 33, 0.95) 100%);
+  border: 1px solid var(--border-gold);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  margin-bottom: 14px;
+}
+
+.finance-hero-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--primary-light);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+
+.finance-hero-amount {
+  font-size: 1.6rem;
+  font-weight: 900;
+  color: var(--primary-light);
+  line-height: 1.2;
+}
+
+.finance-period-bar {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 12px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.finance-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.finance-metric-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.finance-metric-card.inflow {
+  border-left: 3px solid var(--success);
+}
+
+.finance-metric-card.outflow {
+  border-left: 3px solid var(--danger);
+}
+
+.finance-metric-card .title {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+.finance-metric-card .val {
+  font-size: 1.05rem;
+  font-weight: 800;
+}
+
+.finance-metric-card .val.green {
+  color: var(--success);
+}
+
+.finance-metric-card .val.red {
+  color: var(--danger);
+}
+
+.finance-breakdown-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 14px;
+  margin-bottom: 12px;
+}
+
+.finance-breakdown-card .header-title {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--primary-light);
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.finance-line-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  font-size: 0.82rem;
+}
+
+.finance-line-item:last-child {
+  border-bottom: none;
+}
+
+.finance-line-item .label {
+  color: var(--text-secondary);
+}
+
+.finance-line-item .amount {
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+/* Theme Picker Styles */
+.theme-picker-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.theme-pill-card {
+  background: var(--bg-surface);
+  border: 1.5px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.theme-pill-card.active {
+  border-color: var(--primary);
+  background: var(--primary-glow);
+}
+
+.theme-dot {
+  width: 16px;
+  height: 16px;
+  border-radius: var(--radius-full);
+  flex-shrink: 0;
+}
+
+.theme-dot.dark-gold { background: #D4A017; border: 1px solid #F6CE55; }
+.theme-dot.midnight-blue { background: #3B82F6; border: 1px solid #60A5FA; }
+.theme-dot.emerald-green { background: #10B981; border: 1px solid #34D399; }
+.theme-dot.light { background: #F3F4F6; border: 1px solid #9CA3AF; }
+
+.theme-pill-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+/* Printer & Receipt Setting Styles */
+.printer-status-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  background: var(--bg-surface);
+  border-radius: var(--radius-sm);
+  margin-bottom: 10px;
+}
+
+.printer-badge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: var(--radius-full);
+}
+
+.printer-badge.disconnected {
+  background: var(--danger-bg);
+  color: var(--danger);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+}
+
+.printer-badge.connected {
+  background: var(--success-bg);
+  color: var(--success);
+  border: 1px solid rgba(16, 185, 129, 0.4);
 }

@@ -44,7 +44,22 @@
       items: {},
       filterSearch: '',
       filterDiffOnly: false
-    }
+    },
+    theme: localStorage.getItem('ar_pos_theme') || 'dark-gold',
+    receiptTemplate: JSON.parse(localStorage.getItem('ar_pos_receipt_template') || 'null') || {
+      shopName: 'AR CELL & SERVICE',
+      address: 'Jl. Raya Utama No. 12, Pemalang',
+      phone: '0812-3456-7890',
+      footer: 'Terima kasih atas kunjungan Anda!\nBarang yang dibeli tidak dapat ditukar.',
+      paperSize: '58'
+    },
+    bluetoothPrinter: {
+      device: null,
+      characteristic: null,
+      connected: false
+    },
+    financialPeriod: 'this_month',
+    historyPeriod: 'all'
   };
 
   // --- Utility Functions ---
@@ -285,17 +300,51 @@
     }
   }
 
-  async function fetchHistory() {
+  async function fetchHistory(period = state.historyPeriod) {
+    state.historyPeriod = period;
     const container = document.getElementById('history-list');
+    if (!container) return;
     container.innerHTML = '<div style="text-align:center; padding:30px; color:var(--text-muted);">Memuat riwayat...</div>';
 
+    // Update filter pills UI
+    document.querySelectorAll('.btn-history-filter').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.period === period);
+    });
+
+    let queryParams = '?per_page=50';
+    const today = new Date().toISOString().split('T')[0];
+    if (period === 'today') {
+      queryParams += `&from=${today}&to=${today}`;
+    } else if (period === 'this_month') {
+      const now = new Date();
+      const monthStart = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`;
+      queryParams += `&from=${monthStart}&to=${today}`;
+    }
+
     try {
-      const res = await apiRequest('/transactions?per_page=50');
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Koneksi timeout, server lambat merespon.')), 9000)
+      );
+      const res = await Promise.race([
+        apiRequest(`/transactions${queryParams}`),
+        timeoutPromise
+      ]);
+
       const list = res?.data?.items || res?.data?.transactions || [];
       state.historyList = list;
       renderHistoryList(list);
     } catch (err) {
-      container.innerHTML = `<div style="text-align:center; color:var(--danger); padding:20px;">Gagal memuat riwayat: ${err.message}</div>`;
+      console.warn('Gagal memuat riwayat:', err);
+      container.innerHTML = `
+        <div style="text-align:center; color:var(--danger); padding:24px;">
+          <div style="margin-bottom:8px;">Gagal memuat riwayat: ${err.message}</div>
+          <button class="btn-primary-action" id="btn-retry-history" style="width:auto; margin:0 auto; padding:8px 18px; font-size:0.82rem;">
+            Coba Lagi
+          </button>
+        </div>
+      `;
+      const retryBtn = document.getElementById('btn-retry-history');
+      if (retryBtn) retryBtn.addEventListener('click', () => fetchHistory(period));
     }
   }
 
@@ -642,6 +691,17 @@
 
   // --- Receipt Modal & Printing ---
   function openReceiptModal(tx) {
+    const tpl = state.receiptTemplate || {};
+    const headerTitleEl = document.getElementById('rec-header-title');
+    const headerAddressEl = document.getElementById('rec-header-address');
+    const headerPhoneEl = document.getElementById('rec-header-phone');
+    const footerTextEl = document.getElementById('rec-footer-text');
+
+    if (headerTitleEl) headerTitleEl.textContent = tpl.shopName || 'AR CELL & SERVICE';
+    if (headerAddressEl) headerAddressEl.textContent = tpl.address || '';
+    if (headerPhoneEl) headerPhoneEl.textContent = tpl.phone ? `Telp / WA: ${tpl.phone}` : '';
+    if (footerTextEl) footerTextEl.textContent = tpl.footer || 'Terima kasih atas kunjungan Anda!\nBarang yang dibeli tidak dapat ditukar.';
+
     document.getElementById('rec-invoice-no').textContent = tx.invoice_no || tx.code || '-';
     document.getElementById('rec-date').textContent = new Date().toLocaleString('id-ID');
     document.getElementById('rec-cashier').textContent = tx.cashier || state.user?.name || 'Kasir';
@@ -668,7 +728,12 @@
     document.getElementById('receipt-modal').classList.add('open');
   }
 
-  function printReceipt() {
+  async function printReceipt() {
+    if (state.bluetoothPrinter.connected && state.bluetoothPrinter.characteristic && state.lastTransaction) {
+      await printThermalReceipt(state.lastTransaction);
+      return;
+    }
+
     if (window.AndroidBridge && window.AndroidBridge.printHtml) {
       const html = document.getElementById('printable-receipt').outerHTML;
       window.AndroidBridge.printHtml(html);
@@ -680,21 +745,25 @@
   function shareReceiptWhatsApp() {
     if (!state.lastTransaction) return;
     const tx = state.lastTransaction;
-    let text = `*NOTA PENJUALAN - AR SERVICE*\n`;
+    const tpl = state.receiptTemplate || {};
+    let text = `*NOTA PENJUALAN - ${tpl.shopName || 'AR SERVICE'}*\n`;
+    if (tpl.address) text += `${tpl.address}\n`;
+    if (tpl.phone) text += `Telp/WA: ${tpl.phone}\n`;
+    text += `--------------------------------\n`;
     text += `No. Faktur: ${tx.invoice_no || tx.code}\n`;
-    text += `Tanggal: ${new Date().toLocaleString('id-ID')}\n`;
-    text += `Kasir: ${tx.cashier}\n`;
-    text += `Pelanggan: ${tx.customer}\n`;
+    text += `Tanggal   : ${new Date().toLocaleString('id-ID')}\n`;
+    text += `Kasir     : ${tx.cashier}\n`;
+    text += `Pelanggan : ${tx.customer}\n`;
     text += `--------------------------------\n`;
     (tx.items || []).forEach(it => {
       text += `${it.name} x${it.qty} = ${formatRupiah(it.price * it.qty)}\n`;
     });
     text += `--------------------------------\n`;
-    text += `*TOTAL : ${formatRupiah(tx.total_amount)}*\n`;
-    text += `Bayar : ${formatRupiah(tx.paid_amount)} (${tx.payment_method})\n`;
+    text += `*TOTAL   : ${formatRupiah(tx.total_amount)}*\n`;
+    text += `Bayar   : ${formatRupiah(tx.paid_amount)} (${tx.payment_method})\n`;
     text += `Kembali : ${formatRupiah(tx.change)}\n`;
     text += `--------------------------------\n`;
-    text += `Terima kasih telah berbelanja di AR Service!`;
+    text += `${tpl.footer || 'Terima kasih telah berbelanja di AR Service!'}`;
 
     const url = `https://wa.me/?text=${encodeURIComponent(text)}`;
     window.open(url, '_blank');
@@ -1243,6 +1312,363 @@
     }
   }
 
+  // --- Bluetooth Thermal Printer & ESC/POS ---
+  function updatePrinterStatus(connected, deviceName = '') {
+    const badge = document.getElementById('printer-status-badge');
+    const nameEl = document.getElementById('printer-device-name');
+    if (!badge || !nameEl) return;
+
+    if (connected) {
+      badge.className = 'printer-badge connected';
+      badge.textContent = 'Terhubung';
+      nameEl.textContent = deviceName || 'Printer Bluetooth';
+    } else {
+      badge.className = 'printer-badge disconnected';
+      badge.textContent = 'Terputus';
+      nameEl.textContent = 'Belum Terhubung';
+    }
+  }
+
+  async function connectBluetoothPrinter() {
+    if (!navigator.bluetooth) {
+      alert('Browser Anda belum mendukung Web Bluetooth. Silakan gunakan Google Chrome di Android atau Desktop, dan pastikan Bluetooth aktif.');
+      return;
+    }
+    showToast('Mencari printer Bluetooth...');
+    try {
+      const device = await navigator.bluetooth.requestDevice({
+        acceptAllDevices: true,
+        optionalServices: [
+          '000018f0-0000-1000-8000-00805f9b34fb',
+          'e7810a71-73ae-499d-8c15-faa9aef0c3f2',
+          '0000ffe0-0000-1000-8000-00805f9b34fb',
+          '49535343-fe7d-4ae5-8fa9-9fafd205e455'
+        ]
+      });
+
+      const server = await device.gatt.connect();
+      state.bluetoothPrinter.device = device;
+      state.bluetoothPrinter.connected = true;
+
+      device.addEventListener('gattserverdisconnected', () => {
+        state.bluetoothPrinter.connected = false;
+        state.bluetoothPrinter.characteristic = null;
+        updatePrinterStatus(false);
+        showToast('Koneksi printer terputus.');
+      });
+
+      try {
+        const services = await server.getPrimaryServices();
+        for (const s of services) {
+          const chars = await s.getCharacteristics();
+          for (const c of chars) {
+            if (c.properties.write || c.properties.writeWithoutResponse) {
+              state.bluetoothPrinter.characteristic = c;
+              break;
+            }
+          }
+          if (state.bluetoothPrinter.characteristic) break;
+        }
+      } catch (err) {
+        console.warn('Gagal membaca karakteristik GATT:', err);
+      }
+
+      updatePrinterStatus(true, device.name || 'Printer Bluetooth');
+      showToast(`Printer terhubung: ${device.name || 'Bluetooth'}`);
+    } catch (err) {
+      console.warn('Bluetooth connect cancelled:', err);
+      if (!err.message?.includes('User cancelled')) {
+        alert('Gagal menyambung printer: ' + err.message);
+      }
+    }
+  }
+
+  function generateEscPosBytes(tx) {
+    const encoder = new TextEncoder();
+    const tpl = state.receiptTemplate || {};
+    const is80mm = tpl.paperSize === '80';
+    const lineWidth = is80mm ? 48 : 32;
+
+    const ESC = 0x1B;
+    const GS = 0x1D;
+
+    const buffer = [];
+    const push = (...bytes) => buffer.push(...bytes);
+    const pushText = (str) => {
+      const b = encoder.encode(str + '\n');
+      b.forEach(x => buffer.push(x));
+    };
+
+    // Initialize printer
+    push(ESC, 0x40);
+
+    // Center header
+    push(ESC, 0x61, 1);
+    push(ESC, 0x45, 1); // bold on
+    pushText(tpl.shopName || 'AR CELL & SERVICE');
+    push(ESC, 0x45, 0); // bold off
+    if (tpl.address) pushText(tpl.address);
+    if (tpl.phone) pushText('Telp/WA: ' + tpl.phone);
+    pushText('-'.repeat(lineWidth));
+
+    // Left align meta
+    push(ESC, 0x61, 0);
+    pushText(`No.Nota: ${tx.invoice_no || tx.code || '-'}`);
+    pushText(`Waktu  : ${new Date().toLocaleString('id-ID')}`);
+    pushText(`Kasir  : ${tx.cashier || state.user?.name || 'Kasir'}`);
+    pushText(`Cust   : ${tx.customer || 'Umum'}`);
+    pushText('-'.repeat(lineWidth));
+
+    // Items
+    (tx.items || []).forEach(it => {
+      const name = (it.name || it.item?.name || 'Barang').substring(0, lineWidth);
+      pushText(name);
+      const qtyPrice = `${it.qty || it.quantity} x ${formatRupiah(it.price || it.unit_price)}`;
+      const subtotal = formatRupiah((it.price || it.unit_price) * (it.qty || it.quantity));
+      const spaces = Math.max(1, lineWidth - qtyPrice.length - subtotal.length);
+      pushText(qtyPrice + ' '.repeat(spaces) + subtotal);
+    });
+
+    pushText('-'.repeat(lineWidth));
+
+    // Totals
+    push(ESC, 0x45, 1);
+    const totalStr = `TOTAL   : ${formatRupiah(tx.total_amount)}`;
+    pushText(totalStr);
+    push(ESC, 0x45, 0);
+
+    pushText(`BAYAR   : ${formatRupiah(tx.paid_amount)} (${tx.payment_method?.toUpperCase() || 'TUNAI'})`);
+    pushText(`KEMBALI : ${formatRupiah(tx.change || 0)}`);
+    pushText('-'.repeat(lineWidth));
+
+    // Footer
+    push(ESC, 0x61, 1);
+    const footerLines = (tpl.footer || 'Terima kasih!\nBarang tidak dapat ditukar.').split('\n');
+    footerLines.forEach(l => pushText(l));
+    push(ESC, 0x61, 0);
+
+    // Feed lines & Cut
+    push(ESC, 0x64, 4);
+    push(GS, 0x56, 66, 0);
+
+    return new Uint8Array(buffer);
+  }
+
+  async function printThermalReceipt(tx) {
+    if (state.bluetoothPrinter.connected && state.bluetoothPrinter.characteristic) {
+      try {
+        showToast('Mengirim struk ke printer Bluetooth...');
+        const bytes = generateEscPosBytes(tx);
+        for (let i = 0; i < bytes.length; i += 512) {
+          const chunk = bytes.slice(i, i + 512);
+          await state.bluetoothPrinter.characteristic.writeValue(chunk);
+        }
+        showToast('Struk berhasil dicetak!');
+        return;
+      } catch (err) {
+        console.warn('Bluetooth direct print error:', err);
+      }
+    }
+    window.print();
+  }
+
+  // --- Theme Management ---
+  function applyTheme(themeName) {
+    state.theme = themeName;
+    localStorage.setItem('ar_pos_theme', themeName);
+    if (themeName === 'dark-gold') {
+      document.documentElement.removeAttribute('data-theme');
+    } else {
+      document.documentElement.setAttribute('data-theme', themeName);
+    }
+    document.querySelectorAll('.theme-pill-card').forEach(card => {
+      card.classList.toggle('active', card.dataset.theme === themeName);
+    });
+  }
+
+  // --- Financial Report ---
+  async function fetchFinancialReport(period = state.financialPeriod) {
+    state.financialPeriod = period;
+    const container = document.getElementById('financial-report-content');
+    if (!container) return;
+
+    container.innerHTML = '<div style="text-align:center; padding:30px; color:var(--text-muted);">Memuat laporan keuangan...</div>';
+
+    document.querySelectorAll('.btn-fin-period').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.period === period);
+    });
+
+    let query = '';
+    const today = new Date().toISOString().split('T')[0];
+    if (period === 'today') {
+      query = `?from=${today}&to=${today}`;
+    } else if (period === 'this_month') {
+      const now = new Date();
+      const monthStart = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`;
+      query = `?from=${monthStart}&to=${today}`;
+    }
+
+    try {
+      const res = await apiRequest(`/financial-reports${query}`);
+      if (res && res.data) {
+        renderFinancialReport(res.data);
+      } else {
+        container.innerHTML = '<div style="text-align:center; padding:30px; color:var(--text-muted);">Data tidak tersedia.</div>';
+      }
+    } catch (err) {
+      console.error('Gagal mengambil laporan keuangan:', err);
+      container.innerHTML = `
+        <div style="text-align:center; padding:24px; color:var(--danger);">
+          <div style="margin-bottom:8px;">Gagal memuat laporan: ${err.message}</div>
+          <button class="btn-primary-action" id="btn-retry-finance" style="width:auto; margin:0 auto; padding:8px 18px; font-size:0.82rem;">Coba Lagi</button>
+        </div>
+      `;
+      const retryBtn = document.getElementById('btn-retry-finance');
+      if (retryBtn) retryBtn.addEventListener('click', () => fetchFinancialReport(period));
+    }
+  }
+
+  function renderFinancialReport(data) {
+    const container = document.getElementById('financial-report-content');
+    if (!container) return;
+
+    const netProfit = data.profit?.owner_net_estimate || 0;
+    const totalInflow = data.totals?.inflow || 0;
+    const operatingOutflow = data.totals?.operating_outflow || 0;
+
+    const sales = data.sales || {};
+    const itemsRevenue = sales.items_revenue || 0;
+    const itemsCost = sales.items_cost || 0;
+    const itemsMargin = sales.items_margin || 0;
+    const servicesRevenue = sales.services_revenue || 0;
+    const techCommission = sales.technician_commission || 0;
+    const ownerServiceShare = sales.owner_service_share || 0;
+
+    const manualIncome = data.manual_income?.amount || 0;
+    const manualExpense = data.manual_expense?.amount || 0;
+
+    const payments = data.payment_sources?.inflows || {};
+    const cashIn = payments.cash || 0;
+    const qrisIn = payments.qris || 0;
+    const transferIn = payments.transfer_total || payments.transfer || 0;
+
+    const commissions = data.commissions || [];
+
+    container.innerHTML = `
+      <!-- HERO PROFIT CARD -->
+      <div class="finance-hero-card">
+        <div class="finance-hero-label">Estimasi Laba Bersih (Owner)</div>
+        <div class="finance-hero-amount">${formatRupiah(netProfit)}</div>
+        <div style="font-size:0.75rem; color:var(--text-secondary); margin-top:6px;">
+          Periode: ${data.period?.from || '-'} s/d ${data.period?.to || '-'}
+        </div>
+      </div>
+
+      <!-- INFLOW & OUTFLOW GRID -->
+      <div class="finance-summary-grid">
+        <div class="finance-metric-card inflow">
+          <span class="title">Total Pemasukan (Omset)</span>
+          <span class="val green">${formatRupiah(totalInflow)}</span>
+        </div>
+        <div class="finance-metric-card outflow">
+          <span class="title">Beban & Pengeluaran</span>
+          <span class="val red">${formatRupiah(operatingOutflow + manualExpense)}</span>
+        </div>
+      </div>
+
+      <!-- RINCIAN PENJUALAN BARANG -->
+      <div class="finance-breakdown-card">
+        <div class="header-title">
+          <span>📦 Penjualan Sparepart & Aksesoris</span>
+          <span style="font-size:0.75rem; color:var(--text-muted);">${sales.transaction_count || 0} Transaksi</span>
+        </div>
+        <div class="finance-line-item">
+          <span class="label">Total Omset Barang</span>
+          <span class="amount">${formatRupiah(itemsRevenue)}</span>
+        </div>
+        <div class="finance-line-item">
+          <span class="label">Total Modal Barang (HPP)</span>
+          <span class="amount" style="color:var(--text-muted);">${formatRupiah(itemsCost)}</span>
+        </div>
+        <div class="finance-line-item">
+          <span class="label">Laba Kotor Barang (Margin)</span>
+          <span class="amount" style="color:var(--success); font-weight:800;">+${formatRupiah(itemsMargin)}</span>
+        </div>
+      </div>
+
+      <!-- RINCIAN SERVIS HP -->
+      <div class="finance-breakdown-card">
+        <div class="header-title">
+          <span>🔧 Servis & Jasa Teknisi</span>
+        </div>
+        <div class="finance-line-item">
+          <span class="label">Total Pendapatan Servis</span>
+          <span class="amount">${formatRupiah(servicesRevenue)}</span>
+        </div>
+        <div class="finance-line-item">
+          <span class="label">Bagian Owner / Toko</span>
+          <span class="amount" style="color:var(--primary-light);">${formatRupiah(ownerServiceShare)}</span>
+        </div>
+        <div class="finance-line-item">
+          <span class="label">Komisi Teknisi</span>
+          <span class="amount" style="color:var(--warning);">${formatRupiah(techCommission)}</span>
+        </div>
+      </div>
+
+      <!-- KAS OPERASIONAL -->
+      <div class="finance-breakdown-card">
+        <div class="header-title">
+          <span>💵 Kas Operasional</span>
+        </div>
+        <div class="finance-line-item">
+          <span class="label">Pemasukan Kas Lainnya</span>
+          <span class="amount" style="color:var(--success);">${formatRupiah(manualIncome)}</span>
+        </div>
+        <div class="finance-line-item">
+          <span class="label">Beban Pengeluaran Kas</span>
+          <span class="amount" style="color:var(--danger);">${formatRupiah(manualExpense)}</span>
+        </div>
+      </div>
+
+      <!-- METODE PEMBAYARAN -->
+      <div class="finance-breakdown-card">
+        <div class="header-title">
+          <span>💳 Sumber Pembayaran Masuk</span>
+        </div>
+        <div class="finance-line-item">
+          <span class="label">💵 Tunai (Cash di Laci)</span>
+          <span class="amount">${formatRupiah(cashIn)}</span>
+        </div>
+        <div class="finance-line-item">
+          <span class="label">📱 QRIS</span>
+          <span class="amount">${formatRupiah(qrisIn)}</span>
+        </div>
+        <div class="finance-line-item">
+          <span class="label">🏦 Transfer Bank</span>
+          <span class="amount">${formatRupiah(transferIn)}</span>
+        </div>
+      </div>
+
+      ${commissions.length > 0 ? `
+        <!-- KOMISI TEKNISI -->
+        <div class="finance-breakdown-card">
+          <div class="header-title">
+            <span>👨‍🔧 Rincian Komisi Teknisi</span>
+          </div>
+          ${commissions.map(c => `
+            <div class="finance-line-item">
+              <div>
+                <strong style="color:var(--text-main); font-size:0.85rem;">${c.technician_name}</strong>
+                <div style="font-size:0.7rem; color:var(--text-muted);">${c.transaction_count} unit servis • Omset: ${formatRupiah(c.services_total)}</div>
+              </div>
+              <span class="amount" style="color:var(--warning); font-weight:700;">${formatRupiah(c.commission_total)}</span>
+            </div>
+          `).join('')}
+        </div>
+      ` : ''}
+    `;
+  }
+
   // --- Navigation & Event Listeners ---
   function setupEvents() {
     function switchTab(target) {
@@ -1269,9 +1695,10 @@
         document.getElementById('floating-cart-bar').classList.remove('visible');
       }
 
-      if (target === 'view-history') fetchHistory();
+      if (target === 'view-history') fetchHistory(state.historyPeriod);
       if (target === 'view-inventory') renderInventoryList();
       if (target === 'view-stock-opname') fetchStockOpname();
+      if (target === 'view-financial-report') fetchFinancialReport(state.financialPeriod);
     }
 
     // Nav Items (Bottom)
@@ -1443,26 +1870,138 @@
     // Logout
     document.getElementById('btn-logout').addEventListener('click', logout);
 
-    // Settings
-    document.getElementById('setting-server-url').value = state.serverUrl;
-    document.getElementById('setting-api-key').value = state.apiKey;
-    document.getElementById('btn-save-settings').addEventListener('click', async () => {
-      const url = document.getElementById('setting-server-url').value.trim();
-      const key = document.getElementById('setting-api-key').value.trim();
-      state.serverUrl = url;
-      state.apiKey = key;
-      localStorage.setItem('ar_pos_server_url', url);
-      localStorage.setItem('ar_pos_api_key', key);
-      showToast('Menguji koneksi server...');
-      try {
-        await apiRequest('/settings');
-        updateServerStatus(true);
-        showToast('Koneksi server sukses & setelan tersimpan!');
-      } catch (err) {
-        updateServerStatus(false);
-        alert('Gagal terhubung ke server: ' + err.message);
-      }
+    // Theme selector
+    document.querySelectorAll('.theme-pill-card').forEach(card => {
+      card.addEventListener('click', () => {
+        vibrateTouch(15);
+        applyTheme(card.dataset.theme);
+        showToast(`Tema diterapkan: ${card.querySelector('.theme-pill-label')?.textContent || card.dataset.theme}`);
+      });
     });
+    applyTheme(state.theme);
+
+    // Bluetooth Printer
+    const btnConnectBt = document.getElementById('btn-connect-bluetooth');
+    if (btnConnectBt) {
+      btnConnectBt.addEventListener('click', () => {
+        vibrateTouch(15);
+        connectBluetoothPrinter();
+      });
+    }
+
+    const btnTestPrint = document.getElementById('btn-test-print');
+    if (btnTestPrint) {
+      btnTestPrint.addEventListener('click', async () => {
+        vibrateTouch(15);
+        const sampleTx = {
+          invoice_no: 'TES-STRUK',
+          cashier: state.user?.name || 'Kasir AR POS',
+          customer: 'Pelanggan Tes',
+          payment_method: 'TUNAI',
+          total_amount: 50000,
+          paid_amount: 50000,
+          change: 0,
+          items: [
+            { name: 'Tes Cetak Printer Bluetooth', qty: 1, price: 50000 }
+          ]
+        };
+        await printThermalReceipt(sampleTx);
+      });
+    }
+
+    const paperSizeSel = document.getElementById('setting-paper-size');
+    if (paperSizeSel) {
+      paperSizeSel.value = state.receiptTemplate.paperSize || '58';
+      paperSizeSel.addEventListener('change', (e) => {
+        state.receiptTemplate.paperSize = e.target.value;
+        localStorage.setItem('ar_pos_receipt_template', JSON.stringify(state.receiptTemplate));
+        showToast(`Lebar kertas: ${e.target.value}mm`);
+      });
+    }
+
+    // Receipt Template
+    const shopNameInp = document.getElementById('setting-receipt-shop-name');
+    const shopAddressInp = document.getElementById('setting-receipt-address');
+    const shopPhoneInp = document.getElementById('setting-receipt-phone');
+    const shopFooterInp = document.getElementById('setting-receipt-footer');
+    const btnSaveReceipt = document.getElementById('btn-save-receipt-template');
+
+    if (shopNameInp) shopNameInp.value = state.receiptTemplate.shopName || '';
+    if (shopAddressInp) shopAddressInp.value = state.receiptTemplate.address || '';
+    if (shopPhoneInp) shopPhoneInp.value = state.receiptTemplate.phone || '';
+    if (shopFooterInp) shopFooterInp.value = state.receiptTemplate.footer || '';
+
+    if (btnSaveReceipt) {
+      btnSaveReceipt.addEventListener('click', () => {
+        vibrateTouch(20);
+        state.receiptTemplate.shopName = shopNameInp.value.trim() || 'AR CELL & SERVICE';
+        state.receiptTemplate.address = shopAddressInp.value.trim();
+        state.receiptTemplate.phone = shopPhoneInp.value.trim();
+        state.receiptTemplate.footer = shopFooterInp.value.trim();
+        localStorage.setItem('ar_pos_receipt_template', JSON.stringify(state.receiptTemplate));
+        showToast('Template struk berhasil disimpan!');
+      });
+    }
+
+    // Financial Report Controls
+    document.querySelectorAll('.btn-fin-period').forEach(btn => {
+      btn.addEventListener('click', () => {
+        vibrateTouch(15);
+        fetchFinancialReport(btn.dataset.period);
+      });
+    });
+
+    const btnRefreshFin = document.getElementById('btn-refresh-financial');
+    if (btnRefreshFin) {
+      btnRefreshFin.addEventListener('click', () => {
+        vibrateTouch(15);
+        showToast('Memuat ulang laporan keuangan...');
+        fetchFinancialReport(state.financialPeriod);
+      });
+    }
+
+    // History Filters & Refresh
+    document.querySelectorAll('.btn-history-filter').forEach(btn => {
+      btn.addEventListener('click', () => {
+        vibrateTouch(15);
+        fetchHistory(btn.dataset.period);
+      });
+    });
+
+    const btnRefreshHist = document.getElementById('btn-refresh-history');
+    if (btnRefreshHist) {
+      btnRefreshHist.addEventListener('click', () => {
+        vibrateTouch(15);
+        showToast('Memuat ulang riwayat...');
+        fetchHistory(state.historyPeriod);
+      });
+    }
+
+    // Optional Settings if present
+    const settingServerUrl = document.getElementById('setting-server-url');
+    const settingApiKey = document.getElementById('setting-api-key');
+    const btnSaveSettings = document.getElementById('btn-save-settings');
+    if (settingServerUrl) settingServerUrl.value = state.serverUrl;
+    if (settingApiKey) settingApiKey.value = state.apiKey;
+    if (btnSaveSettings) {
+      btnSaveSettings.addEventListener('click', async () => {
+        const url = settingServerUrl.value.trim();
+        const key = settingApiKey.value.trim();
+        state.serverUrl = url;
+        state.apiKey = key;
+        localStorage.setItem('ar_pos_server_url', url);
+        localStorage.setItem('ar_pos_api_key', key);
+        showToast('Menguji koneksi server...');
+        try {
+          await apiRequest('/settings');
+          updateServerStatus(true);
+          showToast('Koneksi server sukses & setelan tersimpan!');
+        } catch (err) {
+          updateServerStatus(false);
+          alert('Gagal terhubung ke server: ' + err.message);
+        }
+      });
+    }
 
     // Modal server config triggers
     document.getElementById('link-config-server').addEventListener('click', (e) => {
