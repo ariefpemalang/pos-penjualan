@@ -1380,7 +1380,15 @@
 
   async function connectBluetoothPrinter() {
     if (!navigator.bluetooth) {
-      alert('Browser Anda belum mendukung Web Bluetooth. Silakan gunakan Google Chrome di Android atau Desktop, dan pastikan Bluetooth aktif.');
+      const isHttps = window.location.protocol === 'https:' || window.location.hostname === 'localhost';
+      const msg = 'Browser ini belum mendukung Web Bluetooth secara langsung.\n\n' +
+        'Penyebab umum & solusi:\n' +
+        '1. Jika membuka dari WhatsApp/chat: Ketuk titik tiga (⋮) di pojok kanan atas > pilih "Buka di Chrome".\n' +
+        '2. Pastikan menggunakan aplikasi Google Chrome resmi di Android.\n' +
+        '3. Pastikan Bluetooth dan Lokasi (GPS) HP sudah AKTIF.\n' +
+        (!isHttps ? '4. Pastikan alamat diawali https:// (keamanan browser mewajibkan HTTPS).\n\n' : '\n') +
+        'Tips: Anda tetap bisa mencetak struk langsung menggunakan tombol "Cetak Struk" pada nota transaksi tanpa perlu menyambungkan Bluetooth di sini.';
+      alert(msg);
       return;
     }
     showToast('Mencari printer Bluetooth...');
