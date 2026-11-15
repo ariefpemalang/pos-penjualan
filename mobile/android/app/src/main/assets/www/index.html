@@ -10,7 +10,7 @@
   <link rel="manifest" href="manifest.json">
   <link rel="icon" type="image/png" href="icon.png">
   <link rel="apple-touch-icon" href="icon.png">
-  <link rel="stylesheet" href="css/app.css?v=6">
+  <link rel="stylesheet" href="css/app.css?v=7">
 </head>
 <body>
   <div class="app-container">
@@ -182,9 +182,10 @@
 
         <!-- PERIOD SELECTOR -->
         <div class="finance-period-bar">
-          <button class="category-pill active btn-fin-period" data-period="this_month">Bulan Ini</button>
-          <button class="category-pill btn-fin-period" data-period="today">Hari Ini</button>
-          <button class="category-pill btn-fin-period" data-period="all">Semua</button>
+          <button class="category-pill active btn-fin-period" data-period="today">Hari Ini</button>
+          <button class="category-pill btn-fin-period" data-period="7days">7 Hari</button>
+          <button class="category-pill btn-fin-period" data-period="this_month">Bulan Ini</button>
+          <button class="category-pill btn-fin-period" data-period="last_month">Bulan Lalu</button>
         </div>
 
         <div id="financial-report-content">
@@ -601,6 +602,6 @@
     <span id="toast-text">Pemberitahuan</span>
   </div>
 
-  <script src="js/app.js?v=6"></script>
+  <script src="js/app.js?v=7"></script>
 </body>
 </html>

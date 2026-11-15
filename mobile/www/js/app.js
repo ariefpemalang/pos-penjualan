@@ -58,7 +58,7 @@
       characteristic: null,
       connected: false
     },
-    financialPeriod: 'this_month',
+    financialPeriod: 'today',
     historyPeriod: 'all'
   };
 
@@ -1498,18 +1498,36 @@
       btn.classList.toggle('active', btn.dataset.period === period);
     });
 
+    const now = new Date();
+    const today = now.toISOString().split('T')[0];
     let query = '';
-    const today = new Date().toISOString().split('T')[0];
+
     if (period === 'today') {
       query = `?from=${today}&to=${today}`;
+    } else if (period === '7days') {
+      const past7 = new Date(Date.now() - 6 * 24 * 60 * 60 * 1000);
+      const fromStr = past7.toISOString().split('T')[0];
+      query = `?from=${fromStr}&to=${today}`;
     } else if (period === 'this_month') {
-      const now = new Date();
       const monthStart = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`;
       query = `?from=${monthStart}&to=${today}`;
+    } else if (period === 'last_month') {
+      const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+      const lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0);
+      const fromStr = `${lastMonthStart.getFullYear()}-${String(lastMonthStart.getMonth() + 1).padStart(2, '0')}-01`;
+      const toStr = `${lastMonthEnd.getFullYear()}-${String(lastMonthEnd.getMonth() + 1).padStart(2, '0')}-${String(lastMonthEnd.getDate()).padStart(2, '0')}`;
+      query = `?from=${fromStr}&to=${toStr}`;
     }
 
     try {
-      const res = await apiRequest(`/financial-reports${query}`);
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Koneksi timeout, server lambat merespon.')), 9000)
+      );
+      const res = await Promise.race([
+        apiRequest(`/financial-reports${query}`),
+        timeoutPromise
+      ]);
+
       if (res && res.data) {
         renderFinancialReport(res.data);
       } else {
@@ -1533,53 +1551,58 @@
     if (!container) return;
 
     const netProfit = data.profit?.owner_net_estimate || 0;
+    const cashFlowEstimate = data.profit?.cash_flow_estimate ?? 0;
     const totalInflow = data.totals?.inflow || 0;
     const operatingOutflow = data.totals?.operating_outflow || 0;
+    const manualIncome = data.manual_income?.amount || 0;
+    const manualExpense = data.manual_expense?.amount || 0;
+    const purchasesExpense = data.purchases?.expense || 0;
+    const totalOutflow = operatingOutflow + manualExpense + purchasesExpense;
 
     const sales = data.sales || {};
     const itemsRevenue = sales.items_revenue || 0;
     const itemsCost = sales.items_cost || 0;
     const itemsMargin = sales.items_margin || 0;
-    const servicesRevenue = sales.services_revenue || 0;
-    const techCommission = sales.technician_commission || 0;
-    const ownerServiceShare = sales.owner_service_share || 0;
-
-    const manualIncome = data.manual_income?.amount || 0;
-    const manualExpense = data.manual_expense?.amount || 0;
-
-    const payments = data.payment_sources?.inflows || {};
-    const cashIn = payments.cash || 0;
-    const qrisIn = payments.qris || 0;
-    const transferIn = payments.transfer_total || payments.transfer || 0;
-
-    const commissions = data.commissions || [];
 
     container.innerHTML = `
-      <!-- HERO PROFIT CARD -->
-      <div class="finance-hero-card">
-        <div class="finance-hero-label">Estimasi Laba Bersih (Owner)</div>
-        <div class="finance-hero-amount">${formatRupiah(netProfit)}</div>
-        <div style="font-size:0.75rem; color:var(--text-secondary); margin-top:6px;">
-          Periode: ${data.period?.from || '-'} s/d ${data.period?.to || '-'}
+      <!-- LABA BERSIH & SISA KAS GRID -->
+      <div class="finance-hero-grid">
+        <div class="finance-hero-card">
+          <div class="finance-hero-label">LABA BERSIH</div>
+          <div class="finance-hero-amount" style="color:var(--primary-light);">${formatRupiah(netProfit)}</div>
+        </div>
+        <div class="finance-hero-card">
+          <div class="finance-hero-label">SISA KAS</div>
+          <div class="finance-hero-amount" style="color:var(--success);">${formatRupiah(cashFlowEstimate)}</div>
         </div>
       </div>
-
-      <!-- INFLOW & OUTFLOW GRID -->
-      <div class="finance-summary-grid">
-        <div class="finance-metric-card inflow">
-          <span class="title">Total Pemasukan (Omset)</span>
-          <span class="val green">${formatRupiah(totalInflow)}</span>
-        </div>
-        <div class="finance-metric-card outflow">
-          <span class="title">Beban & Pengeluaran</span>
-          <span class="val red">${formatRupiah(operatingOutflow + manualExpense)}</span>
-        </div>
+      <div style="font-size:0.75rem; color:var(--text-muted); text-align:center; margin-top:-6px; margin-bottom:12px;">
+        Periode: ${data.period?.from || '-'} s/d ${data.period?.to || '-'}
       </div>
 
-      <!-- RINCIAN PENJUALAN BARANG -->
+      <!-- RINGKASAN ARUS KAS -->
       <div class="finance-breakdown-card">
         <div class="header-title">
-          <span>📦 Penjualan Sparepart & Aksesoris</span>
+          <span>💰 Ringkasan Arus Kas</span>
+        </div>
+        <div class="finance-line-item">
+          <span class="label">Total Pemasukan</span>
+          <span class="amount" style="color:var(--success); font-weight:700;">+${formatRupiah(totalInflow)}</span>
+        </div>
+        <div class="finance-line-item">
+          <span class="label">Total Pengeluaran</span>
+          <span class="amount" style="color:var(--danger); font-weight:700;">-${formatRupiah(totalOutflow)}</span>
+        </div>
+        <div class="finance-line-item" style="border-top:1px dashed var(--border-gold); padding-top:10px; margin-top:4px;">
+          <span class="label" style="font-weight:700; color:var(--text-main);">Estimasi Sisa Kas</span>
+          <span class="amount" style="color:var(--primary-light); font-weight:900; font-size:0.95rem;">${formatRupiah(cashFlowEstimate)}</span>
+        </div>
+      </div>
+
+      <!-- PENJUALAN -->
+      <div class="finance-breakdown-card">
+        <div class="header-title">
+          <span>📦 Penjualan</span>
           <span style="font-size:0.75rem; color:var(--text-muted);">${sales.transaction_count || 0} Transaksi</span>
         </div>
         <div class="finance-line-item">
@@ -1596,76 +1619,20 @@
         </div>
       </div>
 
-      <!-- RINCIAN SERVIS HP -->
-      <div class="finance-breakdown-card">
-        <div class="header-title">
-          <span>🔧 Servis & Jasa Teknisi</span>
-        </div>
-        <div class="finance-line-item">
-          <span class="label">Total Pendapatan Servis</span>
-          <span class="amount">${formatRupiah(servicesRevenue)}</span>
-        </div>
-        <div class="finance-line-item">
-          <span class="label">Bagian Owner / Toko</span>
-          <span class="amount" style="color:var(--primary-light);">${formatRupiah(ownerServiceShare)}</span>
-        </div>
-        <div class="finance-line-item">
-          <span class="label">Komisi Teknisi</span>
-          <span class="amount" style="color:var(--warning);">${formatRupiah(techCommission)}</span>
-        </div>
-      </div>
-
       <!-- KAS OPERASIONAL -->
       <div class="finance-breakdown-card">
         <div class="header-title">
           <span>💵 Kas Operasional</span>
         </div>
         <div class="finance-line-item">
-          <span class="label">Pemasukan Kas Lainnya</span>
+          <span class="label">Pemasukan Manual</span>
           <span class="amount" style="color:var(--success);">${formatRupiah(manualIncome)}</span>
         </div>
         <div class="finance-line-item">
-          <span class="label">Beban Pengeluaran Kas</span>
+          <span class="label">Pengeluaran Manual</span>
           <span class="amount" style="color:var(--danger);">${formatRupiah(manualExpense)}</span>
         </div>
       </div>
-
-      <!-- METODE PEMBAYARAN -->
-      <div class="finance-breakdown-card">
-        <div class="header-title">
-          <span>💳 Sumber Pembayaran Masuk</span>
-        </div>
-        <div class="finance-line-item">
-          <span class="label">💵 Tunai (Cash di Laci)</span>
-          <span class="amount">${formatRupiah(cashIn)}</span>
-        </div>
-        <div class="finance-line-item">
-          <span class="label">📱 QRIS</span>
-          <span class="amount">${formatRupiah(qrisIn)}</span>
-        </div>
-        <div class="finance-line-item">
-          <span class="label">🏦 Transfer Bank</span>
-          <span class="amount">${formatRupiah(transferIn)}</span>
-        </div>
-      </div>
-
-      ${commissions.length > 0 ? `
-        <!-- KOMISI TEKNISI -->
-        <div class="finance-breakdown-card">
-          <div class="header-title">
-            <span>👨‍🔧 Rincian Komisi Teknisi</span>
-          </div>
-          ${commissions.map(c => `
-            <div class="finance-line-item">
-              <div>
-                <strong style="color:var(--text-main); font-size:0.85rem;">${c.technician_name}</strong>
-                <div style="font-size:0.7rem; color:var(--text-muted);">${c.transaction_count} unit servis • Omset: ${formatRupiah(c.services_total)}</div>
-              </div>
-              <span class="amount" style="color:var(--warning); font-weight:700;">${formatRupiah(c.commission_total)}</span>
-            </div>
-          `).join('')}
-        </div>
-      ` : ''}
     `;
   }
 

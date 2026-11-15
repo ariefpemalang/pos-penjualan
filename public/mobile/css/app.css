@@ -1378,28 +1378,36 @@ body {
 }
 
 /* Financial Report Styles */
-.finance-hero-card {
-  background: linear-gradient(135deg, rgba(212, 160, 23, 0.15) 0%, rgba(20, 24, 33, 0.95) 100%);
-  border: 1px solid var(--border-gold);
-  border-radius: var(--radius-md);
-  padding: 16px;
+.finance-hero-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
   margin-bottom: 14px;
 }
 
+.finance-hero-card {
+  background: linear-gradient(135deg, rgba(212, 160, 23, 0.12) 0%, rgba(20, 24, 33, 0.95) 100%);
+  border: 1px solid var(--border-gold);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
 .finance-hero-label {
-  font-size: 0.78rem;
-  font-weight: 600;
-  color: var(--primary-light);
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.5px;
   margin-bottom: 4px;
 }
 
 .finance-hero-amount {
-  font-size: 1.6rem;
+  font-size: 1.25rem;
   font-weight: 900;
-  color: var(--primary-light);
-  line-height: 1.2;
+  line-height: 1.25;
 }
 
 .finance-period-bar {
