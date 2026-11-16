@@ -87,21 +87,19 @@
     historyPeriod: 'all'
   };
 
+  // Override window.alert agar dialog popup sistem yang mengganggu tidak memblokir layar
+  window.alert = (msg) => {
+    console.warn('[Popup Alert Dimatikan]:', msg);
+  };
+
   // --- Utility Functions ---
   const formatRupiah = (number) => {
     return 'Rp ' + Number(number || 0).toLocaleString('id-ID');
   };
 
   const showToast = (message, duration = 2500) => {
-    const toast = document.getElementById('toast-box');
-    const toastText = document.getElementById('toast-text');
-    if (!toast || !toastText) return;
-    toastText.textContent = message;
-    toast.classList.add('show');
-    if (window.AndroidBridge && window.AndroidBridge.showToast) {
-      window.AndroidBridge.showToast(message);
-    }
-    setTimeout(() => toast.classList.remove('show'), duration);
+    // Sesuai permintaan user: hilangkan semua pop-up yang mengganggu
+    console.log('[Notice]:', message);
   };
 
   const vibrateTouch = (ms = 25) => {
@@ -211,7 +209,7 @@
         throw new Error('Respon login tidak valid.');
       }
     } catch (err) {
-      alert('Login Gagal: ' + err.message);
+      console.warn('Login Gagal:', err.message);
     }
   }
 
@@ -715,7 +713,7 @@
       updateCartUI();
       fetchProducts(); // Refresh stock
     } catch (err) {
-      alert('Gagal menyelesaikan transaksi: ' + err.message);
+      console.warn('Gagal menyelesaikan transaksi:', err.message);
     } finally {
       submitBtn.disabled = false;
       submitBtn.textContent = 'SELESAIKAN TRANSAKSI';
@@ -1585,7 +1583,7 @@
 
   async function connectWebBluetooth() {
     if (!navigator.bluetooth) {
-      alert('Browser Anda belum mendukung Web Bluetooth. Silakan gunakan Google Chrome di Android atau gunakan aplikasi APK.');
+      console.warn('Browser belum mendukung Web Bluetooth.');
       return;
     }
     showToast('Mencari printer Bluetooth...');
@@ -1639,7 +1637,7 @@
     } catch (err) {
       console.warn('Bluetooth connect cancelled:', err);
       if (!err.message?.includes('User cancelled')) {
-        alert('Gagal menyambung printer: ' + err.message);
+        console.warn('Gagal menyambung printer:', err.message);
       }
     }
   }
@@ -2070,6 +2068,270 @@
     `;
   }
 
+  // --- MODUL: TAMBAH BARANG (INVENTORY) ---
+  let itemCategoriesCache = [];
+  let itemUnitsCache = [];
+
+  async function initAddItemModule() {
+    const catSelect = document.getElementById('add-item-category');
+    const unitSelect = document.getElementById('add-item-unit');
+    const msgEl = document.getElementById('add-item-msg');
+    if (msgEl) msgEl.style.display = 'none';
+
+    try {
+      if (!itemCategoriesCache.length) {
+        const catRes = await apiRequest('/item-categories');
+        itemCategoriesCache = catRes?.data?.categories || catRes?.data || [];
+      }
+      if (catSelect) {
+        catSelect.innerHTML = '<option value="">Pilih Kategori...</option>' +
+          itemCategoriesCache.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+      }
+
+      if (!itemUnitsCache.length) {
+        const unitRes = await apiRequest('/item-units');
+        itemUnitsCache = unitRes?.data?.units || unitRes?.data || [];
+      }
+      if (unitSelect) {
+        unitSelect.innerHTML = '<option value="">Pilih Satuan...</option>' +
+          itemUnitsCache.map(u => `<option value="${u.id}">${u.name} (${u.abbreviation || '-'})</option>`).join('');
+      }
+    } catch (err) {
+      console.warn('Gagal memuat kategori/satuan barang:', err);
+    }
+  }
+
+  // --- MODUL: TRANSAKSI PEMBELIAN ---
+  let suppliersCache = [];
+  let purchasesListCache = [];
+
+  async function fetchPurchases() {
+    const container = document.getElementById('purchase-items-container');
+    if (!container) return;
+    container.innerHTML = '<div style="text-align:center; padding:30px; color:var(--text-muted);">Memuat riwayat pembelian...</div>';
+
+    try {
+      const res = await apiRequest('/purchases');
+      purchasesListCache = res?.data?.purchases || res?.data?.items || res?.data || [];
+
+      if (!Array.isArray(purchasesListCache) || purchasesListCache.length === 0) {
+        container.innerHTML = `
+          <div style="text-align:center; padding:40px 20px; color:var(--text-muted);">
+            <div style="font-size:2rem; margin-bottom:8px;">📦</div>
+            <div style="font-weight:700;">Belum Ada Riwayat Pembelian</div>
+            <div style="font-size:0.75rem; margin-top:4px;">Klik tab "+ Catat Pembelian" untuk memasukkan belanja stok baru.</div>
+          </div>
+        `;
+        return;
+      }
+
+      renderPurchasesList(purchasesListCache);
+    } catch (err) {
+      container.innerHTML = `<div style="text-align:center; padding:20px; color:var(--danger);">Gagal memuat pembelian: ${err.message}</div>`;
+    }
+  }
+
+  function renderPurchasesList(list) {
+    const container = document.getElementById('purchase-items-container');
+    if (!container) return;
+
+    container.innerHTML = list.map(p => {
+      const supplierName = p.supplier?.name || p.supplier_name || 'Supplier Umum';
+      const invoiceNo = p.purchase_no || p.invoice_no || p.code || '-';
+      const dateStr = p.occurred_at ? new Date(p.occurred_at).toLocaleDateString('id-ID', { day:'numeric', month:'short', year:'numeric' }) : '-';
+      const total = formatRupiah(p.total_amount || p.amount || 0);
+      const isPaid = (p.status || 'completed').toLowerCase() === 'completed';
+
+      return `
+        <div class="entry-card">
+          <div class="entry-card-header">
+            <div>
+              <div class="entry-title">${invoiceNo}</div>
+              <div class="entry-meta">
+                <span>🏢 ${supplierName}</span>
+                <span>📅 ${dateStr}</span>
+              </div>
+            </div>
+            <div style="text-align:right;">
+              <div class="entry-amount expense">${total}</div>
+              <span class="badge-tag ${isPaid ? 'success' : 'primary'}" style="margin-top:4px;">${isPaid ? 'Lunas' : (p.status || 'Draft')}</span>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  async function initPurchaseFormOptions() {
+    const supplierSel = document.getElementById('purchase-supplier');
+    const itemSel = document.getElementById('purchase-item-select');
+    const dateInp = document.getElementById('purchase-date');
+    if (dateInp && !dateInp.value) {
+      dateInp.value = new Date().toISOString().split('T')[0];
+    }
+
+    try {
+      if (!suppliersCache.length) {
+        const supRes = await apiRequest('/suppliers');
+        suppliersCache = supRes?.data?.suppliers || supRes?.data?.items || supRes?.data || [];
+      }
+      if (supplierSel) {
+        supplierSel.innerHTML = '<option value="">-- Pilih Supplier --</option>' +
+          '<option value="none">Supplier Umum (Tanpa Akun)</option>' +
+          suppliersCache.map(s => `<option value="${s.id}">${s.name} ${s.phone ? `(${s.phone})` : ''}</option>`).join('');
+      }
+
+      if (itemSel && state.products) {
+        itemSel.innerHTML = '<option value="">-- Pilih Barang Toko --</option>' +
+          state.products.map(p => `<option value="${p.id}" data-cost="${p.purchase_price || 0}">${p.name} (Stok: ${p.stock || 0})</option>`).join('');
+      }
+    } catch (err) {
+      console.warn('Gagal memuat opsi supplier:', err);
+    }
+  }
+
+  // --- MODUL: PEMASUKAN MANUAL ---
+  let incomeCategoriesCache = [];
+
+  async function fetchManualIncomes() {
+    const container = document.getElementById('income-items-container');
+    const summaryEl = document.getElementById('income-total-summary');
+    if (!container) return;
+    container.innerHTML = '<div style="text-align:center; padding:30px; color:var(--text-muted);">Memuat riwayat pemasukan...</div>';
+
+    try {
+      const res = await apiRequest('/manual-incomes');
+      const items = res?.data?.items || res?.data?.manual_incomes || [];
+      const totalAmount = res?.data?.summary?.completed_amount || 0;
+      if (summaryEl) summaryEl.textContent = formatRupiah(totalAmount);
+
+      if (!items.length) {
+        container.innerHTML = `
+          <div style="text-align:center; padding:40px 20px; color:var(--text-muted);">
+            <div style="font-size:2rem; margin-bottom:8px;">💰</div>
+            <div style="font-weight:700;">Belum Ada Pemasukan Manual</div>
+            <div style="font-size:0.75rem; margin-top:4px;">Klik tab "+ Catat Pemasukan" untuk input kas masuk.</div>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = items.map(it => {
+        const catName = it.category?.name || it.category_name || 'Pemasukan Kas';
+        const dateStr = it.occurred_at ? new Date(it.occurred_at).toLocaleDateString('id-ID', { day:'numeric', month:'short', year:'numeric' }) : '-';
+        return `
+          <div class="entry-card">
+            <div class="entry-card-header">
+              <div>
+                <div class="entry-title">${catName}</div>
+                <div class="entry-meta">
+                  <span>📅 ${dateStr}</span>
+                  <span>💳 ${(it.payment_method || 'TUNAI').toUpperCase()}</span>
+                </div>
+              </div>
+              <div class="entry-amount income">+${formatRupiah(it.amount)}</div>
+            </div>
+            ${it.description ? `<div style="font-size:0.76rem; color:var(--text-secondary); margin-top:4px;">${it.description}</div>` : ''}
+          </div>
+        `;
+      }).join('');
+    } catch (err) {
+      container.innerHTML = `<div style="text-align:center; padding:20px; color:var(--danger);">Gagal memuat pemasukan: ${err.message}</div>`;
+    }
+  }
+
+  async function initIncomeFormOptions() {
+    const catSel = document.getElementById('income-category');
+    const dateInp = document.getElementById('income-date');
+    if (dateInp && !dateInp.value) {
+      dateInp.value = new Date().toISOString().split('T')[0];
+    }
+
+    try {
+      if (!incomeCategoriesCache.length) {
+        const optRes = await apiRequest('/manual-incomes/options');
+        incomeCategoriesCache = optRes?.data?.categories || [];
+      }
+      if (catSel) {
+        catSel.innerHTML = '<option value="">Pilih Kategori Pemasukan...</option>' +
+          incomeCategoriesCache.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+      }
+    } catch (err) {
+      console.warn('Gagal memuat opsi kategori pemasukan:', err);
+    }
+  }
+
+  // --- MODUL: PENGELUARAN MANUAL ---
+  let expenseCategoriesCache = [];
+
+  async function fetchManualExpenses() {
+    const container = document.getElementById('expense-items-container');
+    const summaryEl = document.getElementById('expense-total-summary');
+    if (!container) return;
+    container.innerHTML = '<div style="text-align:center; padding:30px; color:var(--text-muted);">Memuat riwayat pengeluaran...</div>';
+
+    try {
+      const res = await apiRequest('/manual-expenses');
+      const items = res?.data?.items || res?.data?.manual_expenses || [];
+      const totalAmount = res?.data?.summary?.completed_amount || 0;
+      if (summaryEl) summaryEl.textContent = formatRupiah(totalAmount);
+
+      if (!items.length) {
+        container.innerHTML = `
+          <div style="text-align:center; padding:40px 20px; color:var(--text-muted);">
+            <div style="font-size:2rem; margin-bottom:8px;">💸</div>
+            <div style="font-weight:700;">Belum Ada Pengeluaran Manual</div>
+            <div style="font-size:0.75rem; margin-top:4px;">Klik tab "+ Catat Pengeluaran" untuk input biaya operasional.</div>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = items.map(it => {
+        const catName = it.category?.name || it.category_name || 'Beban Kas';
+        const dateStr = it.occurred_at ? new Date(it.occurred_at).toLocaleDateString('id-ID', { day:'numeric', month:'short', year:'numeric' }) : '-';
+        return `
+          <div class="entry-card">
+            <div class="entry-card-header">
+              <div>
+                <div class="entry-title">${catName}</div>
+                <div class="entry-meta">
+                  <span>📅 ${dateStr}</span>
+                  <span>💳 ${(it.payment_method || 'TUNAI').toUpperCase()}</span>
+                </div>
+              </div>
+              <div class="entry-amount expense">-${formatRupiah(it.amount)}</div>
+            </div>
+            ${it.description ? `<div style="font-size:0.76rem; color:var(--text-secondary); margin-top:4px;">${it.description}</div>` : ''}
+          </div>
+        `;
+      }).join('');
+    } catch (err) {
+      container.innerHTML = `<div style="text-align:center; padding:20px; color:var(--danger);">Gagal memuat pengeluaran: ${err.message}</div>`;
+    }
+  }
+
+  async function initExpenseFormOptions() {
+    const catSel = document.getElementById('expense-category');
+    const dateInp = document.getElementById('expense-date');
+    if (dateInp && !dateInp.value) {
+      dateInp.value = new Date().toISOString().split('T')[0];
+    }
+
+    try {
+      if (!expenseCategoriesCache.length) {
+        const optRes = await apiRequest('/manual-expenses/options');
+        expenseCategoriesCache = optRes?.data?.categories || [];
+      }
+      if (catSel) {
+        catSel.innerHTML = '<option value="">Pilih Kategori Pengeluaran...</option>' +
+          expenseCategoriesCache.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+      }
+    } catch (err) {
+      console.warn('Gagal memuat opsi kategori pengeluaran:', err);
+    }
+  }
+
   // --- Navigation & Event Listeners ---
   function setupEvents() {
     function switchTab(target) {
@@ -2098,9 +2360,24 @@
 
       if (target === 'view-history') fetchHistory(state.historyPeriod);
       if (target === 'view-inventory') renderInventoryList();
+      if (target === 'view-add-item') initAddItemModule();
       if (target === 'view-stock-opname') fetchStockOpname();
       if (target === 'view-financial-report') fetchFinancialReport(state.financialPeriod);
+      if (target === 'view-purchases') {
+        fetchPurchases();
+        initPurchaseFormOptions();
+      }
+      if (target === 'view-manual-income') {
+        fetchManualIncomes();
+        initIncomeFormOptions();
+      }
+      if (target === 'view-manual-expense') {
+        fetchManualExpenses();
+        initExpenseFormOptions();
+      }
     }
+
+    window.switchTab = switchTab;
 
     // Nav Items (Bottom)
     document.querySelectorAll('.nav-item').forEach(item => {
@@ -2432,7 +2709,7 @@
           showToast('Koneksi server sukses & setelan tersimpan!');
         } catch (err) {
           updateServerStatus(false);
-          alert('Gagal terhubung ke server: ' + err.message);
+          console.warn('Gagal terhubung ke server:', err.message);
         }
       });
     }
@@ -2472,7 +2749,7 @@
         if (state.token) loadInitialData();
       } catch (err) {
         updateServerStatus(false);
-        alert('Gagal terhubung ke server (' + url + '):\n' + err.message + '\n\nPastikan port dan alamat IP benar.');
+        console.warn('Gagal terhubung ke server (' + url + '): ' + err.message);
       }
     });
 
@@ -2530,6 +2807,402 @@
       btnSaveOpnameDraft.addEventListener('click', () => {
         vibrateTouch(20);
         saveStockOpnameDraft();
+      });
+    }
+
+    // --- EVENT LISTENERS MODUL TAMBAH BARANG ---
+    const btnGotoAddItem = document.getElementById('btn-goto-add-item');
+    if (btnGotoAddItem) {
+      btnGotoAddItem.addEventListener('click', () => {
+        vibrateTouch(15);
+        switchTab('view-add-item');
+      });
+    }
+
+    const btnBackToInv = document.getElementById('btn-back-to-inventory');
+    if (btnBackToInv) {
+      btnBackToInv.addEventListener('click', () => {
+        vibrateTouch(15);
+        switchTab('view-inventory');
+      });
+    }
+
+    const formAddItem = document.getElementById('form-add-item');
+    if (formAddItem) {
+      formAddItem.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        vibrateTouch(20);
+        const msgEl = document.getElementById('add-item-msg');
+        const submitBtn = document.getElementById('btn-submit-add-item');
+
+        const name = document.getElementById('add-item-name')?.value?.trim();
+        const categoryId = document.getElementById('add-item-category')?.value;
+        const unitId = document.getElementById('add-item-unit')?.value;
+        const cost = parseFloat(document.getElementById('add-item-cost')?.value) || 0;
+        const price = parseFloat(document.getElementById('add-item-price')?.value) || 0;
+        const stock = parseInt(document.getElementById('add-item-stock')?.value) || 0;
+        const code = document.getElementById('add-item-code')?.value?.trim();
+        const desc = document.getElementById('add-item-desc')?.value?.trim();
+
+        if (!name || !categoryId || !unitId || price <= 0) {
+          if (msgEl) {
+            msgEl.className = 'inline-msg-box error';
+            msgEl.textContent = 'Harap isi nama barang, kategori, satuan, dan harga jual yang valid.';
+          }
+          return;
+        }
+
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Menyimpan Barang...';
+
+        try {
+          const payload = {
+            name,
+            category_id: parseInt(categoryId),
+            unit_id: parseInt(unitId),
+            purchase_price: cost,
+            selling_price: price,
+            stock_opname: stock,
+            description: desc
+          };
+          if (code) payload.code = code;
+
+          await apiRequest('/items', {
+            method: 'POST',
+            body: JSON.stringify(payload)
+          });
+
+          formAddItem.reset();
+          if (msgEl) {
+            msgEl.className = 'inline-msg-box success';
+            msgEl.textContent = '✓ Barang baru berhasil ditambahkan!';
+          }
+
+          await fetchProducts(); // Refresh katalog
+          setTimeout(() => {
+            switchTab('view-inventory');
+          }, 1000);
+        } catch (err) {
+          if (msgEl) {
+            msgEl.className = 'inline-msg-box error';
+            msgEl.textContent = 'Gagal menyimpan barang: ' + err.message;
+          }
+        } finally {
+          submitBtn.disabled = false;
+          submitBtn.textContent = '✓ Simpan Barang Baru';
+        }
+      });
+    }
+
+    // --- EVENT LISTENERS MODUL TRANSAKSI PEMBELIAN ---
+    const tabBtnPurchaseList = document.getElementById('tab-btn-purchase-list');
+    const tabBtnPurchaseNew = document.getElementById('tab-btn-purchase-new');
+    const panelPurchaseList = document.getElementById('panel-purchase-list');
+    const panelPurchaseNew = document.getElementById('panel-purchase-new');
+
+    if (tabBtnPurchaseList && tabBtnPurchaseNew) {
+      tabBtnPurchaseList.addEventListener('click', () => {
+        tabBtnPurchaseList.classList.add('active');
+        tabBtnPurchaseNew.classList.remove('active');
+        if (panelPurchaseList) panelPurchaseList.style.display = 'block';
+        if (panelPurchaseNew) panelPurchaseNew.style.display = 'none';
+        fetchPurchases();
+      });
+
+      tabBtnPurchaseNew.addEventListener('click', () => {
+        tabBtnPurchaseNew.classList.add('active');
+        tabBtnPurchaseList.classList.remove('active');
+        if (panelPurchaseNew) panelPurchaseNew.style.display = 'block';
+        if (panelPurchaseList) panelPurchaseList.style.display = 'none';
+        initPurchaseFormOptions();
+      });
+    }
+
+    const btnRefreshPurchases = document.getElementById('btn-refresh-purchases');
+    if (btnRefreshPurchases) {
+      btnRefreshPurchases.addEventListener('click', () => {
+        vibrateTouch(15);
+        fetchPurchases();
+      });
+    }
+
+    const purchaseItemSelect = document.getElementById('purchase-item-select');
+    const purchaseItemQty = document.getElementById('purchase-item-qty');
+    const purchaseItemPrice = document.getElementById('purchase-item-price');
+    const purchaseCalcTotal = document.getElementById('purchase-calc-total');
+
+    function updatePurchaseCalc() {
+      const q = parseInt(purchaseItemQty?.value) || 0;
+      const p = parseFloat(purchaseItemPrice?.value) || 0;
+      if (purchaseCalcTotal) purchaseCalcTotal.textContent = formatRupiah(q * p);
+    }
+
+    if (purchaseItemSelect) {
+      purchaseItemSelect.addEventListener('change', () => {
+        const selectedOpt = purchaseItemSelect.options[purchaseItemSelect.selectedIndex];
+        const defaultCost = selectedOpt?.dataset?.cost || 0;
+        if (purchaseItemPrice && defaultCost > 0) {
+          purchaseItemPrice.value = defaultCost;
+        }
+        updatePurchaseCalc();
+      });
+    }
+
+    if (purchaseItemQty) purchaseItemQty.addEventListener('input', updatePurchaseCalc);
+    if (purchaseItemPrice) purchaseItemPrice.addEventListener('input', updatePurchaseCalc);
+
+    const formNewPurchase = document.getElementById('form-new-purchase');
+    if (formNewPurchase) {
+      formNewPurchase.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        vibrateTouch(20);
+        const msgEl = document.getElementById('purchase-msg');
+        const submitBtn = document.getElementById('btn-submit-purchase');
+
+        const supplierVal = document.getElementById('purchase-supplier')?.value;
+        const itemId = document.getElementById('purchase-item-select')?.value;
+        const qty = parseInt(purchaseItemQty?.value) || 0;
+        const unitPrice = parseFloat(purchaseItemPrice?.value) || 0;
+        const payMethod = document.getElementById('purchase-pay-method')?.value || 'cash';
+        const notes = document.getElementById('purchase-notes')?.value?.trim();
+
+        if (!itemId || qty < 1 || unitPrice <= 0) {
+          if (msgEl) {
+            msgEl.className = 'inline-msg-box error';
+            msgEl.textContent = 'Harap pilih barang, isi jumlah qty dan harga beli yang valid.';
+          }
+          return;
+        }
+
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Menyimpan Pembelian...';
+
+        try {
+          const payload = {
+            supplier_mode: (supplierVal && supplierVal !== 'none') ? 'existing' : 'none',
+            payment_method: payMethod,
+            notes: notes || '',
+            items: [
+              {
+                item_id: parseInt(itemId),
+                quantity: qty,
+                unit_price: unitPrice
+              }
+            ]
+          };
+          if (supplierVal && supplierVal !== 'none') {
+            payload.supplier_id = parseInt(supplierVal);
+          }
+
+          await apiRequest('/purchases', {
+            method: 'POST',
+            body: JSON.stringify(payload)
+          });
+
+          formNewPurchase.reset();
+          updatePurchaseCalc();
+          if (msgEl) {
+            msgEl.className = 'inline-msg-box success';
+            msgEl.textContent = '✓ Transaksi pembelian berhasil dicatat & stok bertambah!';
+          }
+
+          await fetchProducts(); // Refresh stok
+          setTimeout(() => {
+            if (tabBtnPurchaseList) tabBtnPurchaseList.click();
+          }, 1200);
+        } catch (err) {
+          if (msgEl) {
+            msgEl.className = 'inline-msg-box error';
+            msgEl.textContent = 'Gagal menyimpan pembelian: ' + err.message;
+          }
+        } finally {
+          submitBtn.disabled = false;
+          submitBtn.textContent = '✓ Simpan Transaksi Pembelian';
+        }
+      });
+    }
+
+    // --- EVENT LISTENERS MODUL PEMASUKAN MANUAL ---
+    const tabBtnIncomeList = document.getElementById('tab-btn-income-list');
+    const tabBtnIncomeNew = document.getElementById('tab-btn-income-new');
+    const panelIncomeList = document.getElementById('panel-income-list');
+    const panelIncomeNew = document.getElementById('panel-income-new');
+
+    if (tabBtnIncomeList && tabBtnIncomeNew) {
+      tabBtnIncomeList.addEventListener('click', () => {
+        tabBtnIncomeList.classList.add('active');
+        tabBtnIncomeNew.classList.remove('active');
+        if (panelIncomeList) panelIncomeList.style.display = 'block';
+        if (panelIncomeNew) panelIncomeNew.style.display = 'none';
+        fetchManualIncomes();
+      });
+
+      tabBtnIncomeNew.addEventListener('click', () => {
+        tabBtnIncomeNew.classList.add('active');
+        tabBtnIncomeList.classList.remove('active');
+        if (panelIncomeNew) panelIncomeNew.style.display = 'block';
+        if (panelIncomeList) panelIncomeList.style.display = 'none';
+        initIncomeFormOptions();
+      });
+    }
+
+    const btnRefreshIncome = document.getElementById('btn-refresh-income');
+    if (btnRefreshIncome) {
+      btnRefreshIncome.addEventListener('click', () => {
+        vibrateTouch(15);
+        fetchManualIncomes();
+      });
+    }
+
+    const formNewIncome = document.getElementById('form-new-income');
+    if (formNewIncome) {
+      formNewIncome.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        vibrateTouch(20);
+        const msgEl = document.getElementById('income-msg');
+        const submitBtn = document.getElementById('btn-submit-income');
+
+        const catId = document.getElementById('income-category')?.value;
+        const amount = parseFloat(document.getElementById('income-amount')?.value) || 0;
+        const method = document.getElementById('income-pay-method')?.value || 'cash';
+        const dateVal = document.getElementById('income-date')?.value;
+        const desc = document.getElementById('income-desc')?.value?.trim();
+
+        if (!catId || amount <= 0 || !desc) {
+          if (msgEl) {
+            msgEl.className = 'inline-msg-box error';
+            msgEl.textContent = 'Harap pilih kategori, nominal dan isi keterangan pemasukan.';
+          }
+          return;
+        }
+
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Menyimpan Pemasukan...';
+
+        try {
+          const payload = {
+            category_id: parseInt(catId),
+            amount: amount,
+            payment_method: method,
+            description: desc,
+            occurred_at: dateVal ? `${dateVal} 12:00:00` : new Date().toISOString()
+          };
+
+          await apiRequest('/manual-incomes', {
+            method: 'POST',
+            body: JSON.stringify(payload)
+          });
+
+          formNewIncome.reset();
+          if (msgEl) {
+            msgEl.className = 'inline-msg-box success';
+            msgEl.textContent = '✓ Pemasukan manual kas berhasil dicatat!';
+          }
+
+          setTimeout(() => {
+            if (tabBtnIncomeList) tabBtnIncomeList.click();
+          }, 1000);
+        } catch (err) {
+          if (msgEl) {
+            msgEl.className = 'inline-msg-box error';
+            msgEl.textContent = 'Gagal menyimpan pemasukan: ' + err.message;
+          }
+        } finally {
+          submitBtn.disabled = false;
+          submitBtn.textContent = '✓ Simpan Pemasukan Manual';
+        }
+      });
+    }
+
+    // --- EVENT LISTENERS MODUL PENGELUARAN MANUAL ---
+    const tabBtnExpenseList = document.getElementById('tab-btn-expense-list');
+    const tabBtnExpenseNew = document.getElementById('tab-btn-expense-new');
+    const panelExpenseList = document.getElementById('panel-expense-list');
+    const panelExpenseNew = document.getElementById('panel-expense-new');
+
+    if (tabBtnExpenseList && tabBtnExpenseNew) {
+      tabBtnExpenseList.addEventListener('click', () => {
+        tabBtnExpenseList.classList.add('active');
+        tabBtnExpenseNew.classList.remove('active');
+        if (panelExpenseList) panelExpenseList.style.display = 'block';
+        if (panelExpenseNew) panelExpenseNew.style.display = 'none';
+        fetchManualExpenses();
+      });
+
+      tabBtnExpenseNew.addEventListener('click', () => {
+        tabBtnExpenseNew.classList.add('active');
+        tabBtnExpenseList.classList.remove('active');
+        if (panelExpenseNew) panelExpenseNew.style.display = 'block';
+        if (panelExpenseList) panelExpenseList.style.display = 'none';
+        initExpenseFormOptions();
+      });
+    }
+
+    const btnRefreshExpense = document.getElementById('btn-refresh-expense');
+    if (btnRefreshExpense) {
+      btnRefreshExpense.addEventListener('click', () => {
+        vibrateTouch(15);
+        fetchManualExpenses();
+      });
+    }
+
+    const formNewExpense = document.getElementById('form-new-expense');
+    if (formNewExpense) {
+      formNewExpense.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        vibrateTouch(20);
+        const msgEl = document.getElementById('expense-msg');
+        const submitBtn = document.getElementById('btn-submit-expense');
+
+        const catId = document.getElementById('expense-category')?.value;
+        const amount = parseFloat(document.getElementById('expense-amount')?.value) || 0;
+        const method = document.getElementById('expense-pay-method')?.value || 'cash';
+        const dateVal = document.getElementById('expense-date')?.value;
+        const desc = document.getElementById('expense-desc')?.value?.trim();
+
+        if (!catId || amount <= 0 || !desc) {
+          if (msgEl) {
+            msgEl.className = 'inline-msg-box error';
+            msgEl.textContent = 'Harap pilih kategori, nominal dan isi keterangan pengeluaran.';
+          }
+          return;
+        }
+
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Menyimpan Pengeluaran...';
+
+        try {
+          const payload = {
+            category_id: parseInt(catId),
+            amount: amount,
+            payment_method: method,
+            description: desc,
+            occurred_at: dateVal ? `${dateVal} 12:00:00` : new Date().toISOString()
+          };
+
+          await apiRequest('/manual-expenses', {
+            method: 'POST',
+            body: JSON.stringify(payload)
+          });
+
+          formNewExpense.reset();
+          if (msgEl) {
+            msgEl.className = 'inline-msg-box success';
+            msgEl.textContent = '✓ Pengeluaran manual kas berhasil dicatat!';
+          }
+
+          setTimeout(() => {
+            if (tabBtnExpenseList) tabBtnExpenseList.click();
+          }, 1000);
+        } catch (err) {
+          if (msgEl) {
+            msgEl.className = 'inline-msg-box error';
+            msgEl.textContent = 'Gagal menyimpan pengeluaran: ' + err.message;
+          }
+        } finally {
+          submitBtn.disabled = false;
+          submitBtn.textContent = '✓ Simpan Pengeluaran Manual';
+        }
       });
     }
   }

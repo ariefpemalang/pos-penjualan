@@ -89,10 +89,19 @@
         </div>
       </section>
 
-      <!-- VIEW 3: STOK BARANG -->
+      <!-- VIEW 3: DATA BARANG (INVENTORY) -->
       <section id="view-inventory" class="app-view" style="display:none;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-          <h2 style="font-size:1.1rem; font-weight:700; color:var(--primary-light);">Katalog & Stok</h2>
+          <div>
+            <h2 style="font-size:1.15rem; font-weight:800; color:var(--primary-light);">Data Barang</h2>
+            <div style="font-size:0.75rem; color:var(--text-muted);">Katalog produk & sisa stok toko</div>
+          </div>
+          <button class="btn-primary-action" id="btn-goto-add-item" style="padding:7px 12px; font-size:0.8rem; margin:0; border-radius:var(--radius-sm); display:flex; align-items:center; gap:6px;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            <span>Tambah Barang</span>
+          </button>
+        </div>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
           <label style="font-size:0.8rem; color:var(--warning); display:flex; align-items:center; gap:6px; cursor:pointer;">
             <input type="checkbox" id="filter-low-stock"> Stok Menipis
           </label>
@@ -103,6 +112,76 @@
         </div>
         <div id="inventory-list">
           <!-- Injected inventory -->
+        </div>
+      </section>
+
+      <!-- VIEW BARU: TAMBAH BARANG -->
+      <section id="view-add-item" class="app-view" style="display:none;">
+        <div class="module-header">
+          <div>
+            <h2 class="module-title">Tambah Barang Baru</h2>
+            <div class="module-sub">Input produk atau sparepart ke sistem</div>
+          </div>
+          <button class="icon-btn" id="btn-back-to-inventory" title="Kembali" style="background:var(--bg-surface); border:1px solid var(--border-gold); color:var(--primary-light); width:34px; height:34px;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
+          </button>
+        </div>
+
+        <div id="add-item-msg" class="inline-msg-box"></div>
+
+        <div class="settings-group">
+          <form id="form-add-item">
+            <div style="margin-bottom:12px;">
+              <label class="settings-label">Nama Barang <span style="color:var(--danger)">*</span></label>
+              <input type="text" id="add-item-name" class="settings-input" placeholder="Contoh: LCD iPhone X OEM" required>
+            </div>
+
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:12px;">
+              <div>
+                <label class="settings-label">Kategori <span style="color:var(--danger)">*</span></label>
+                <select id="add-item-category" class="settings-input" required>
+                  <option value="">Pilih Kategori...</option>
+                </select>
+              </div>
+              <div>
+                <label class="settings-label">Satuan <span style="color:var(--danger)">*</span></label>
+                <select id="add-item-unit" class="settings-input" required>
+                  <option value="">Pilih Satuan...</option>
+                </select>
+              </div>
+            </div>
+
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:12px;">
+              <div>
+                <label class="settings-label">Harga Beli (Modal)</label>
+                <input type="number" id="add-item-cost" class="settings-input" placeholder="Rp 0" min="0">
+              </div>
+              <div>
+                <label class="settings-label">Harga Jual <span style="color:var(--danger)">*</span></label>
+                <input type="number" id="add-item-price" class="settings-input" placeholder="Rp 0" min="0" required>
+              </div>
+            </div>
+
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:12px;">
+              <div>
+                <label class="settings-label">Stok Awal (Opname)</label>
+                <input type="number" id="add-item-stock" class="settings-input" placeholder="0" min="0">
+              </div>
+              <div>
+                <label class="settings-label">Kode / Barcode (Opsional)</label>
+                <input type="text" id="add-item-code" class="settings-input" placeholder="Otomatis jika kosong">
+              </div>
+            </div>
+
+            <div style="margin-bottom:16px;">
+              <label class="settings-label">Keterangan / Spesifikasi</label>
+              <textarea id="add-item-desc" class="settings-input" rows="2" placeholder="Catatan tambahan barang..."></textarea>
+            </div>
+
+            <button type="submit" id="btn-submit-add-item" class="btn-primary-action" style="margin-top:0;">
+              ✓ Simpan Barang Baru
+            </button>
+          </form>
         </div>
       </section>
 
@@ -190,6 +269,261 @@
 
         <div id="financial-report-content">
           <div style="text-align:center; padding:30px; color:var(--text-muted);">Memuat laporan keuangan...</div>
+        </div>
+      </section>
+
+      <!-- VIEW: TRANSAKSI PEMBELIAN -->
+      <section id="view-purchases" class="app-view" style="display:none;">
+        <div class="module-header">
+          <div>
+            <h2 class="module-title">Transaksi Pembelian</h2>
+            <div class="module-sub">Belanja stok barang & sparepart dari supplier</div>
+          </div>
+          <button class="icon-btn" id="btn-refresh-purchases" title="Segarkan" style="background:var(--bg-surface); border:1px solid var(--border-gold); color:var(--primary-light); width:34px; height:34px;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+          </button>
+        </div>
+
+        <div class="tab-subnav">
+          <button class="tab-subnav-btn active" id="tab-btn-purchase-list">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+            Riwayat Pembelian
+          </button>
+          <button class="tab-subnav-btn" id="tab-btn-purchase-new">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            + Catat Pembelian
+          </button>
+        </div>
+
+        <div id="purchase-msg" class="inline-msg-box"></div>
+
+        <!-- Panel 1: List Riwayat Pembelian -->
+        <div id="panel-purchase-list">
+          <div class="search-box" style="margin-bottom:10px;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            <input type="text" id="purchase-search" placeholder="Cari nomor nota atau supplier...">
+          </div>
+          <div id="purchase-items-container">
+            <div style="text-align:center; padding:30px; color:var(--text-muted);">Memuat riwayat pembelian...</div>
+          </div>
+        </div>
+
+        <!-- Panel 2: Form Catat Pembelian Baru -->
+        <div id="panel-purchase-new" style="display:none;">
+          <div class="settings-group">
+            <form id="form-new-purchase">
+              <div style="margin-bottom:12px;">
+                <label class="settings-label">Pilih Supplier / Toko Asal <span style="color:var(--danger)">*</span></label>
+                <select id="purchase-supplier" class="settings-input" required>
+                  <option value="">Pilih Supplier...</option>
+                </select>
+              </div>
+
+              <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:12px;">
+                <div>
+                  <label class="settings-label">Metode Pembayaran</label>
+                  <select id="purchase-pay-method" class="settings-input">
+                    <option value="cash">Tunai (Cash)</option>
+                    <option value="bank_transfer">Transfer Bank</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="settings-label">Tanggal Transaksi</label>
+                  <input type="date" id="purchase-date" class="settings-input">
+                </div>
+              </div>
+
+              <div style="margin-bottom:12px;">
+                <label class="settings-label">Pilih Barang yang Dibeli <span style="color:var(--danger)">*</span></label>
+                <select id="purchase-item-select" class="settings-input">
+                  <option value="">-- Pilih Barang --</option>
+                </select>
+              </div>
+
+              <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:12px;">
+                <div>
+                  <label class="settings-label">Jumlah (Qty) <span style="color:var(--danger)">*</span></label>
+                  <input type="number" id="purchase-item-qty" class="settings-input" placeholder="1" min="1" value="1">
+                </div>
+                <div>
+                  <label class="settings-label">Harga Beli Satuan (Rp) <span style="color:var(--danger)">*</span></label>
+                  <input type="number" id="purchase-item-price" class="settings-input" placeholder="Rp 0" min="0">
+                </div>
+              </div>
+
+              <div style="margin-bottom:12px;">
+                <label class="settings-label">Catatan Tambahan (Opsional)</label>
+                <input type="text" id="purchase-notes" class="settings-input" placeholder="No invoice dari supplier, dsb">
+              </div>
+
+              <div style="background:var(--bg-surface); border-radius:var(--radius-sm); padding:10px 14px; margin-bottom:14px; display:flex; justify-content:space-between; align-items:center;">
+                <span style="font-size:0.82rem; color:var(--text-muted);">Total Pembelian:</span>
+                <span id="purchase-calc-total" style="font-weight:900; font-size:1.1rem; color:var(--primary-light);">Rp 0</span>
+              </div>
+
+              <button type="submit" id="btn-submit-purchase" class="btn-primary-action" style="margin-top:0;">
+                ✓ Simpan Transaksi Pembelian
+              </button>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW: PEMASUKAN MANUAL (KEUANGAN) -->
+      <section id="view-manual-income" class="app-view" style="display:none;">
+        <div class="module-header">
+          <div>
+            <h2 class="module-title">Pemasukan Manual</h2>
+            <div class="module-sub">Catat kas masuk operasional toko & servis manual</div>
+          </div>
+          <button class="icon-btn" id="btn-refresh-income" title="Segarkan" style="background:var(--bg-surface); border:1px solid var(--border-gold); color:var(--primary-light); width:34px; height:34px;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+          </button>
+        </div>
+
+        <div class="tab-subnav">
+          <button class="tab-subnav-btn active" id="tab-btn-income-list">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+            Riwayat Pemasukan
+          </button>
+          <button class="tab-subnav-btn" id="tab-btn-income-new">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            + Catat Pemasukan
+          </button>
+        </div>
+
+        <div id="income-msg" class="inline-msg-box"></div>
+
+        <!-- Panel 1: List Riwayat Pemasukan -->
+        <div id="panel-income-list">
+          <div class="entry-card" style="background:rgba(16, 185, 129, 0.08); border-color:rgba(16, 185, 129, 0.3); margin-bottom:12px;">
+            <div style="font-size:0.75rem; color:var(--text-muted);">Total Pemasukan Manual (Bulan Ini)</div>
+            <div id="income-total-summary" style="font-size:1.3rem; font-weight:900; color:var(--success); margin-top:2px;">Rp 0</div>
+          </div>
+          <div id="income-items-container">
+            <div style="text-align:center; padding:30px; color:var(--text-muted);">Memuat riwayat pemasukan...</div>
+          </div>
+        </div>
+
+        <!-- Panel 2: Form Catat Pemasukan -->
+        <div id="panel-income-new" style="display:none;">
+          <div class="settings-group">
+            <form id="form-new-income">
+              <div style="margin-bottom:12px;">
+                <label class="settings-label">Kategori Pemasukan <span style="color:var(--danger)">*</span></label>
+                <select id="income-category" class="settings-input" required>
+                  <option value="">Pilih Kategori...</option>
+                </select>
+              </div>
+
+              <div style="margin-bottom:12px;">
+                <label class="settings-label">Nominal Pemasukan (Rp) <span style="color:var(--danger)">*</span></label>
+                <input type="number" id="income-amount" class="settings-input" placeholder="Rp 0" min="1" required style="font-size:1.1rem; font-weight:800; color:var(--success);">
+              </div>
+
+              <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:12px;">
+                <div>
+                  <label class="settings-label">Metode Kas</label>
+                  <select id="income-pay-method" class="settings-input">
+                    <option value="cash">Tunai (Kas Kasir)</option>
+                    <option value="transfer">Transfer Bank</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="settings-label">Tanggal Transaksi</label>
+                  <input type="date" id="income-date" class="settings-input">
+                </div>
+              </div>
+
+              <div style="margin-bottom:16px;">
+                <label class="settings-label">Keterangan / Rincian <span style="color:var(--danger)">*</span></label>
+                <textarea id="income-desc" class="settings-input" rows="2" placeholder="Contoh: Pemasukan jasa pasang tempered glass / isi saldo" required></textarea>
+              </div>
+
+              <button type="submit" id="btn-submit-income" class="btn-primary-action" style="margin-top:0;">
+                ✓ Simpan Pemasukan Manual
+              </button>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW: PENGELUARAN MANUAL (KEUANGAN) -->
+      <section id="view-manual-expense" class="app-view" style="display:none;">
+        <div class="module-header">
+          <div>
+            <h2 class="module-title">Pengeluaran Manual</h2>
+            <div class="module-sub">Beban biaya operasional, belanja alat & kas keluar</div>
+          </div>
+          <button class="icon-btn" id="btn-refresh-expense" title="Segarkan" style="background:var(--bg-surface); border:1px solid var(--border-gold); color:var(--primary-light); width:34px; height:34px;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+          </button>
+        </div>
+
+        <div class="tab-subnav">
+          <button class="tab-subnav-btn active" id="tab-btn-expense-list">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+            Riwayat Pengeluaran
+          </button>
+          <button class="tab-subnav-btn" id="tab-btn-expense-new">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            + Catat Pengeluaran
+          </button>
+        </div>
+
+        <div id="expense-msg" class="inline-msg-box"></div>
+
+        <!-- Panel 1: List Riwayat Pengeluaran -->
+        <div id="panel-expense-list">
+          <div class="entry-card" style="background:rgba(239, 68, 68, 0.08); border-color:rgba(239, 68, 68, 0.3); margin-bottom:12px;">
+            <div style="font-size:0.75rem; color:var(--text-muted);">Total Pengeluaran Manual (Bulan Ini)</div>
+            <div id="expense-total-summary" style="font-size:1.3rem; font-weight:900; color:var(--danger); margin-top:2px;">Rp 0</div>
+          </div>
+          <div id="expense-items-container">
+            <div style="text-align:center; padding:30px; color:var(--text-muted);">Memuat riwayat pengeluaran...</div>
+          </div>
+        </div>
+
+        <!-- Panel 2: Form Catat Pengeluaran -->
+        <div id="panel-expense-new" style="display:none;">
+          <div class="settings-group">
+            <form id="form-new-expense">
+              <div style="margin-bottom:12px;">
+                <label class="settings-label">Kategori Pengeluaran <span style="color:var(--danger)">*</span></label>
+                <select id="expense-category" class="settings-input" required>
+                  <option value="">Pilih Kategori...</option>
+                </select>
+              </div>
+
+              <div style="margin-bottom:12px;">
+                <label class="settings-label">Nominal Pengeluaran (Rp) <span style="color:var(--danger)">*</span></label>
+                <input type="number" id="expense-amount" class="settings-input" placeholder="Rp 0" min="1" required style="font-size:1.1rem; font-weight:800; color:var(--danger);">
+              </div>
+
+              <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:12px;">
+                <div>
+                  <label class="settings-label">Metode Kas</label>
+                  <select id="expense-pay-method" class="settings-input">
+                    <option value="cash">Tunai (Kas Kasir)</option>
+                    <option value="transfer">Transfer Bank</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="settings-label">Tanggal Transaksi</label>
+                  <input type="date" id="expense-date" class="settings-input">
+                </div>
+              </div>
+
+              <div style="margin-bottom:16px;">
+                <label class="settings-label">Keterangan / Keperluan <span style="color:var(--danger)">*</span></label>
+                <textarea id="expense-desc" class="settings-input" rows="2" placeholder="Contoh: Beli pulsa listrik toko, konsumsi, kantong kresek" required></textarea>
+              </div>
+
+              <button type="submit" id="btn-submit-expense" class="btn-primary-action" style="margin-top:0;">
+                ✓ Simpan Pengeluaran Manual
+              </button>
+            </form>
+          </div>
         </div>
       </section>
 
@@ -637,26 +971,46 @@
 
       <!-- Sidebar Menu Navigation -->
       <div class="sidebar-menu">
-        <div class="sidebar-section-title">MENU UTAMA</div>
+        <div class="sidebar-section-title">TRANSAKSI</div>
         <div class="sidebar-nav-item active" data-target="view-pos">
           <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
           <span>Kasir (POS)</span>
         </div>
         <div class="sidebar-nav-item" data-target="view-history">
           <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-          <span>Riwayat Transaksi</span>
+          <span>Riwayat Penjualan</span>
         </div>
+        <div class="sidebar-nav-item" data-target="view-purchases">
+          <svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+          <span>Transaksi Pembelian</span>
+        </div>
+
+        <div class="sidebar-section-title">INVENTORY</div>
         <div class="sidebar-nav-item" data-target="view-inventory">
           <svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
-          <span>Katalog & Stok</span>
+          <span>Data Barang</span>
+        </div>
+        <div class="sidebar-nav-item" data-target="view-add-item">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
+          <span>Tambah Barang</span>
         </div>
         <div class="sidebar-nav-item" data-target="view-stock-opname">
           <svg viewBox="0 0 24 24"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect><path d="M9 14l2 2 4-4"></path></svg>
           <span>Stok Opname</span>
         </div>
+
+        <div class="sidebar-section-title">KEUANGAN</div>
         <div class="sidebar-nav-item" data-target="view-financial-report">
           <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
           <span>Laporan Keuangan</span>
+        </div>
+        <div class="sidebar-nav-item" data-target="view-manual-income">
+          <svg viewBox="0 0 24 24"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>
+          <span>Pemasukan Manual</span>
+        </div>
+        <div class="sidebar-nav-item" data-target="view-manual-expense">
+          <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
+          <span>Pengeluaran Manual</span>
         </div>
 
         <div class="sidebar-section-title">SETELAN</div>

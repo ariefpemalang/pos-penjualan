@@ -1,28 +1,28 @@
-/* AR Service - Mobile POS Theme */
+/* AR Service - Mobile POS Theme (Warna Sejuk & Eye-Friendly) */
 :root {
-  --primary: #D4A017;
-  --primary-light: #F6CE55;
-  --primary-dark: #9C6B03;
-  --primary-glow: rgba(212, 160, 23, 0.25);
+  --primary: #C5A059;
+  --primary-light: #DFC07A;
+  --primary-dark: #8C6D32;
+  --primary-glow: rgba(197, 160, 89, 0.15);
   
-  --bg-main: #0E121A;
-  --bg-card: #171C26;
-  --bg-surface: #1F2633;
-  --bg-elevated: #283142;
+  --bg-main: #0F141C;
+  --bg-card: #18202C;
+  --bg-surface: #222C3D;
+  --bg-elevated: #2D3A4F;
   
-  --text-main: #F9FAFB;
-  --text-secondary: #D1D5DB;
-  --text-muted: #9CA3AF;
+  --text-main: #F1F5F9;
+  --text-secondary: #CBD5E1;
+  --text-muted: #94A3B8;
   
   --border-subtle: rgba(255, 255, 255, 0.08);
-  --border-gold: rgba(212, 160, 23, 0.35);
+  --border-gold: rgba(197, 160, 89, 0.3);
   
   --success: #10B981;
   --success-bg: rgba(16, 185, 129, 0.15);
   --danger: #EF4444;
   --danger-bg: rgba(239, 68, 68, 0.15);
   --warning: #F59E0B;
-  --info: #3B82F6;
+  --info: #38BDF8;
 
   --radius-sm: 8px;
   --radius-md: 14px;
@@ -32,54 +32,113 @@
   --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.2);
   --shadow-md: 0 4px 14px rgba(0, 0, 0, 0.35);
-  --shadow-gold: 0 4px 16px rgba(212, 160, 23, 0.25);
+  --shadow-gold: 0 4px 16px rgba(197, 160, 89, 0.2);
 
   --safe-bottom: env(safe-area-inset-bottom, 0px);
 }
 
-/* Theme: Midnight Blue */
+/* Theme: Midnight Blue (Sejuk & Tenang) */
 [data-theme="midnight-blue"] {
-  --primary: #3B82F6;
-  --primary-light: #60A5FA;
-  --primary-dark: #1D4ED8;
-  --primary-glow: rgba(59, 130, 246, 0.25);
-  --bg-main: #0B132B;
-  --bg-card: #1C2541;
-  --bg-surface: #243056;
-  --bg-elevated: #2E3C6B;
-  --border-gold: rgba(59, 130, 246, 0.4);
-  --shadow-gold: 0 4px 16px rgba(59, 130, 246, 0.25);
+  --primary: #0EA5E9;
+  --primary-light: #38BDF8;
+  --primary-dark: #0284C7;
+  --primary-glow: rgba(14, 165, 233, 0.18);
+  --bg-main: #0B1120;
+  --bg-card: #131E32;
+  --bg-surface: #1E2D48;
+  --bg-elevated: #283C5E;
+  --border-gold: rgba(14, 165, 233, 0.3);
+  --shadow-gold: 0 4px 16px rgba(14, 165, 233, 0.2);
 }
 
-/* Theme: Emerald Green */
+/* Theme: Emerald Green (Sejuk Alami / Sage) */
 [data-theme="emerald-green"] {
-  --primary: #10B981;
+  --primary: #059669;
   --primary-light: #34D399;
   --primary-dark: #047857;
-  --primary-glow: rgba(16, 185, 129, 0.25);
-  --bg-main: #062018;
-  --bg-card: #0D3328;
-  --bg-surface: #144738;
-  --bg-elevated: #1B5C49;
-  --border-gold: rgba(16, 185, 129, 0.4);
-  --shadow-gold: 0 4px 16px rgba(16, 185, 129, 0.25);
+  --primary-glow: rgba(5, 150, 105, 0.18);
+  --bg-main: #071510;
+  --bg-card: #0F261F;
+  --bg-surface: #17382E;
+  --bg-elevated: #214C3F;
+  --border-gold: rgba(52, 211, 153, 0.3);
+  --shadow-gold: 0 4px 16px rgba(5, 150, 105, 0.2);
 }
 
-/* Theme: Light Mode */
+/* Theme: Light Mode (Clean, Kontras Jelas, Elegan & Sejuk) */
 [data-theme="light"] {
-  --primary: #B8860B;
-  --primary-light: #996F08;
-  --primary-dark: #7A5706;
-  --primary-glow: rgba(184, 134, 11, 0.2);
-  --bg-main: #F3F4F6;
+  --primary: #0284C7;
+  --primary-light: #0369A1;
+  --primary-dark: #0C4A6E;
+  --primary-glow: rgba(2, 132, 199, 0.12);
+  --bg-main: #F8FAFC;
   --bg-card: #FFFFFF;
-  --bg-surface: #E5E7EB;
-  --bg-elevated: #D1D5DB;
-  --text-main: #111827;
-  --text-secondary: #374151;
-  --text-muted: #6B7280;
-  --border-subtle: rgba(0, 0, 0, 0.1);
-  --border-gold: rgba(184, 134, 11, 0.4);
+  --bg-surface: #F1F5F9;
+  --bg-elevated: #E2E8F0;
+  --text-main: #0F172A;
+  --text-secondary: #334155;
+  --text-muted: #64748B;
+  --border-subtle: #E2E8F0;
+  --border-gold: #CBD5E1;
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.06);
+  --shadow-gold: 0 4px 14px rgba(2, 132, 199, 0.15);
+}
+
+[data-theme="light"] .top-bar,
+[data-theme="light"] .bottom-nav,
+[data-theme="light"] .sidebar {
+  background: #FFFFFF !important;
+  border-color: #E2E8F0 !important;
+}
+
+[data-theme="light"] .product-card,
+[data-theme="light"] .settings-group,
+[data-theme="light"] .inv-item-card,
+[data-theme="light"] .fin-card,
+[data-theme="light"] .history-card {
+  background: #FFFFFF !important;
+  border-color: #E2E8F0 !important;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04) !important;
+}
+
+[data-theme="light"] .search-box input,
+[data-theme="light"] .settings-input,
+[data-theme="light"] input[type="text"],
+[data-theme="light"] input[type="number"],
+[data-theme="light"] input[type="date"],
+[data-theme="light"] select,
+[data-theme="light"] textarea {
+  background: #FFFFFF !important;
+  color: #0F172A !important;
+  border-color: #CBD5E1 !important;
+}
+
+[data-theme="light"] .btn-primary-action {
+  background: linear-gradient(135deg, #0284C7 0%, #0369A1 100%) !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 4px 12px rgba(2, 132, 199, 0.25) !important;
+}
+
+[data-theme="light"] .category-pill {
+  background: #F1F5F9 !important;
+  color: #334155 !important;
+  border-color: #E2E8F0 !important;
+}
+
+[data-theme="light"] .category-pill.active {
+  background: #0284C7 !important;
+  color: #FFFFFF !important;
+  border-color: #0284C7 !important;
+}
+
+[data-theme="light"] .bottom-nav .nav-item.active {
+  color: #0284C7 !important;
+}
+
+[data-theme="light"] .sidebar-nav-item.active {
+  background: rgba(2, 132, 199, 0.08) !important;
+  color: #0284C7 !important;
 }
 
 * {
@@ -1361,29 +1420,9 @@ body {
   padding-top: 8px;
 }
 
-/* Toast */
+/* Toast (Dimatikan sesuai permintaan user agar tidak mengganggu) */
 .toast-box {
-  position: fixed;
-  top: 20px;
-  left: 50%;
-  transform: translateX(-50%) translateY(-100px);
-  background: #1E232E;
-  color: var(--text-main);
-  border: 1px solid var(--border-gold);
-  border-radius: var(--radius-full);
-  padding: 10px 20px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
-  z-index: 200;
-  transition: transform 0.3s cubic-bezier(0.1, 0.9, 0.2, 1);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.toast-box.show {
-  transform: translateX(-50%) translateY(0);
+  display: none !important;
 }
 
 /* Settings Form */
@@ -1796,10 +1835,10 @@ body {
   flex-shrink: 0;
 }
 
-.theme-dot.dark-gold { background: #D4A017; border: 1px solid #F6CE55; }
-.theme-dot.midnight-blue { background: #3B82F6; border: 1px solid #60A5FA; }
-.theme-dot.emerald-green { background: #10B981; border: 1px solid #34D399; }
-.theme-dot.light { background: #F3F4F6; border: 1px solid #9CA3AF; }
+.theme-dot.dark-gold { background: #C5A059; border: 1px solid #DFC07A; }
+.theme-dot.midnight-blue { background: #0EA5E9; border: 1px solid #38BDF8; }
+.theme-dot.emerald-green { background: #059669; border: 1px solid #34D399; }
+.theme-dot.light { background: #FFFFFF; border: 1.5px solid #0284C7; }
 
 .theme-pill-label {
   font-size: 0.8rem;
@@ -1936,4 +1975,146 @@ body {
   background: var(--success-bg);
   color: var(--success);
   border: 1px solid var(--success);
+}
+
+/* Modul-modul Baru (Inventory, Pembelian, Kas Manual) */
+.module-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.module-title {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--primary-light);
+}
+
+.module-sub {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.tab-subnav {
+  display: flex;
+  background: var(--bg-surface);
+  border-radius: var(--radius-md);
+  padding: 4px;
+  gap: 4px;
+  margin-bottom: 14px;
+  border: 1px solid var(--border-subtle);
+}
+
+.tab-subnav-btn {
+  flex: 1;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.tab-subnav-btn.active {
+  background: var(--bg-card);
+  color: var(--primary-light);
+  box-shadow: var(--shadow-sm);
+}
+
+.entry-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  margin-bottom: 10px;
+  box-shadow: var(--shadow-sm);
+}
+
+.entry-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 6px;
+}
+
+.entry-title {
+  font-weight: 800;
+  font-size: 0.92rem;
+  color: var(--text-main);
+}
+
+.entry-meta {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.entry-amount {
+  font-weight: 900;
+  font-size: 1rem;
+}
+
+.entry-amount.income {
+  color: var(--success);
+}
+
+.entry-amount.expense {
+  color: var(--danger);
+}
+
+.inline-msg-box {
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 0.8rem;
+  margin-bottom: 12px;
+  display: none;
+}
+
+.inline-msg-box.success {
+  background: var(--success-bg);
+  border: 1px solid var(--success);
+  color: var(--success);
+  display: block;
+}
+
+.inline-msg-box.error {
+  background: var(--danger-bg);
+  border: 1px solid var(--danger);
+  color: var(--danger);
+  display: block;
+}
+
+.badge-tag {
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  display: inline-block;
+}
+
+.badge-tag.primary {
+  background: var(--primary-glow);
+  color: var(--primary-light);
+  border: 1px solid var(--border-gold);
+}
+
+.badge-tag.success {
+  background: var(--success-bg);
+  color: var(--success);
+}
+
+.badge-tag.danger {
+  background: var(--danger-bg);
+  color: var(--danger);
 }
