@@ -1715,101 +1715,170 @@
 
     const buffer = [];
     const push = (...bytes) => buffer.push(...bytes);
-    const pushText = (str) => {
-      const b = encoder.encode(str + '\n');
-      b.forEach(x => buffer.push(x));
+
+    // Pembersih ASCII murni agar printer thermal tidak menghasilkan karakter rusak (seperti õ£a)
+    const cleanAscii = (str) => {
+      if (!str) return '';
+      return String(str)
+        .replace(/[\u2018\u2019]/g, "'")
+        .replace(/[\u201C\u201D]/g, '"')
+        .replace(/[\u2013\u2014]/g, '-')
+        .replace(/\u2026/g, '...')
+        .replace(/[^\x20-\x7E]/g, '') // Hapus simbol non-ASCII
+        .trim();
     };
 
-    // Initialize printer
+    // Word wrapper cerdas agar kata tidak terpenggal sembarangan di tepi kertas
+    const wrapWords = (str, maxLen) => {
+      if (!str) return [];
+      const clean = cleanAscii(str);
+      const words = clean.split(/\s+/);
+      const lines = [];
+      let cur = '';
+      for (const w of words) {
+        if (!w) continue;
+        if (!cur) {
+          cur = w;
+        } else if ((cur + ' ' + w).length <= maxLen) {
+          cur += ' ' + w;
+        } else {
+          lines.push(cur);
+          cur = w;
+        }
+      }
+      if (cur) lines.push(cur);
+      return lines;
+    };
+
+    // Cetak baris dengan feed ekstra terjamin agar antar baris lega dan tidak pernah nempel
+    const pushLine = (str, extraDots = 14) => {
+      const clean = cleanAscii(str);
+      const b = encoder.encode(clean + '\n');
+      b.forEach(x => buffer.push(x));
+      if (extraDots > 0) {
+        push(ESC, 0x4A, extraDots); // Physical stepper motor micro-feed
+      }
+    };
+
+    const pushFeed = (dots = 16) => {
+      push(ESC, 0x4A, dots);
+    };
+
+    // 1. Initialize printer
     push(ESC, 0x40);
 
-    // Set comfortable line spacing (40 dots instead of default 24 dots)
-    push(ESC, 0x33, 52);
+    // 2. Set line spacing 60 dots (~7.5mm per baris) untuk printer yang mendukung ESC 3
+    push(ESC, 0x33, 60);
 
-    // Center header
-    push(ESC, 0x61, 1); // Center align
+    // 3. Header Toko (Center Align)
+    push(ESC, 0x61, 1);
 
-    // Huruf Judul AR Cell Sangat Besar (Double Height + Double Width + Bold)
-    push(GS, 0x21, 0x11); // Double width & Double height
-    push(ESC, 0x45, 1);   // Bold ON
-    pushText(tpl.shopName || 'AR Cell');
-    push(GS, 0x21, 0x00); // Normal size
-    push(ESC, 0x45, 0);   // Bold OFF
-    pushText(''); // Spasi baris agar tidak mepet
+    // Nama Toko: Double Width + Double Height + Bold
+    push(GS, 0x21, 0x11);
+    push(ESC, 0x45, 1);
+    pushLine(tpl.shopName || 'AR Cell', 18);
+    push(GS, 0x21, 0x00);
+    push(ESC, 0x45, 0);
+    pushFeed(14); // Jeda vertikal setelah nama toko
 
+    // Slogan toko
     if (tpl.slogan) {
       push(ESC, 0x45, 1);
-      pushText(tpl.slogan);
+      wrapWords(tpl.slogan, lineWidth).forEach(l => pushLine(l, 12));
       push(ESC, 0x45, 0);
     }
-    if (tpl.address) pushText(tpl.address);
-    if (tpl.phone) pushText('Telp/WA: ' + tpl.phone);
-    pushText('='.repeat(lineWidth));
 
-    // Left align meta
+    // Alamat toko (dibagi rapi per kata, tidak patah di tengah kata)
+    if (tpl.address) {
+      wrapWords(tpl.address, lineWidth).forEach(l => pushLine(l, 12));
+    }
+
+    // Telepon toko
+    if (tpl.phone) {
+      pushLine('Telp/WA: ' + cleanAscii(tpl.phone), 12);
+    }
+    pushFeed(8);
+    pushLine('='.repeat(lineWidth), 14);
+
+    // 4. Meta Transaksi (Left Align)
     push(ESC, 0x61, 0);
-    pushText(`No.Nota: ${tx.invoice_no || tx.code || '-'}`);
-    pushText(`Waktu  : ${new Date().toLocaleString('id-ID')}`);
-    pushText(`Kasir  : ${tx.cashier || state.user?.name || 'Kasir'}`);
-    pushText(`Cust   : ${tx.customer || 'Pelanggan Umum'}`);
-    pushText('-'.repeat(lineWidth));
+    pushLine(`No.Nota: ${cleanAscii(tx.invoice_no || tx.code || '-')}`, 12);
+    pushLine(`Waktu  : ${new Date().toLocaleString('id-ID')}`, 12);
+    pushLine(`Kasir  : ${cleanAscii(tx.cashier || state.user?.name || 'Kasir')}`, 12);
+    pushLine(`Cust   : ${cleanAscii(tx.customer || 'Pelanggan Umum')}`, 12);
+    pushFeed(6);
+    pushLine('-'.repeat(lineWidth), 14);
 
-    // Items
-    (tx.items || []).forEach((it, idx) => {
-      const name = (it.name || it.item?.name || 'Barang').substring(0, lineWidth);
-      push(ESC, 0x45, 1);
-      pushText(name);
-      push(ESC, 0x45, 0);
-      const qtyPrice = ` ${it.qty || it.quantity} x ${formatRupiah(it.price || it.unit_price)}`;
-      const subtotal = formatRupiah((it.price || it.unit_price) * (it.qty || it.quantity));
-      const spaces = Math.max(1, lineWidth - qtyPrice.length - subtotal.length);
-      pushText(qtyPrice + ' '.repeat(spaces) + subtotal);
-      if (idx < (tx.items.length - 1)) {
-        pushText(''); // Spasi antar barang
-      }
-    });
+    // 5. Items Belanja
+    const items = tx.items || [];
+    if (items.length > 0) {
+      items.forEach((it, idx) => {
+        const itemName = cleanAscii(it.name || it.item?.name || 'Barang');
+        wrapWords(itemName, lineWidth).forEach(nl => {
+          push(ESC, 0x45, 1); // Bold nama barang
+          pushLine(nl, 10);
+          push(ESC, 0x45, 0);
+        });
+        const qtyPrice = `  ${it.qty || it.quantity} x ${formatRupiah(it.price || it.unit_price)}`;
+        const subtotal = formatRupiah((it.price || it.unit_price) * (it.qty || it.quantity));
+        const spaces = Math.max(1, lineWidth - qtyPrice.length - subtotal.length);
+        pushLine(qtyPrice + ' '.repeat(spaces) + subtotal, 14);
+        if (idx < (items.length - 1)) {
+          pushFeed(10); // Jeda antar barang
+        }
+      });
+      pushFeed(8);
+      pushLine('='.repeat(lineWidth), 14);
+    }
 
-    pushText('='.repeat(lineWidth));
-
-    // Totals - Double Height & Bold
-    push(ESC, 0x45, 1);
-    push(GS, 0x21, 0x01); // Double height for grand total
+    // 6. Totals Section (Grand Total, Bayar, Kembali)
+    push(ESC, 0x45, 1); // Bold ON
+    push(GS, 0x21, 0x01); // Double height untuk TOTAL
     const totalLabel = 'TOTAL';
     const totalVal = formatRupiah(tx.total_amount);
-    const totalSpaces = Math.max(1, (lineWidth / 2) - totalLabel.length - totalVal.length);
-    pushText(totalLabel + ' '.repeat(Math.max(1, totalSpaces)) + totalVal);
+    const totalSpaces = Math.max(1, lineWidth - totalLabel.length - totalVal.length);
+    pushLine(totalLabel + ' '.repeat(totalSpaces) + totalVal, 16);
     push(GS, 0x21, 0x00); // Normal size
-    push(ESC, 0x45, 0);
+    push(ESC, 0x45, 0); // Bold OFF
+    pushFeed(12); // Ruang nafas vertikal setelah huruf TOTAL
 
-    const payLabel = `BAYAR (${(tx.payment_method || 'TUNAI').toUpperCase()})`;
+    const payLabel = `BAYAR (${cleanAscii(tx.payment_method || 'TUNAI').toUpperCase()})`;
     const payVal = formatRupiah(tx.paid_amount);
     const paySpaces = Math.max(1, lineWidth - payLabel.length - payVal.length);
-    pushText(payLabel + ' '.repeat(paySpaces) + payVal);
+    pushLine(payLabel + ' '.repeat(paySpaces) + payVal, 12);
 
     const changeLabel = 'KEMBALI';
     const changeVal = formatRupiah(tx.change || 0);
     const changeSpaces = Math.max(1, lineWidth - changeLabel.length - changeVal.length);
-    pushText(changeLabel + ' '.repeat(changeSpaces) + changeVal);
-    pushText('='.repeat(lineWidth));
+    pushLine(changeLabel + ' '.repeat(changeSpaces) + changeVal, 14);
+    pushFeed(8);
+    pushLine('='.repeat(lineWidth), 16);
 
-    // Footer - Latin Prayer Header & Message
+    // 7. Footer / Doa (Center Align)
     push(ESC, 0x61, 1);
-    pushText('');
-    push(ESC, 0x45, 1);
-    pushText('JAZAKUMULLAH KHAIRAN');
+    pushFeed(14); // Jeda sebelum doa
+    push(ESC, 0x45, 1); // Bold
+    pushLine('JAZAKUMULLAH KHAIRAN', 16); // Murni teks tanpa simbol
     push(ESC, 0x45, 0);
-    pushText('');
+    pushFeed(10);
 
-    const footerLines = (tpl.footer || 'Terima Kasih Sudah Belanja ditempat Kami.\nSemoga Rezekinya Lancar, Aamiin...').split('\n');
-    footerLines.forEach(l => {
-      if (l.trim()) pushText(l.trim());
+    const rawFooter = tpl.footer || 'Terima Kasih Sudah Belanja ditempat Kami.\nSemoga Rezekinya Lancar, Aamiin...';
+    const footerParas = rawFooter.split('\n');
+    footerParas.forEach(p => {
+      const pClean = cleanAscii(p);
+      if (!pClean) return;
+      wrapWords(pClean, lineWidth).forEach(l => {
+        pushLine(l, 12);
+      });
+      pushFeed(8); // Jeda kecil antar alinea doa
     });
-    pushText('');
-    push(ESC, 0x61, 0);
 
-    // Feed lines & Cut
-    push(ESC, 0x64, 4);
-    push(GS, 0x56, 66, 0);
+    push(ESC, 0x61, 0); // Left align
+
+    // 8. Feed and Cut
+    pushFeed(24);
+    push(ESC, 0x64, 4); // Feed 4 baris sebelum potong kertas
+    push(GS, 0x56, 66, 0); // Cut paper
 
     return new Uint8Array(buffer);
   }
