@@ -2174,6 +2174,8 @@
   async function initPurchaseFormOptions() {
     const supplierSel = document.getElementById('purchase-supplier');
     const itemSel = document.getElementById('purchase-item-select');
+    const itemSearch = document.getElementById('purchase-item-search');
+    const itemInfo = document.getElementById('purchase-item-info');
     const dateInp = document.getElementById('purchase-date');
     if (dateInp && !dateInp.value) {
       dateInp.value = new Date().toISOString().split('T')[0];
@@ -2190,12 +2192,62 @@
           suppliersCache.map(s => `<option value="${s.id}">${s.name} ${s.phone ? `(${s.phone})` : ''}</option>`).join('');
       }
 
-      if (itemSel && state.products) {
+      if (!state.products || state.products.length === 0) {
+        const prodRes = await apiRequest('/items');
+        state.products = prodRes?.data?.items || prodRes?.data || [];
+      }
+
+      function populateItems(filterText = '') {
+        if (!itemSel) return;
+        const q = filterText.toLowerCase().trim();
+        let list = state.products || [];
+        if (q) {
+          list = list.filter(p => 
+            (p.name && p.name.toLowerCase().includes(q)) ||
+            (p.code && p.code.toLowerCase().includes(q))
+          );
+        }
         itemSel.innerHTML = '<option value="">-- Pilih Barang Toko --</option>' +
-          state.products.map(p => `<option value="${p.id}" data-cost="${p.purchase_price || 0}">${p.name} (Stok: ${p.stock || 0})</option>`).join('');
+          list.map(p => `<option value="${p.id}" data-cost="${p.purchase_price || 0}" data-stock="${p.stock || 0}" data-code="${p.code || ''}">${p.name} (Stok: ${p.stock || 0})</option>`).join('');
+        
+        // Auto select jika hasil pencarian tersisa 1 barang
+        if (q && list.length === 1) {
+          itemSel.selectedIndex = 1;
+          onItemSelected();
+        }
+      }
+
+      function onItemSelected() {
+        if (!itemSel) return;
+        const opt = itemSel.options[itemSel.selectedIndex];
+        if (opt && opt.value) {
+          const defaultCost = parseFloat(opt.dataset?.cost) || 0;
+          const stock = opt.dataset?.stock || 0;
+          const code = opt.dataset?.code || '';
+          const purchaseItemPrice = document.getElementById('purchase-item-price');
+          if (purchaseItemPrice) {
+            purchaseItemPrice.value = defaultCost > 0 ? defaultCost : '';
+          }
+          if (itemInfo) {
+            itemInfo.style.display = 'block';
+            itemInfo.textContent = `✓ Terpilih: ${opt.text} • Kode: ${code || '-'} • Modal: ${formatRupiah(defaultCost)}`;
+          }
+          updatePurchaseCalc();
+        } else {
+          if (itemInfo) itemInfo.style.display = 'none';
+        }
+      }
+
+      window.onPurchaseItemSelected = onItemSelected;
+      populateItems();
+
+      if (itemSearch) {
+        itemSearch.oninput = (e) => {
+          populateItems(e.target.value);
+        };
       }
     } catch (err) {
-      console.warn('Gagal memuat opsi supplier:', err);
+      console.warn('Gagal memuat opsi supplier/barang:', err);
     }
   }
 
@@ -2948,12 +3000,16 @@
 
     if (purchaseItemSelect) {
       purchaseItemSelect.addEventListener('change', () => {
-        const selectedOpt = purchaseItemSelect.options[purchaseItemSelect.selectedIndex];
-        const defaultCost = selectedOpt?.dataset?.cost || 0;
-        if (purchaseItemPrice && defaultCost > 0) {
-          purchaseItemPrice.value = defaultCost;
+        if (window.onPurchaseItemSelected) {
+          window.onPurchaseItemSelected();
+        } else {
+          const selectedOpt = purchaseItemSelect.options[purchaseItemSelect.selectedIndex];
+          const defaultCost = selectedOpt?.dataset?.cost || 0;
+          if (purchaseItemPrice && defaultCost > 0) {
+            purchaseItemPrice.value = defaultCost;
+          }
+          updatePurchaseCalc();
         }
-        updatePurchaseCalc();
       });
     }
 

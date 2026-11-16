@@ -247,35 +247,104 @@ html {
   font-weight: 800 !important;
 }
 
-[data-theme="emerald"] .sidebar,
-[data-theme="ocean"] .sidebar,
-[data-theme="sage"] .sidebar,
-[data-theme="earth"] .sidebar,
-[data-theme="gold"] .sidebar,
-[data-theme="light"] .sidebar {
-  background: #FFFFFF !important;
-  border-right: 1px solid #CBD5E1 !important;
+/* Sidebar Drawer: Selalu Latar Gelap & Font PUTIH di Semua Tema */
+.sidebar-drawer,
+[data-theme="emerald"] .sidebar-drawer,
+[data-theme="ocean"] .sidebar-drawer,
+[data-theme="sage"] .sidebar-drawer,
+[data-theme="earth"] .sidebar-drawer,
+[data-theme="gold"] .sidebar-drawer,
+[data-theme="light"] .sidebar-drawer {
+  background: #111827 !important;
+  color: #FFFFFF !important;
+  border-right: 1px solid #1E293B !important;
 }
 
+.sidebar-header,
+[data-theme="emerald"] .sidebar-header,
+[data-theme="ocean"] .sidebar-header,
+[data-theme="sage"] .sidebar-header,
+[data-theme="earth"] .sidebar-header,
+[data-theme="gold"] .sidebar-header,
+[data-theme="light"] .sidebar-header {
+  background: #0F172A !important;
+  border-bottom: 1px solid #1E293B !important;
+  color: #FFFFFF !important;
+}
+
+#sidebar-user-name,
+[data-theme="emerald"] #sidebar-user-name,
+[data-theme="ocean"] #sidebar-user-name,
+[data-theme="sage"] #sidebar-user-name,
+[data-theme="earth"] #sidebar-user-name,
+[data-theme="gold"] #sidebar-user-name,
+[data-theme="light"] #sidebar-user-name {
+  color: #FFFFFF !important;
+  font-weight: 800 !important;
+}
+
+#sidebar-user-email,
+[data-theme="emerald"] #sidebar-user-email,
+[data-theme="ocean"] #sidebar-user-email,
+[data-theme="sage"] #sidebar-user-email,
+[data-theme="earth"] #sidebar-user-email,
+[data-theme="gold"] #sidebar-user-email,
+[data-theme="light"] #sidebar-user-email {
+  color: #94A3B8 !important;
+}
+
+.sidebar-section-title,
+[data-theme="emerald"] .sidebar-section-title,
+[data-theme="ocean"] .sidebar-section-title,
+[data-theme="sage"] .sidebar-section-title,
+[data-theme="earth"] .sidebar-section-title,
+[data-theme="gold"] .sidebar-section-title,
+[data-theme="light"] .sidebar-section-title {
+  color: #94A3B8 !important;
+  font-weight: 700 !important;
+}
+
+.sidebar-nav-item,
 [data-theme="emerald"] .sidebar-nav-item,
 [data-theme="ocean"] .sidebar-nav-item,
 [data-theme="sage"] .sidebar-nav-item,
 [data-theme="earth"] .sidebar-nav-item,
 [data-theme="gold"] .sidebar-nav-item,
 [data-theme="light"] .sidebar-nav-item {
-  color: #000000 !important;
+  color: #FFFFFF !important;
   font-weight: 600 !important;
 }
 
+.sidebar-nav-item svg,
+[data-theme="emerald"] .sidebar-nav-item svg,
+[data-theme="ocean"] .sidebar-nav-item svg,
+[data-theme="sage"] .sidebar-nav-item svg,
+[data-theme="earth"] .sidebar-nav-item svg,
+[data-theme="gold"] .sidebar-nav-item svg,
+[data-theme="light"] .sidebar-nav-item svg {
+  stroke: #FFFFFF !important;
+}
+
+.sidebar-nav-item.active,
 [data-theme="emerald"] .sidebar-nav-item.active,
 [data-theme="ocean"] .sidebar-nav-item.active,
 [data-theme="sage"] .sidebar-nav-item.active,
 [data-theme="earth"] .sidebar-nav-item.active,
 [data-theme="gold"] .sidebar-nav-item.active,
 [data-theme="light"] .sidebar-nav-item.active {
-  background: var(--bg-surface) !important;
-  color: var(--primary) !important;
+  background: #FFFFFF !important;
+  color: #0F172A !important;
   font-weight: 800 !important;
+}
+
+.sidebar-nav-item.active svg,
+[data-theme="emerald"] .sidebar-nav-item.active svg,
+[data-theme="ocean"] .sidebar-nav-item.active svg,
+[data-theme="sage"] .sidebar-nav-item.active svg,
+[data-theme="earth"] .sidebar-nav-item.active svg,
+[data-theme="gold"] .sidebar-nav-item.active svg,
+[data-theme="light"] .sidebar-nav-item.active svg {
+  stroke: #0F172A !important;
 }
 
 /* Card Produk Kasir (Mode Terang: TULISAN HITAM & STOK JELAS) */
@@ -758,8 +827,132 @@ html {
 [data-theme="light"] .floating-cart-bar {
   background: var(--header-bg) !important;
   color: #FFFFFF !important;
-  border: 1px solid rgba(255, 255, 255, 0.15) !important;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35) !important;
+}
+
+/* Label Total Belanja di Floating Bar */
+.cart-bar-total-label,
+[data-theme="emerald"] .cart-bar-total-label,
+[data-theme="ocean"] .cart-bar-total-label,
+[data-theme="sage"] .cart-bar-total-label,
+[data-theme="earth"] .cart-bar-total-label,
+[data-theme="gold"] .cart-bar-total-label,
+[data-theme="light"] .cart-bar-total-label {
+  color: #E2E8F0 !important;
+  font-size: 0.72rem !important;
+  font-weight: 600 !important;
+}
+
+/* Harga di sebelah 'Lihat Keranjang': PUTIH SOLID & TEBAL */
+.cart-bar-total-val,
+#cart-total-bar,
+[data-theme="emerald"] .cart-bar-total-val,
+[data-theme="ocean"] .cart-bar-total-val,
+[data-theme="sage"] .cart-bar-total-val,
+[data-theme="earth"] .cart-bar-total-val,
+[data-theme="gold"] .cart-bar-total-val,
+[data-theme="light"] .cart-bar-total-val,
+[data-theme="emerald"] #cart-total-bar,
+[data-theme="ocean"] #cart-total-bar,
+[data-theme="sage"] #cart-total-bar,
+[data-theme="earth"] #cart-total-bar,
+[data-theme="gold"] #cart-total-bar,
+[data-theme="light"] #cart-total-bar {
+  color: #FFFFFF !important;
+  font-weight: 900 !important;
+  font-size: 1.15rem !important;
+}
+
+/* Tombol 'Lihat Keranjang': Sangat Kontras dengan Background Bar */
+.btn-open-cart,
+[data-theme="emerald"] .btn-open-cart,
+[data-theme="ocean"] .btn-open-cart,
+[data-theme="sage"] .btn-open-cart,
+[data-theme="earth"] .btn-open-cart,
+[data-theme="gold"] .btn-open-cart,
+[data-theme="light"] .btn-open-cart {
+  background: #FFFFFF !important;
+  color: #0F172A !important;
+  font-weight: 800 !important;
+  font-size: 0.88rem !important;
+  padding: 8px 16px !important;
+  border-radius: var(--radius-full) !important;
+  border: none !important;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.25) !important;
+}
+
+.btn-open-cart svg,
+[data-theme="emerald"] .btn-open-cart svg,
+[data-theme="ocean"] .btn-open-cart svg,
+[data-theme="sage"] .btn-open-cart svg,
+[data-theme="earth"] .btn-open-cart svg,
+[data-theme="gold"] .btn-open-cart svg,
+[data-theme="light"] .btn-open-cart svg {
+  stroke: #0F172A !important;
+}
+
+/* Subtotal & Total Bayar di Cart Sheet Modal (sebelum 'Lanjut ke Pembayaran'): PUTIH TEGAS */
+.cart-footer,
+[data-theme="emerald"] .cart-footer,
+[data-theme="ocean"] .cart-footer,
+[data-theme="sage"] .cart-footer,
+[data-theme="earth"] .cart-footer,
+[data-theme="gold"] .cart-footer,
+[data-theme="light"] .cart-footer {
+  background: #111827 !important;
+  border-top: 1px solid #1E293B !important;
+}
+
+.cart-footer .bill-row,
+.cart-footer .bill-row span,
+.cart-footer #bill-subtotal,
+[data-theme="emerald"] .cart-footer .bill-row,
+[data-theme="emerald"] .cart-footer .bill-row span,
+[data-theme="emerald"] .cart-footer #bill-subtotal,
+[data-theme="ocean"] .cart-footer .bill-row,
+[data-theme="ocean"] .cart-footer .bill-row span,
+[data-theme="ocean"] .cart-footer #bill-subtotal,
+[data-theme="sage"] .cart-footer .bill-row,
+[data-theme="sage"] .cart-footer .bill-row span,
+[data-theme="sage"] .cart-footer #bill-subtotal,
+[data-theme="earth"] .cart-footer .bill-row,
+[data-theme="earth"] .cart-footer .bill-row span,
+[data-theme="earth"] .cart-footer #bill-subtotal,
+[data-theme="gold"] .cart-footer .bill-row,
+[data-theme="gold"] .cart-footer .bill-row span,
+[data-theme="gold"] .cart-footer #bill-subtotal,
+[data-theme="light"] .cart-footer .bill-row,
+[data-theme="light"] .cart-footer .bill-row span,
+[data-theme="light"] .cart-footer #bill-subtotal {
+  color: #FFFFFF !important;
+  font-weight: 700 !important;
+}
+
+.cart-footer .bill-row.total,
+.cart-footer .bill-row.total span,
+.cart-footer #bill-total,
+[data-theme="emerald"] .cart-footer .bill-row.total,
+[data-theme="emerald"] .cart-footer .bill-row.total span,
+[data-theme="emerald"] .cart-footer #bill-total,
+[data-theme="ocean"] .cart-footer .bill-row.total,
+[data-theme="ocean"] .cart-footer .bill-row.total span,
+[data-theme="ocean"] .cart-footer #bill-total,
+[data-theme="sage"] .cart-footer .bill-row.total,
+[data-theme="sage"] .cart-footer .bill-row.total span,
+[data-theme="sage"] .cart-footer #bill-total,
+[data-theme="earth"] .cart-footer .bill-row.total,
+[data-theme="earth"] .cart-footer .bill-row.total span,
+[data-theme="earth"] .cart-footer #bill-total,
+[data-theme="gold"] .cart-footer .bill-row.total,
+[data-theme="gold"] .cart-footer .bill-row.total span,
+[data-theme="gold"] .cart-footer #bill-total,
+[data-theme="light"] .cart-footer .bill-row.total,
+[data-theme="light"] .cart-footer .bill-row.total span,
+[data-theme="light"] .cart-footer #bill-total {
+  color: #FFFFFF !important;
+  font-weight: 900 !important;
+  font-size: 1.25rem !important;
 }
 
 * {
