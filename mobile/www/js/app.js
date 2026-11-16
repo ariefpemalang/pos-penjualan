@@ -24,7 +24,19 @@
   const DEFAULT_SERVER_URL = autoDetectedUrl;
   const DEFAULT_API_KEY = 'pos-service-mobile-dev-key';
 
-  let savedServerUrl = localStorage.getItem('ar_pos_server_url') || DEFAULT_SERVER_URL;
+  // Deteksi cerdas: jika aplikasi dibuka melalui browser Web lokal (misal: 192.168.1.40 atau localhost),
+  // otomatis gunakan URL server web lokal tersebut agar data selalu sinkron dengan Web!
+  const isLocalWebAccess = window.location.protocol.startsWith('http') && 
+    !window.location.hostname.includes('arcell.store');
+
+  let savedServerUrl = localStorage.getItem('ar_pos_server_url');
+  if (isLocalWebAccess && (!savedServerUrl || savedServerUrl.includes('arcell.store'))) {
+    savedServerUrl = autoDetectedUrl;
+    localStorage.setItem('ar_pos_server_url', savedServerUrl);
+  } else if (!savedServerUrl) {
+    savedServerUrl = DEFAULT_SERVER_URL;
+    localStorage.setItem('ar_pos_server_url', savedServerUrl);
+  }
 
   const DEFAULT_RECEIPT_TEMPLATE = {
     shopName: 'AR Cell',
@@ -61,6 +73,7 @@
     activeCategory: '',
     searchQuery: '',
     cart: [],
+    purchaseCart: [],
     selectedCustomer: { id: null, name: 'Pelanggan Umum', phone: '' },
     paymentMethod: 'cash',
     cashReceived: 0,
@@ -129,6 +142,24 @@
 
   function hideServerModal() {
     const modal = document.getElementById('server-modal');
+    if (modal) modal.classList.remove('open');
+  }
+
+  function showStockEmptyPopup(productName) {
+    const modal = document.getElementById('modal-stock-empty');
+    const msg = document.getElementById('modal-stock-empty-msg');
+    if (msg) {
+      msg.innerHTML = `Barang <strong>"${productName}"</strong> stoknya habis (0) sehingga tidak dapat dimasukkan ke keranjang kasir.`;
+    }
+    if (modal) {
+      modal.classList.add('open');
+    } else {
+      alert(`⚠️ STOK HABIS\n\nBarang "${productName}" stoknya kosong (0), tidak dapat dimasukkan ke keranjang.`);
+    }
+  }
+
+  function hideStockEmptyPopup() {
+    const modal = document.getElementById('modal-stock-empty');
     if (modal) modal.classList.remove('open');
   }
 
@@ -277,6 +308,9 @@
         sbServer.textContent = state.serverUrl;
       }
     }
+    const loginDisplay = document.getElementById('login-display-server');
+    if (loginDisplay) loginDisplay.textContent = state.serverUrl;
+
     const settingServerUrl = document.getElementById('setting-server-url');
     if (settingServerUrl) settingServerUrl.value = state.serverUrl || DEFAULT_SERVER_URL;
   }
@@ -514,10 +548,20 @@
 
   // --- Cart Operations ---
   function addToCart(product) {
-    vibrateTouch(30);
+    const stock = Number(product.stock !== undefined && product.stock !== null ? product.stock : 999);
+    if (stock <= 0) {
+      vibrateTouch(60);
+      showStockEmptyPopup(product.name);
+      return;
+    }
 
     const existingIndex = state.cart.findIndex(i => i.id === product.id);
     if (existingIndex > -1) {
+      if (state.cart[existingIndex].qty >= stock) {
+        vibrateTouch(40);
+        showToast(`⚠️ Stok "${product.name}" hanya tersedia ${stock}!`);
+        return;
+      }
       state.cart[existingIndex].qty += 1;
     } else {
       state.cart.push({
@@ -526,10 +570,11 @@
         code: product.code,
         price: Number(product.selling_price || product.price || 0),
         qty: 1,
-        stock: Number(product.stock || 999)
+        stock: stock
       });
     }
 
+    vibrateTouch(30);
     updateCartUI(product.id);
     showToast(`Ditambah: ${product.name}`);
   }
@@ -537,9 +582,14 @@
   function changeCartQty(index, delta) {
     vibrateTouch(20);
     const item = state.cart[index];
-    const itemId = item ? item.id : null;
-    state.cart[index].qty += delta;
-    if (state.cart[index].qty <= 0) {
+    if (!item) return;
+    const itemId = item.id;
+    if (delta > 0 && item.stock !== undefined && (item.qty + delta) > item.stock) {
+      showToast(`⚠️ Jumlah melebihi stok yang tersedia (${item.stock})`);
+      return;
+    }
+    item.qty += delta;
+    if (item.qty <= 0) {
       state.cart.splice(index, 1);
     }
     updateCartUI(itemId);
@@ -2195,13 +2245,80 @@
     }).join('');
   }
 
+  function renderPurchaseItemSelect(items) {
+    const itemSel = document.getElementById('purchase-item-select');
+    if (!itemSel) return;
+    const currentVal = itemSel.value;
+    itemSel.innerHTML = '<option value="">-- Pilih Barang Toko --</option>' +
+      items.map(p => {
+        const cost = p.purchase_price !== undefined ? p.purchase_price : 0;
+        const stock = p.stock !== undefined ? p.stock : 0;
+        const code = p.code || '';
+        return `<option value="${p.id}" data-cost="${cost}" data-stock="${stock}" data-code="${code}" data-name="${p.name}">${code ? code + ' — ' : ''}${p.name} (Stok: ${stock} | Modal: ${formatRupiah(cost)})</option>`;
+      }).join('');
+    if (currentVal) itemSel.value = currentVal;
+  }
+
+  function renderPurchaseCart() {
+    const container = document.getElementById('purchase-cart-container');
+    const countEl = document.getElementById('purchase-cart-count');
+    if (!container) return;
+
+    if (!state.purchaseCart || state.purchaseCart.length === 0) {
+      container.innerHTML = `
+        <div id="purchase-cart-empty" style="text-align:center; padding:12px; font-size:0.75rem; color:var(--text-muted); background:var(--bg-surface); border-radius:var(--radius-sm); border:1px dashed var(--border-subtle);">
+          Belum ada barang di keranjang. Pilih barang di atas lalu tekan "+ Masukkan ke Keranjang Pembelian".
+        </div>
+      `;
+      if (countEl) countEl.textContent = '0 item';
+      if (typeof window.updatePurchaseCalc === 'function') window.updatePurchaseCalc();
+      return;
+    }
+
+    if (countEl) countEl.textContent = `${state.purchaseCart.length} item`;
+
+    container.innerHTML = state.purchaseCart.map((it, idx) => {
+      const subtotal = it.qty * it.unit_price;
+      return `
+        <div style="display:flex; justify-content:space-between; align-items:center; background:var(--bg-surface); border:1px solid var(--border-subtle); border-radius:var(--radius-sm); padding:10px 12px;">
+          <div>
+            <div style="font-size:0.85rem; font-weight:700; color:var(--text-main);">${it.name}</div>
+            <div style="font-size:0.75rem; color:var(--text-muted); margin-top:2px;">
+              ${it.qty} x ${formatRupiah(it.unit_price)} = <strong style="color:var(--primary-light);">${formatRupiah(subtotal)}</strong>
+            </div>
+          </div>
+          <button type="button" class="btn-remove-p-cart" data-idx="${idx}" style="background:var(--danger-bg); border:1px solid var(--danger); color:var(--danger); border-radius:var(--radius-sm); padding:6px 10px; font-size:0.75rem; cursor:pointer; font-weight:700;">
+            ✕ Hapus
+          </button>
+        </div>
+      `;
+    }).join('');
+
+    container.querySelectorAll('.btn-remove-p-cart').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const idx = parseInt(e.currentTarget.dataset.idx);
+        if (!isNaN(idx) && state.purchaseCart[idx]) {
+          vibrateTouch(20);
+          state.purchaseCart.splice(idx, 1);
+          renderPurchaseCart();
+        }
+      });
+    });
+
+    if (typeof window.updatePurchaseCalc === 'function') window.updatePurchaseCalc();
+  }
+
   async function initPurchaseFormOptions() {
     const supplierSel = document.getElementById('purchase-supplier');
+    const bankSel = document.getElementById('purchase-bank-id');
     const itemSel = document.getElementById('purchase-item-select');
     const itemInfo = document.getElementById('purchase-item-info');
     const dateInp = document.getElementById('purchase-date');
+    const payMethodSel = document.getElementById('purchase-pay-method');
+    const bankWrapper = document.getElementById('purchase-bank-wrapper');
     const purchaseItemQty = document.getElementById('purchase-item-qty');
     const purchaseItemPrice = document.getElementById('purchase-item-price');
+
     if (dateInp && !dateInp.value) {
       dateInp.value = new Date().toISOString().split('T')[0];
     }
@@ -2209,62 +2326,92 @@
       purchaseItemQty.value = 1;
     }
 
+    // Toggle bank select on payment method change
+    if (payMethodSel) {
+      payMethodSel.onchange = () => {
+        if (bankWrapper) {
+          bankWrapper.style.display = payMethodSel.value === 'transfer' ? 'block' : 'none';
+        }
+      };
+      if (bankWrapper) {
+        bankWrapper.style.display = payMethodSel.value === 'transfer' ? 'block' : 'none';
+      }
+    }
+
+    // 1. Tampilkan barang langsung jika sudah ada di memori (instan tanpa tunggu network!)
+    if (state.products && state.products.length > 0) {
+      renderPurchaseItemSelect(state.products);
+    }
+
+    renderPurchaseCart();
+
+    // 2. Muat opsi pembelian (supplier & rekening bank)
     try {
-      if (!suppliersCache.length) {
-        const supRes = await apiRequest('/suppliers');
-        suppliersCache = supRes?.data?.suppliers || supRes?.data?.items || supRes?.data || [];
-      }
-      if (supplierSel) {
-        supplierSel.innerHTML = '<option value="">-- Pilih Supplier --</option>' +
-          '<option value="none">Supplier Umum (Tanpa Akun)</option>' +
-          suppliersCache.map(s => `<option value="${s.id}">${s.name} ${s.phone ? `(${s.phone})` : ''}</option>`).join('');
-      }
-
-      if (!state.products || state.products.length === 0) {
-        const prodRes = await apiRequest('/items?is_active=1&per_page=250');
-        state.products = prodRes?.data?.items || prodRes?.data || [];
-      }
-
-      if (itemSel) {
-        const list = state.products || [];
-        itemSel.innerHTML = '<option value="">-- Pilih Barang Toko --</option>' +
-          list.map(p => `<option value="${p.id}" data-cost="${p.purchase_price || 0}" data-stock="${p.stock || 0}" data-code="${p.code || ''}">${p.name} (Stok: ${p.stock || 0})</option>`).join('');
-      }
-
-      function onItemSelected() {
-        if (!itemSel) return;
-        const opt = itemSel.options[itemSel.selectedIndex];
-        if (opt && opt.value) {
-          const defaultCost = parseFloat(opt.dataset?.cost) || 0;
-          const stock = opt.dataset?.stock || 0;
-          const code = opt.dataset?.code || '';
-          if (purchaseItemPrice) {
-            purchaseItemPrice.value = defaultCost > 0 ? defaultCost : 0;
-          }
-          if (purchaseItemQty && (!purchaseItemQty.value || parseInt(purchaseItemQty.value) < 1)) {
-            purchaseItemQty.value = 1;
-          }
-          if (itemInfo) {
-            itemInfo.style.display = 'block';
-            itemInfo.textContent = `✓ Terpilih: ${opt.text} • Kode: ${code || '-'} • Modal: ${formatRupiah(defaultCost)}`;
-          }
-          if (typeof window.updatePurchaseCalc === 'function') {
-            window.updatePurchaseCalc();
-          }
-        } else {
-          if (itemInfo) itemInfo.style.display = 'none';
-          if (purchaseItemPrice) purchaseItemPrice.value = '';
-          if (typeof window.updatePurchaseCalc === 'function') {
-            window.updatePurchaseCalc();
-          }
+      const optRes = await apiRequest('/purchases/options').catch(() => null);
+      if (optRes && optRes.data) {
+        if (optRes.data.suppliers && supplierSel) {
+          supplierSel.innerHTML = '<option value="">-- Pilih Supplier --</option>' +
+            '<option value="none">Supplier Umum (Tanpa Akun)</option>' +
+            optRes.data.suppliers.map(s => `<option value="${s.id}">${s.code ? s.code + ' — ' : ''}${s.name}</option>`).join('');
+        }
+        if (optRes.data.bank_accounts && bankSel) {
+          bankSel.innerHTML = '<option value="">-- Pilih Rekening Tujuan --</option>' +
+            optRes.data.bank_accounts.map(b => `<option value="${b.id}">${b.label || (b.bank_name + ' - ' + b.account_number)}</option>`).join('');
+        }
+      } else {
+        // Fallback: muat suppliers mandiri
+        const supRes = await apiRequest('/suppliers').catch(() => null);
+        const sups = supRes?.data?.suppliers || supRes?.data?.items || supRes?.data || [];
+        if (supplierSel && sups.length) {
+          supplierSel.innerHTML = '<option value="">-- Pilih Supplier --</option>' +
+            '<option value="none">Supplier Umum (Tanpa Akun)</option>' +
+            sups.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
         }
       }
-
-      window.onPurchaseItemSelected = onItemSelected;
-      if (itemSel) itemSel.onchange = onItemSelected;
-    } catch (err) {
-      console.warn('Gagal memuat opsi supplier/barang:', err);
+    } catch (e) {
+      console.warn('Opsi pembelian gagal dimuat:', e);
     }
+
+    // 3. Muat atau segarkan daftar produk
+    try {
+      const prodRes = await apiRequest('/items?is_active=1&per_page=100').catch(() => null);
+      if (prodRes && prodRes.data && (prodRes.data.items || prodRes.data)) {
+        state.products = prodRes.data.items || prodRes.data;
+        renderPurchaseItemSelect(state.products);
+      }
+    } catch (e) {
+      console.warn('Daftar barang gagal diperbarui:', e);
+    }
+
+    function onItemSelected() {
+      if (!itemSel) return;
+      const opt = itemSel.options[itemSel.selectedIndex];
+      if (opt && opt.value) {
+        const defaultCost = parseFloat(opt.dataset?.cost) || 0;
+        const stock = opt.dataset?.stock || 0;
+        const code = opt.dataset?.code || '';
+        const name = opt.dataset?.name || opt.text;
+        if (purchaseItemPrice) {
+          purchaseItemPrice.value = defaultCost > 0 ? defaultCost : 0;
+        }
+        if (purchaseItemQty && (!purchaseItemQty.value || parseInt(purchaseItemQty.value) < 1)) {
+          purchaseItemQty.value = 1;
+        }
+        if (itemInfo) {
+          itemInfo.style.display = 'block';
+          itemInfo.textContent = `✓ Terpilih: ${name} • Kode: ${code || '-'} • Modal: ${formatRupiah(defaultCost)} • Stok: ${stock}`;
+        }
+      } else {
+        if (itemInfo) itemInfo.style.display = 'none';
+        if (purchaseItemPrice) purchaseItemPrice.value = '';
+      }
+      if (typeof window.updatePurchaseCalc === 'function') {
+        window.updatePurchaseCalc();
+      }
+    }
+
+    window.onPurchaseItemSelected = onItemSelected;
+    if (itemSel) itemSel.onchange = onItemSelected;
   }
 
   // --- MODUL: PEMASUKAN MANUAL ---
@@ -3044,9 +3191,15 @@
     const purchaseCalcTotal = document.getElementById('purchase-calc-total');
 
     function updatePurchaseCalc() {
-      const q = parseInt(purchaseItemQty?.value) || 0;
-      const p = parseFloat(purchaseItemPrice?.value) || 0;
-      if (purchaseCalcTotal) purchaseCalcTotal.textContent = formatRupiah(q * p);
+      if (!purchaseCalcTotal) return;
+      if (state.purchaseCart && state.purchaseCart.length > 0) {
+        const cartTotal = state.purchaseCart.reduce((sum, it) => sum + (it.qty * it.unit_price), 0);
+        purchaseCalcTotal.textContent = formatRupiah(cartTotal);
+      } else {
+        const q = parseInt(purchaseItemQty?.value) || 0;
+        const p = parseFloat(purchaseItemPrice?.value) || 0;
+        purchaseCalcTotal.textContent = formatRupiah(q * p);
+      }
     }
     window.updatePurchaseCalc = updatePurchaseCalc;
 
@@ -3068,6 +3221,76 @@
     if (purchaseItemQty) purchaseItemQty.addEventListener('input', updatePurchaseCalc);
     if (purchaseItemPrice) purchaseItemPrice.addEventListener('input', updatePurchaseCalc);
 
+    // Event listener: Masuk Keranjang Pembelian
+    const btnAddPurchaseCart = document.getElementById('btn-add-purchase-cart');
+    if (btnAddPurchaseCart) {
+      btnAddPurchaseCart.addEventListener('click', () => {
+        if (!purchaseItemSelect || !purchaseItemSelect.value) {
+          showToast('⚠️ Silakan pilih barang yang dibeli terlebih dahulu');
+          return;
+        }
+
+        const opt = purchaseItemSelect.options[purchaseItemSelect.selectedIndex];
+        const itemId = parseInt(opt.value);
+        const itemName = opt.dataset?.name || opt.text.split('(')[0].trim();
+        const itemCode = opt.dataset?.code || '';
+        const qty = parseInt(purchaseItemQty?.value) || 1;
+        const unitPrice = parseFloat(purchaseItemPrice?.value) || 0;
+
+        if (qty < 1) {
+          showToast('⚠️ Jumlah barang minimal 1');
+          return;
+        }
+
+        vibrateTouch(25);
+        if (!state.purchaseCart) state.purchaseCart = [];
+        const existingIdx = state.purchaseCart.findIndex(x => x.item_id === itemId);
+        if (existingIdx > -1) {
+          state.purchaseCart[existingIdx].qty += qty;
+          state.purchaseCart[existingIdx].unit_price = unitPrice;
+        } else {
+          state.purchaseCart.push({
+            item_id: itemId,
+            name: itemName,
+            code: itemCode,
+            qty: qty,
+            unit_price: unitPrice
+          });
+        }
+
+        renderPurchaseCart();
+        showToast(`✓ Masuk keranjang: ${itemName} (${qty} pcs)`);
+
+        // Reset field input barang untuk barang berikutnya
+        purchaseItemSelect.selectedIndex = 0;
+        purchaseItemQty.value = 1;
+        purchaseItemPrice.value = '';
+        const info = document.getElementById('purchase-item-info');
+        if (info) info.style.display = 'none';
+      });
+    }
+
+    // Modal Stok Habis close buttons
+    const btnCloseStockEmpty = document.getElementById('btn-close-stock-empty');
+    if (btnCloseStockEmpty) {
+      btnCloseStockEmpty.addEventListener('click', hideStockEmptyPopup);
+    }
+    const modalStockEmpty = document.getElementById('modal-stock-empty');
+    if (modalStockEmpty) {
+      modalStockEmpty.addEventListener('click', (e) => {
+        if (e.target.id === 'modal-stock-empty') hideStockEmptyPopup();
+      });
+    }
+
+    // Klik server URL di sidebar untuk buka atur server
+    const sbServerLink = document.getElementById('sidebar-server-url');
+    if (sbServerLink) {
+      sbServerLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        showServerModal();
+      });
+    }
+
     const formNewPurchase = document.getElementById('form-new-purchase');
     if (formNewPurchase) {
       formNewPurchase.addEventListener('submit', async (e) => {
@@ -3077,18 +3300,46 @@
         const submitBtn = document.getElementById('btn-submit-purchase');
 
         const supplierVal = document.getElementById('purchase-supplier')?.value;
-        const itemId = document.getElementById('purchase-item-select')?.value;
-        const qty = parseInt(purchaseItemQty?.value) || 0;
-        const unitPrice = parseFloat(purchaseItemPrice?.value) || 0;
         const payMethod = document.getElementById('purchase-pay-method')?.value || 'cash';
         const notes = document.getElementById('purchase-notes')?.value?.trim();
 
-        if (!itemId || qty < 1 || unitPrice <= 0) {
+        // Jika keranjang pembelian masih kosong, cek apakah ada barang yang sudah dipilih di form
+        if (!state.purchaseCart || state.purchaseCart.length === 0) {
+          const itemId = purchaseItemSelect?.value;
+          const qty = parseInt(purchaseItemQty?.value) || 0;
+          const unitPrice = parseFloat(purchaseItemPrice?.value) || 0;
+          if (itemId && qty >= 1) {
+            const opt = purchaseItemSelect.options[purchaseItemSelect.selectedIndex];
+            const itemName = opt ? (opt.dataset?.name || opt.text.split('(')[0].trim()) : 'Barang';
+            state.purchaseCart = [{
+              item_id: parseInt(itemId),
+              name: itemName,
+              qty: qty,
+              unit_price: unitPrice
+            }];
+            renderPurchaseCart();
+          }
+        }
+
+        if (!state.purchaseCart || state.purchaseCart.length === 0) {
           if (msgEl) {
             msgEl.className = 'inline-msg-box error';
-            msgEl.textContent = 'Harap pilih barang, isi jumlah qty dan harga beli yang valid.';
+            msgEl.textContent = 'Harap pilih minimal satu barang untuk dibeli.';
           }
+          showToast('⚠️ Keranjang pembelian masih kosong');
           return;
+        }
+
+        if (payMethod === 'transfer') {
+          const bankId = document.getElementById('purchase-bank-id')?.value;
+          if (!bankId) {
+            if (msgEl) {
+              msgEl.className = 'inline-msg-box error';
+              msgEl.textContent = 'Harap pilih rekening bank tujuan untuk pembayaran transfer.';
+            }
+            showToast('⚠️ Harap pilih rekening bank tujuan');
+            return;
+          }
         }
 
         submitBtn.disabled = true;
@@ -3099,16 +3350,17 @@
             supplier_mode: (supplierVal && supplierVal !== 'none') ? 'existing' : 'none',
             payment_method: payMethod,
             notes: notes || '',
-            items: [
-              {
-                item_id: parseInt(itemId),
-                quantity: qty,
-                unit_price: unitPrice
-              }
-            ]
+            items: state.purchaseCart.map(it => ({
+              item_id: parseInt(it.item_id),
+              quantity: parseInt(it.qty)
+            }))
           };
           if (supplierVal && supplierVal !== 'none') {
             payload.supplier_id = parseInt(supplierVal);
+          }
+          if (payMethod === 'transfer') {
+            const bId = document.getElementById('purchase-bank-id')?.value;
+            if (bId) payload.bank_account_id = parseInt(bId);
           }
 
           await apiRequest('/purchases', {
@@ -3116,14 +3368,17 @@
             body: JSON.stringify(payload)
           });
 
+          state.purchaseCart = [];
+          renderPurchaseCart();
           formNewPurchase.reset();
           updatePurchaseCalc();
           if (msgEl) {
             msgEl.className = 'inline-msg-box success';
             msgEl.textContent = '✓ Transaksi pembelian berhasil dicatat & stok bertambah!';
           }
+          showToast('✓ Pembelian berhasil dicatat!');
 
-          await fetchProducts(); // Refresh stok
+          await fetchProducts(); // Refresh stok barang
           setTimeout(() => {
             if (tabBtnPurchaseList) tabBtnPurchaseList.click();
           }, 1200);
@@ -3132,6 +3387,7 @@
             msgEl.className = 'inline-msg-box error';
             msgEl.textContent = 'Gagal menyimpan pembelian: ' + err.message;
           }
+          showToast('Gagal: ' + err.message);
         } finally {
           submitBtn.disabled = false;
           submitBtn.textContent = '✓ Simpan Transaksi Pembelian';
