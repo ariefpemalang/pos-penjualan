@@ -844,9 +844,7 @@
       const paymentMethod = t.payment_label || t.payment_method || 'Tunai';
       const isCancelled = t.status === 'cancelled';
       const statusText = t.status_label || (isCancelled ? 'Batal' : 'Selesai');
-      const statusStyle = isCancelled 
-        ? 'background:var(--danger-bg); color:var(--danger);' 
-        : 'background:var(--success-bg); color:var(--success);';
+      const statusClass = isCancelled ? 'status-cancelled' : 'status-completed';
 
       const itemsList = t.items || [];
       const itemsCount = itemsList.length > 0 ? itemsList.length : (t.items_count || 1);
@@ -854,13 +852,13 @@
       card.innerHTML = `
         <div class="ticket-header">
           <span class="ticket-no">${invoiceNo}</span>
-          <span class="ticket-status" style="${statusStyle}">${statusText}</span>
+          <span class="ticket-status ${statusClass}">${statusText}</span>
         </div>
         <div class="ticket-device">${custName}</div>
         <div class="ticket-complaint">${itemsCount} item barang • ${paymentMethod}</div>
         <div class="ticket-footer">
           <span>${t.created_at ? new Date(t.created_at).toLocaleString('id-ID') : '-'}</span>
-          <strong style="color:var(--primary-light);">${formatRupiah(totalAmount)}</strong>
+          <strong class="ticket-total">${formatRupiah(totalAmount)}</strong>
         </div>
       `;
       card.addEventListener('click', () => {
@@ -903,16 +901,16 @@
       const row = document.createElement('div');
       row.className = 'cart-item-row';
       const stock = Number(it.stock || 0);
-      const stockColor = stock <= 0 ? 'var(--danger)' : (stock < 5 ? 'var(--warning)' : 'var(--success)');
+      const stockClass = stock <= 0 ? 'out-stock' : (stock < 5 ? 'low-stock' : 'in-stock');
 
       row.innerHTML = `
         <div class="cart-item-info">
           <div class="cart-item-title">${it.name}</div>
-          <div style="font-size:0.75rem; color:var(--text-muted);">${it.code || ''} • ${it.category?.name || 'Umum'}</div>
+          <div class="cart-item-code" style="font-size:0.75rem;">${it.code || ''} • ${it.category?.name || 'Umum'}</div>
         </div>
         <div style="text-align:right;">
-          <div style="font-size:0.85rem; font-weight:700; color:var(--primary-light);">${formatRupiah(it.selling_price || it.price)}</div>
-          <div style="font-size:0.75rem; font-weight:600; color:${stockColor};">Stok: ${stock}</div>
+          <div class="cart-item-price">${formatRupiah(it.selling_price || it.price)}</div>
+          <div style="margin-top:4px;"><span class="product-stock-tag ${stockClass}">Stok: ${stock}</span></div>
         </div>
       `;
       container.appendChild(row);
@@ -1011,7 +1009,7 @@
     if (canAdjust) {
       ownerActionHtml = `
         <div style="margin-top:14px; padding-top:12px; border-top:1px solid var(--border-subtle); display:flex; flex-direction:column; gap:8px;">
-          <div style="font-size:0.82rem; font-weight:700; color:var(--primary-light); display:flex; align-items:center; gap:6px;">
+          <div style="font-size:0.82rem; font-weight:700; display:flex; align-items:center; gap:6px;">
             👑 Aksi Persetujuan Owner
           </div>
           <p style="font-size:0.72rem; color:var(--text-muted); margin-bottom:4px;">
@@ -1043,7 +1041,7 @@
           <span style="font-size:0.72rem; color:var(--text-muted);">${pending.opname_number}</span>
         </div>
         <div style="font-size:0.82rem; color:var(--text-secondary); margin-bottom:6px;">
-          Dibuat oleh: <strong style="color:var(--primary-light);">${pending.creator}</strong> • ${dateFormatted}
+          Dibuat oleh: <strong>${pending.creator}</strong> • ${dateFormatted}
         </div>
         ${pending.notes ? `<div style="font-size:0.75rem; color:var(--text-muted); font-style:italic;">Catatan: "${pending.notes}"</div>` : ''}
 
@@ -2012,7 +2010,7 @@
       <div class="finance-hero-grid">
         <div class="finance-hero-card">
           <div class="finance-hero-label">LABA BERSIH</div>
-          <div class="finance-hero-amount" style="color:var(--primary-light);">${formatRupiah(netProfit)}</div>
+          <div class="finance-hero-amount">${formatRupiah(netProfit)}</div>
         </div>
         <div class="finance-hero-card">
           <div class="finance-hero-label">SISA KAS</div>
@@ -2038,7 +2036,7 @@
         </div>
         <div class="finance-line-item" style="border-top:1px dashed var(--border-gold); padding-top:10px; margin-top:4px;">
           <span class="label" style="font-weight:700; color:var(--text-main);">Estimasi Sisa Kas</span>
-          <span class="amount" style="color:var(--primary-light); font-weight:900; font-size:0.95rem;">${formatRupiah(cashFlowEstimate)}</span>
+          <span class="amount" style="font-weight:900; font-size:0.95rem;">${formatRupiah(cashFlowEstimate)}</span>
         </div>
       </div>
 
