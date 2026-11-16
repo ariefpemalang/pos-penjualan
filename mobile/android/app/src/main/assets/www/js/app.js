@@ -1750,25 +1750,25 @@
       return lines;
     };
 
-    // Cetak baris dengan feed ekstra terjamin agar antar baris lega dan tidak pernah nempel
-    const pushLine = (str, extraDots = 14) => {
+    // Cetak baris dengan micro-feed terukur agar tulisan lega, jelas, dan tidak boros kertas
+    const pushLine = (str, extraDots = 6) => {
       const clean = cleanAscii(str);
       const b = encoder.encode(clean + '\n');
       b.forEach(x => buffer.push(x));
       if (extraDots > 0) {
-        push(ESC, 0x4A, extraDots); // Physical stepper motor micro-feed
+        push(ESC, 0x4A, extraDots); // Stepper motor micro-feed
       }
     };
 
-    const pushFeed = (dots = 16) => {
+    const pushFeed = (dots = 8) => {
       push(ESC, 0x4A, dots);
     };
 
     // 1. Initialize printer
     push(ESC, 0x40);
 
-    // 2. Set line spacing 60 dots (~7.5mm per baris) untuk printer yang mendukung ESC 3
-    push(ESC, 0x33, 60);
+    // 2. Set line spacing 44 dots (~5.5mm per baris) seimbang, lega, dan hemat kertas
+    push(ESC, 0x33, 44);
 
     // 3. Header Toko (Center Align)
     push(ESC, 0x61, 1);
@@ -1776,38 +1776,38 @@
     // Nama Toko: Double Width + Double Height + Bold
     push(GS, 0x21, 0x11);
     push(ESC, 0x45, 1);
-    pushLine(tpl.shopName || 'AR Cell', 18);
+    pushLine(tpl.shopName || 'AR Cell', 10);
     push(GS, 0x21, 0x00);
     push(ESC, 0x45, 0);
-    pushFeed(14); // Jeda vertikal setelah nama toko
+    pushFeed(6); // Jeda ringkas setelah nama toko
 
     // Slogan toko
     if (tpl.slogan) {
       push(ESC, 0x45, 1);
-      wrapWords(tpl.slogan, lineWidth).forEach(l => pushLine(l, 12));
+      wrapWords(tpl.slogan, lineWidth).forEach(l => pushLine(l, 6));
       push(ESC, 0x45, 0);
     }
 
     // Alamat toko (dibagi rapi per kata, tidak patah di tengah kata)
     if (tpl.address) {
-      wrapWords(tpl.address, lineWidth).forEach(l => pushLine(l, 12));
+      wrapWords(tpl.address, lineWidth).forEach(l => pushLine(l, 6));
     }
 
     // Telepon toko
     if (tpl.phone) {
-      pushLine('Telp/WA: ' + cleanAscii(tpl.phone), 12);
+      pushLine('Telp/WA: ' + cleanAscii(tpl.phone), 6);
     }
-    pushFeed(8);
-    pushLine('='.repeat(lineWidth), 14);
+    pushFeed(4);
+    pushLine('='.repeat(lineWidth), 8);
 
     // 4. Meta Transaksi (Left Align)
     push(ESC, 0x61, 0);
-    pushLine(`No.Nota: ${cleanAscii(tx.invoice_no || tx.code || '-')}`, 12);
-    pushLine(`Waktu  : ${new Date().toLocaleString('id-ID')}`, 12);
-    pushLine(`Kasir  : ${cleanAscii(tx.cashier || state.user?.name || 'Kasir')}`, 12);
-    pushLine(`Cust   : ${cleanAscii(tx.customer || 'Pelanggan Umum')}`, 12);
-    pushFeed(6);
-    pushLine('-'.repeat(lineWidth), 14);
+    pushLine(`No.Nota: ${cleanAscii(tx.invoice_no || tx.code || '-')}`, 6);
+    pushLine(`Waktu  : ${new Date().toLocaleString('id-ID')}`, 6);
+    pushLine(`Kasir  : ${cleanAscii(tx.cashier || state.user?.name || 'Kasir')}`, 6);
+    pushLine(`Cust   : ${cleanAscii(tx.customer || 'Pelanggan Umum')}`, 6);
+    pushFeed(4);
+    pushLine('-'.repeat(lineWidth), 8);
 
     // 5. Items Belanja
     const items = tx.items || [];
@@ -1816,19 +1816,19 @@
         const itemName = cleanAscii(it.name || it.item?.name || 'Barang');
         wrapWords(itemName, lineWidth).forEach(nl => {
           push(ESC, 0x45, 1); // Bold nama barang
-          pushLine(nl, 10);
+          pushLine(nl, 5);
           push(ESC, 0x45, 0);
         });
         const qtyPrice = `  ${it.qty || it.quantity} x ${formatRupiah(it.price || it.unit_price)}`;
         const subtotal = formatRupiah((it.price || it.unit_price) * (it.qty || it.quantity));
         const spaces = Math.max(1, lineWidth - qtyPrice.length - subtotal.length);
-        pushLine(qtyPrice + ' '.repeat(spaces) + subtotal, 14);
+        pushLine(qtyPrice + ' '.repeat(spaces) + subtotal, 8);
         if (idx < (items.length - 1)) {
-          pushFeed(10); // Jeda antar barang
+          pushFeed(5); // Jeda antar barang
         }
       });
-      pushFeed(8);
-      pushLine('='.repeat(lineWidth), 14);
+      pushFeed(4);
+      pushLine('='.repeat(lineWidth), 8);
     }
 
     // 6. Totals Section (Grand Total, Bayar, Kembali)
@@ -1837,48 +1837,53 @@
     const totalLabel = 'TOTAL';
     const totalVal = formatRupiah(tx.total_amount);
     const totalSpaces = Math.max(1, lineWidth - totalLabel.length - totalVal.length);
-    pushLine(totalLabel + ' '.repeat(totalSpaces) + totalVal, 16);
+    pushLine(totalLabel + ' '.repeat(totalSpaces) + totalVal, 10);
     push(GS, 0x21, 0x00); // Normal size
     push(ESC, 0x45, 0); // Bold OFF
-    pushFeed(12); // Ruang nafas vertikal setelah huruf TOTAL
+    pushFeed(6); // Ruang nafas vertikal setelah huruf TOTAL
 
     const payLabel = `BAYAR (${cleanAscii(tx.payment_method || 'TUNAI').toUpperCase()})`;
     const payVal = formatRupiah(tx.paid_amount);
     const paySpaces = Math.max(1, lineWidth - payLabel.length - payVal.length);
-    pushLine(payLabel + ' '.repeat(paySpaces) + payVal, 12);
+    pushLine(payLabel + ' '.repeat(paySpaces) + payVal, 6);
 
     const changeLabel = 'KEMBALI';
     const changeVal = formatRupiah(tx.change || 0);
     const changeSpaces = Math.max(1, lineWidth - changeLabel.length - changeVal.length);
-    pushLine(changeLabel + ' '.repeat(changeSpaces) + changeVal, 14);
-    pushFeed(8);
-    pushLine('='.repeat(lineWidth), 16);
+    pushLine(changeLabel + ' '.repeat(changeSpaces) + changeVal, 8);
+    pushFeed(4);
+    pushLine('='.repeat(lineWidth), 8);
 
     // 7. Footer / Doa (Center Align)
     push(ESC, 0x61, 1);
-    pushFeed(14); // Jeda sebelum doa
+    pushFeed(6); // Jeda sebelum doa
     push(ESC, 0x45, 1); // Bold
-    pushLine('JAZAKUMULLAH KHAIRAN', 16); // Murni teks tanpa simbol
+    pushLine('JAZAKUMULLAH KHAIRAN', 8); // Murni teks tanpa simbol
     push(ESC, 0x45, 0);
-    pushFeed(10);
+    pushFeed(4);
 
-    const rawFooter = tpl.footer || 'Terima Kasih Sudah Belanja ditempat Kami.\nSemoga Rezekinya Lancar, Aamiin...';
+    let rawFooter = tpl.footer || 'Terima Kasih Sudah Belanja ditempat Kami.\nSemoga Rezekinya Lancar, Aamiin...';
+    rawFooter = rawFooter.replace(/^Jazakumullah,?\s*/i, '');
     const footerParas = rawFooter.split('\n');
     footerParas.forEach(p => {
       const pClean = cleanAscii(p);
       if (!pClean) return;
       wrapWords(pClean, lineWidth).forEach(l => {
-        pushLine(l, 12);
+        pushLine(l, 6);
       });
-      pushFeed(8); // Jeda kecil antar alinea doa
+      pushFeed(4); // Jeda kecil antar alinea doa
     });
 
     push(ESC, 0x61, 0); // Left align
 
-    // 8. Feed and Cut
-    pushFeed(24);
-    push(ESC, 0x64, 4); // Feed 4 baris sebelum potong kertas
-    push(GS, 0x56, 66, 0); // Cut paper
+    // 8. Feed pas untuk sobek kertas (Tear Bar) - Hemat kertas, tidak membuang ruang kosong atas & bawah
+    if (is80mm) {
+      push(ESC, 0x64, 3);
+      push(GS, 0x56, 66, 0); // Auto-cutter untuk printer 80mm
+    } else {
+      // Printer 58mm portable manual-tear: feed tepat 2 baris agar tulisan terakhir berada tepat di atas pisau gerigi pemotong
+      push(ESC, 0x64, 2);
+    }
 
     return new Uint8Array(buffer);
   }
