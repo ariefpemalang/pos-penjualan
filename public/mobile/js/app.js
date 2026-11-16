@@ -1723,6 +1723,9 @@
     // Initialize printer
     push(ESC, 0x40);
 
+    // Set comfortable line spacing (40 dots instead of default 24 dots)
+    push(ESC, 0x33, 40);
+
     // Center header
     push(ESC, 0x61, 1); // Center align
 
@@ -1732,6 +1735,7 @@
     pushText(tpl.shopName || 'AR Cell');
     push(GS, 0x21, 0x00); // Normal size
     push(ESC, 0x45, 0);   // Bold OFF
+    pushText(''); // Spasi baris agar tidak mepet
 
     if (tpl.slogan) {
       push(ESC, 0x45, 1);
@@ -1751,7 +1755,7 @@
     pushText('-'.repeat(lineWidth));
 
     // Items
-    (tx.items || []).forEach(it => {
+    (tx.items || []).forEach((it, idx) => {
       const name = (it.name || it.item?.name || 'Barang').substring(0, lineWidth);
       push(ESC, 0x45, 1);
       pushText(name);
@@ -1760,6 +1764,9 @@
       const subtotal = formatRupiah((it.price || it.unit_price) * (it.qty || it.quantity));
       const spaces = Math.max(1, lineWidth - qtyPrice.length - subtotal.length);
       pushText(qtyPrice + ' '.repeat(spaces) + subtotal);
+      if (idx < (tx.items.length - 1)) {
+        pushText(''); // Spasi antar barang
+      }
     });
 
     pushText('='.repeat(lineWidth));
@@ -1785,10 +1792,19 @@
     pushText(changeLabel + ' '.repeat(changeSpaces) + changeVal);
     pushText('='.repeat(lineWidth));
 
-    // Footer
+    // Footer - Latin Prayer Header & Message
     push(ESC, 0x61, 1);
-    const footerLines = (tpl.footer || 'Jazakumullah, Terima Kasih Sudah Belanja ditempat Kami.\nSemoga Rezekinya Lancar, Aamiin...').split('\n');
-    footerLines.forEach(l => pushText(l));
+    pushText('');
+    push(ESC, 0x45, 1);
+    pushText('✦ JAZAKUMULLAH KHAIRAN ✦');
+    push(ESC, 0x45, 0);
+    pushText('');
+
+    const footerLines = (tpl.footer || 'Terima Kasih Sudah Belanja ditempat Kami.\nSemoga Rezekinya Lancar, Aamiin...').split('\n');
+    footerLines.forEach(l => {
+      if (l.trim()) pushText(l.trim());
+    });
+    pushText('');
     push(ESC, 0x61, 0);
 
     // Feed lines & Cut
