@@ -22,10 +22,10 @@
                             <a href="{{ route('items.export') }}" class="btn btn-outline-secondary" title="Export Excel">
                                 <i class="bi bi-download"></i> Export
                             </a>
-                            <a href="{{ route('items.import.template') }}" class="btn btn-outline-secondary" title="Download format import">
-                                <i class="bi bi-file-earmark-spreadsheet"></i> Format Import
-                            </a>
                         @endcan
+                        <a href="{{ route('items.import.template') }}" class="btn btn-outline-secondary" title="Download format import">
+                            <i class="bi bi-file-earmark-spreadsheet"></i> Format Import
+                        </a>
                         @can('item import')
                             <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#import-modal">
                                 <i class="bi bi-upload"></i> Import
@@ -117,13 +117,14 @@
                         <div class="modal-body">
                             <div class="alert alert-light border py-2 px-3 small mb-3">
                                 <i class="bi bi-info-circle me-1"></i>
-                                Gunakan file <strong>Format Import</strong> dari sistem. Kategori &amp; satuan sudah berupa dropdown di Excel.
-                                Kode barang dibuat otomatis; stok awal tetap 0 (atur lewat Stok Masuk).
+                                Anda dapat mengupload file <strong>Format Import</strong> atau file hasil <strong>Export Excel</strong>.
+                                <br>
+                                Stok, harga beli, dan harga jual akan otomatis disesuaikan. Kategori &amp; satuan yang belum ada akan otomatis dibuatkan oleh sistem.
                             </div>
                             <div class="mb-3">
-                                <label class="form-label">File Excel (.xlsx) <span class="text-danger">*</span></label>
-                                <input type="file" name="file" id="import-file" class="form-control form-control-clean" accept=".xlsx,.xls" required>
-                                <div class="form-hint-sm mt-1">Maks. 5 MB. Hapus baris contoh sebelum upload.</div>
+                                <label class="form-label">File Excel (.xlsx, .xls) / .csv <span class="text-danger">*</span></label>
+                                <input type="file" name="file" id="import-file" class="form-control form-control-clean" accept=".xlsx,.xls,.csv" required>
+                                <div class="form-hint-sm mt-1">Maks. 10 MB. Mendukung file .xlsx, .xls, .csv.</div>
                             </div>
                             <div id="import-result" class="d-none"></div>
                         </div>
