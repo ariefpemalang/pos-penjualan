@@ -1724,7 +1724,7 @@
     push(ESC, 0x40);
 
     // Set comfortable line spacing (40 dots instead of default 24 dots)
-    push(ESC, 0x33, 40);
+    push(ESC, 0x33, 52);
 
     // Center header
     push(ESC, 0x61, 1); // Center align
@@ -1796,7 +1796,7 @@
     push(ESC, 0x61, 1);
     pushText('');
     push(ESC, 0x45, 1);
-    pushText('✦ JAZAKUMULLAH KHAIRAN ✦');
+    pushText('JAZAKUMULLAH KHAIRAN');
     push(ESC, 0x45, 0);
     pushText('');
 

@@ -1030,11 +1030,11 @@ body {
   background: #FFFFFF;
   color: #111111;
   font-family: 'SF Mono', 'Roboto Mono', 'Cascadia Code', 'Courier New', Courier, monospace;
-  padding: 28px 20px 22px;
+  padding: 32px 22px 28px;
   border-radius: 10px 10px 0 0;
   font-size: 0.84rem;
   box-shadow: 0 14px 35px rgba(0, 0, 0, 0.55), 0 3px 8px rgba(0, 0, 0, 0.25);
-  line-height: 1.65;
+  line-height: 1.85;
   margin: 0 auto 0 auto;
   max-width: 330px;
   position: relative;
@@ -1044,7 +1044,7 @@ body {
 
 .receipt-header-brand {
   text-align: center;
-  margin-bottom: 12px;
+  margin-bottom: 18px;
 }
 
 .receipt-brand-badge {
@@ -1071,8 +1071,8 @@ body {
   letter-spacing: 2.5px;
   text-transform: uppercase;
   color: #000000;
-  margin: 6px 0 4px 0;
-  line-height: 1.2;
+  margin: 8px 0 6px 0;
+  line-height: 1.25;
   font-family: inherit;
   text-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
 }
@@ -1081,7 +1081,7 @@ body {
   font-size: 0.82rem;
   font-weight: 700;
   color: #333333;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
   text-transform: capitalize;
   letter-spacing: 0.4px;
 }
@@ -1089,27 +1089,27 @@ body {
 .receipt-shop-info {
   font-size: 0.74rem;
   color: #444444;
-  line-height: 1.55;
-  margin-bottom: 2px;
+  line-height: 1.75;
+  margin-bottom: 4px;
 }
 
 .receipt-divider-dashed {
   border-top: 1.5px dashed #777777;
-  margin: 14px 0;
+  margin: 18px 0;
 }
 
 .receipt-divider-double {
   border-top: 2.5px double #222222;
-  margin: 14px 0;
+  margin: 18px 0;
 }
 
 .receipt-meta-grid {
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 7px;
   font-size: 0.78rem;
   color: #333333;
-  line-height: 1.5;
+  line-height: 1.65;
 }
 
 .receipt-meta-row {
@@ -1130,15 +1130,16 @@ body {
 .receipt-items-table {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  padding: 4px 0;
+  gap: 16px;
+  padding: 6px 0;
 }
 
 .receipt-item-row {
   display: flex;
   flex-direction: column;
-  gap: 3px;
-  padding-bottom: 2px;
+  gap: 4px;
+  padding-bottom: 4px;
+  border-bottom: 1px dotted #E0E0E0;
 }
 
 .receipt-item-top {
@@ -1147,7 +1148,7 @@ body {
   font-weight: 800;
   color: #000000;
   font-size: 0.85rem;
-  line-height: 1.35;
+  line-height: 1.45;
 }
 
 .receipt-item-sub {
@@ -1161,9 +1162,9 @@ body {
 .receipt-summary-grid {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 9px;
   font-size: 0.82rem;
-  padding: 2px 0;
+  padding: 4px 0;
 }
 
 .receipt-summary-row {
@@ -1176,11 +1177,11 @@ body {
   font-size: 1.25rem;
   font-weight: 900;
   color: #000000;
-  padding: 8px 0;
+  padding: 10px 0;
   letter-spacing: 0.5px;
   border-top: 1.5px dashed #444444;
   border-bottom: 1.5px dashed #444444;
-  margin: 4px 0;
+  margin: 6px 0;
 }
 
 .receipt-summary-row.receipt-change-row {
@@ -1193,22 +1194,22 @@ body {
   background: #F8F8FA;
   border: 1px dashed #B8B8C2;
   border-radius: 8px;
-  padding: 12px 10px;
-  margin: 14px 0 12px;
+  padding: 16px 12px;
+  margin: 18px 0 14px;
 }
 
 .receipt-prayer-title {
   font-size: 0.95rem;
   font-weight: 900;
   color: #0A0A0A;
-  letter-spacing: 1px;
-  margin-bottom: 4px;
+  letter-spacing: 1.5px;
+  margin-bottom: 8px;
 }
 
 .receipt-footer-prayer {
   text-align: center;
   font-size: 0.76rem;
-  line-height: 1.65;
+  line-height: 1.85;
   color: #333333;
   font-style: italic;
   padding: 0 4px;
