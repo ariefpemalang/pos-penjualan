@@ -434,9 +434,18 @@
       row.className = `product-row-item ${inCartClass}`;
       row.dataset.id = item.id;
 
+      function getProductInitial(name) {
+        if (!name) return 'AR';
+        const words = name.trim().split(/\s+/);
+        if (words.length >= 2) {
+          return (words[0][0] + words[1][0]).toUpperCase();
+        }
+        return name.substring(0, 2).toUpperCase();
+      }
+
       const imgHtml = item.photo_url 
         ? `<img src="${item.photo_url}" alt="${item.name}" loading="lazy" onerror="this.src='icon.png'">`
-        : `<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="product-placeholder-icon"><rect x="2" y="3" width="20" height="14" rx="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>`;
+        : `<span style="font-size:1.05rem; font-weight:800; letter-spacing:0.5px; color:inherit;">${getProductInitial(item.name)}</span>`;
 
       row.innerHTML = `
         <div class="product-row-img-box">
@@ -1904,15 +1913,17 @@
     window.print();
   }
 
-  // --- Theme Management ---
+  // --- Theme Management (Sesuai ar-service-mobile) ---
   function applyTheme(themeName) {
+    if (!themeName || themeName === 'light') themeName = 'emerald';
+    if (themeName === 'dark-gold') themeName = 'dark';
+    if (themeName === 'emerald-green') themeName = 'emerald';
+    if (themeName === 'midnight-blue') themeName = 'ocean';
+
     state.theme = themeName;
     localStorage.setItem('ar_pos_theme', themeName);
-    if (themeName === 'dark-gold') {
-      document.documentElement.removeAttribute('data-theme');
-    } else {
-      document.documentElement.setAttribute('data-theme', themeName);
-    }
+    document.documentElement.setAttribute('data-theme', themeName);
+
     document.querySelectorAll('.theme-pill-card').forEach(card => {
       card.classList.toggle('active', card.dataset.theme === themeName);
     });
