@@ -6,17 +6,25 @@
   'use strict';
 
   // --- Configuration & State ---
-  const DEFAULT_SERVER_URL = window.location.protocol.startsWith('http') && window.location.hostname.includes('arcell.store')
-    ? window.location.origin
-    : 'https://www.arcell.store';
+  let autoDetectedUrl = 'https://www.arcell.store';
+  if (window.location.protocol.startsWith('http')) {
+    const origin = window.location.origin;
+    const path = window.location.pathname;
+    const pubIdx = path.indexOf('/public');
+    const mobIdx = path.indexOf('/mobile');
+    if (pubIdx !== -1) {
+      autoDetectedUrl = origin + path.substring(0, pubIdx + 7);
+    } else if (mobIdx !== -1) {
+      autoDetectedUrl = origin + path.substring(0, mobIdx);
+    } else {
+      autoDetectedUrl = origin;
+    }
+  }
 
+  const DEFAULT_SERVER_URL = autoDetectedUrl;
   const DEFAULT_API_KEY = 'pos-service-mobile-dev-key';
 
-  let savedServerUrl = localStorage.getItem('ar_pos_server_url');
-  if (!savedServerUrl || savedServerUrl.includes('192.168.') || savedServerUrl.includes('localhost') || savedServerUrl.includes('10.0.2.2')) {
-    savedServerUrl = DEFAULT_SERVER_URL;
-    localStorage.setItem('ar_pos_server_url', savedServerUrl);
-  }
+  let savedServerUrl = localStorage.getItem('ar_pos_server_url') || DEFAULT_SERVER_URL;
 
   const DEFAULT_RECEIPT_TEMPLATE = {
     shopName: 'AR Cell',
@@ -254,7 +262,23 @@
 
       const sbRole = document.getElementById('sidebar-user-role');
       if (sbRole) sbRole.textContent = roles;
+
+      updateSidebarServerUrl();
     }
+  }
+
+  function updateSidebarServerUrl() {
+    const sbServer = document.getElementById('sidebar-server-url');
+    if (sbServer && state.serverUrl) {
+      try {
+        const u = new URL(state.serverUrl);
+        sbServer.textContent = u.host || state.serverUrl;
+      } catch (e) {
+        sbServer.textContent = state.serverUrl;
+      }
+    }
+    const settingServerUrl = document.getElementById('setting-server-url');
+    if (settingServerUrl) settingServerUrl.value = state.serverUrl || DEFAULT_SERVER_URL;
   }
 
   // --- Data Loading ---
@@ -2174,11 +2198,15 @@
   async function initPurchaseFormOptions() {
     const supplierSel = document.getElementById('purchase-supplier');
     const itemSel = document.getElementById('purchase-item-select');
-    const itemSearch = document.getElementById('purchase-item-search');
     const itemInfo = document.getElementById('purchase-item-info');
     const dateInp = document.getElementById('purchase-date');
+    const purchaseItemQty = document.getElementById('purchase-item-qty');
+    const purchaseItemPrice = document.getElementById('purchase-item-price');
     if (dateInp && !dateInp.value) {
       dateInp.value = new Date().toISOString().split('T')[0];
+    }
+    if (purchaseItemQty && (!purchaseItemQty.value || parseInt(purchaseItemQty.value) < 1)) {
+      purchaseItemQty.value = 1;
     }
 
     try {
@@ -2193,28 +2221,14 @@
       }
 
       if (!state.products || state.products.length === 0) {
-        const prodRes = await apiRequest('/items');
+        const prodRes = await apiRequest('/items?is_active=1&per_page=250');
         state.products = prodRes?.data?.items || prodRes?.data || [];
       }
 
-      function populateItems(filterText = '') {
-        if (!itemSel) return;
-        const q = filterText.toLowerCase().trim();
-        let list = state.products || [];
-        if (q) {
-          list = list.filter(p => 
-            (p.name && p.name.toLowerCase().includes(q)) ||
-            (p.code && p.code.toLowerCase().includes(q))
-          );
-        }
+      if (itemSel) {
+        const list = state.products || [];
         itemSel.innerHTML = '<option value="">-- Pilih Barang Toko --</option>' +
           list.map(p => `<option value="${p.id}" data-cost="${p.purchase_price || 0}" data-stock="${p.stock || 0}" data-code="${p.code || ''}">${p.name} (Stok: ${p.stock || 0})</option>`).join('');
-        
-        // Auto select jika hasil pencarian tersisa 1 barang
-        if (q && list.length === 1) {
-          itemSel.selectedIndex = 1;
-          onItemSelected();
-        }
       }
 
       function onItemSelected() {
@@ -2224,28 +2238,30 @@
           const defaultCost = parseFloat(opt.dataset?.cost) || 0;
           const stock = opt.dataset?.stock || 0;
           const code = opt.dataset?.code || '';
-          const purchaseItemPrice = document.getElementById('purchase-item-price');
           if (purchaseItemPrice) {
-            purchaseItemPrice.value = defaultCost > 0 ? defaultCost : '';
+            purchaseItemPrice.value = defaultCost > 0 ? defaultCost : 0;
+          }
+          if (purchaseItemQty && (!purchaseItemQty.value || parseInt(purchaseItemQty.value) < 1)) {
+            purchaseItemQty.value = 1;
           }
           if (itemInfo) {
             itemInfo.style.display = 'block';
             itemInfo.textContent = `✓ Terpilih: ${opt.text} • Kode: ${code || '-'} • Modal: ${formatRupiah(defaultCost)}`;
           }
-          updatePurchaseCalc();
+          if (typeof window.updatePurchaseCalc === 'function') {
+            window.updatePurchaseCalc();
+          }
         } else {
           if (itemInfo) itemInfo.style.display = 'none';
+          if (purchaseItemPrice) purchaseItemPrice.value = '';
+          if (typeof window.updatePurchaseCalc === 'function') {
+            window.updatePurchaseCalc();
+          }
         }
       }
 
       window.onPurchaseItemSelected = onItemSelected;
-      populateItems();
-
-      if (itemSearch) {
-        itemSearch.oninput = (e) => {
-          populateItems(e.target.value);
-        };
-      }
+      if (itemSel) itemSel.onchange = onItemSelected;
     } catch (err) {
       console.warn('Gagal memuat opsi supplier/barang:', err);
     }
@@ -2425,8 +2441,21 @@
       if (target === 'view-stock-opname') fetchStockOpname();
       if (target === 'view-financial-report') fetchFinancialReport(state.financialPeriod);
       if (target === 'view-purchases') {
-        fetchPurchases();
+        const tabBtnNew = document.getElementById('tab-btn-purchase-new');
+        const tabBtnList = document.getElementById('tab-btn-purchase-list');
+        const panelNew = document.getElementById('panel-purchase-new');
+        const panelList = document.getElementById('panel-purchase-list');
+        if (tabBtnNew && tabBtnList) {
+          tabBtnNew.classList.add('active');
+          tabBtnList.classList.remove('active');
+        }
+        if (panelNew) panelNew.style.display = 'block';
+        if (panelList) panelList.style.display = 'none';
         initPurchaseFormOptions();
+      }
+      if (target === 'view-settings') {
+        const settingServerUrl = document.getElementById('setting-server-url');
+        if (settingServerUrl) settingServerUrl.value = state.serverUrl || DEFAULT_SERVER_URL;
       }
       if (target === 'view-manual-income') {
         fetchManualIncomes();
@@ -2758,19 +2787,40 @@
     if (btnSaveSettings) {
       btnSaveSettings.addEventListener('click', async () => {
         const url = settingServerUrl.value.trim();
-        const key = settingApiKey.value.trim();
+        if (!url) return;
         state.serverUrl = url;
-        state.apiKey = key;
         localStorage.setItem('ar_pos_server_url', url);
-        localStorage.setItem('ar_pos_api_key', key);
+        updateSidebarServerUrl();
         showToast('Menguji koneksi server...');
         try {
           await apiRequest('/settings');
           updateServerStatus(true);
-          showToast('Koneksi server sukses & setelan tersimpan!');
+          showToast('✓ Koneksi server sukses & setelan tersimpan!');
+          if (state.token) loadInitialData();
         } catch (err) {
           updateServerStatus(false);
-          console.warn('Gagal terhubung ke server:', err.message);
+          showToast('Gagal terhubung ke server: ' + err.message);
+        }
+      });
+    }
+
+    const btnOpenServerModalSettings = document.getElementById('btn-open-server-modal-settings');
+    if (btnOpenServerModalSettings) {
+      btnOpenServerModalSettings.addEventListener('click', () => {
+        showServerModal();
+      });
+    }
+
+    const btnSyncNow = document.getElementById('btn-sync-now');
+    if (btnSyncNow) {
+      btnSyncNow.addEventListener('click', async () => {
+        vibrateTouch(15);
+        showToast('🔄 Menyinkronkan data dari server...');
+        try {
+          await loadInitialData();
+          showToast('✓ Data berhasil disinkronkan!');
+        } catch (err) {
+          showToast('Gagal sinkron data: ' + err.message);
         }
       });
     }
@@ -2795,6 +2845,7 @@
       state.serverUrl = url;
       localStorage.setItem('ar_pos_server_url', url);
       document.getElementById('setting-server-url').value = url;
+      updateSidebarServerUrl();
       showToast('Menguji koneksi server...');
       try {
         await apiRequest('/auth/login', { method: 'POST', body: JSON.stringify({}) }).catch(e => {
@@ -2806,11 +2857,11 @@
         });
         updateServerStatus(true);
         hideServerModal();
-        showToast('Koneksi server BERHASIL!');
+        showToast('✓ Koneksi server BERHASIL!');
         if (state.token) loadInitialData();
       } catch (err) {
         updateServerStatus(false);
-        console.warn('Gagal terhubung ke server (' + url + '): ' + err.message);
+        showToast('Gagal terhubung: ' + err.message);
       }
     });
 
@@ -2997,6 +3048,7 @@
       const p = parseFloat(purchaseItemPrice?.value) || 0;
       if (purchaseCalcTotal) purchaseCalcTotal.textContent = formatRupiah(q * p);
     }
+    window.updatePurchaseCalc = updatePurchaseCalc;
 
     if (purchaseItemSelect) {
       purchaseItemSelect.addEventListener('change', () => {
