@@ -53,6 +53,8 @@ class ItemController extends Controller
             $query,
             ['name', 'code', 'description'],
             [],
+            15,
+            500,
         );
 
         return $this->apiSuccess('Daftar barang berhasil diambil.', [

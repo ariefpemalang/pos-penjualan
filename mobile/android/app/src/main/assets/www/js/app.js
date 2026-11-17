@@ -175,12 +175,23 @@
     return base;
   }
 
-  async function apiRequest(endpoint, options = {}) {
+  async function apiRequest(endpoint, options = {}, isRetry = false) {
     const cleanEndpoint = endpoint.startsWith('/') ? endpoint : '/' + endpoint;
-    const url = getApiBaseUrl() + cleanEndpoint;
+    let url = getApiBaseUrl() + cleanEndpoint;
+
+    // Cache-buster timestamp untuk request GET agar terbebas dari stale cache WebView
+    const method = (options.method || 'GET').toUpperCase();
+    if (method === 'GET') {
+      const sep = url.includes('?') ? '&' : '?';
+      url = `${url}${sep}_t=${Date.now()}`;
+    }
+
     const headers = {
       'Accept': 'application/json',
       'Content-Type': 'application/json',
+      'Cache-Control': 'no-cache, no-store, must-revalidate',
+      'Pragma': 'no-cache',
+      'Expires': '0',
       'X-API-Key': state.apiKey,
       ...(options.headers || {})
     };
@@ -206,10 +217,33 @@
 
       return data;
     } catch (err) {
+      // Auto-fallback domain: jika https://www.arcell.store gagal redirect/CORS, otomatis coba https://arcell.store (dan sebaliknya)
+      if (!isRetry && state.serverUrl && state.serverUrl.includes('arcell.store')) {
+        let altUrl = null;
+        if (state.serverUrl.includes('://www.arcell.store')) {
+          altUrl = state.serverUrl.replace('://www.arcell.store', '://arcell.store');
+        } else if (state.serverUrl.includes('://arcell.store')) {
+          altUrl = state.serverUrl.replace('://arcell.store', '://www.arcell.store');
+        }
+
+        if (altUrl) {
+          console.log(`[Auto-Sync] Gagal ke ${state.serverUrl}, mencoba fallback server: ${altUrl}`);
+          const oldUrl = state.serverUrl;
+          state.serverUrl = altUrl;
+          try {
+            const retryRes = await apiRequest(endpoint, options, true);
+            localStorage.setItem('ar_pos_server_url', altUrl);
+            updateSidebarServerUrl();
+            return retryRes;
+          } catch (retryErr) {
+            state.serverUrl = oldUrl;
+          }
+        }
+      }
+
       console.error('API Request Error:', url, err);
       if (err.message && (err.message.includes('Failed to fetch') || err.message.includes('NetworkError'))) {
         updateServerStatus(false);
-        showServerModal();
       }
       throw err;
     }
@@ -253,6 +287,10 @@
   }
 
   function logout() {
+    if (autoSyncInterval) {
+      clearInterval(autoSyncInterval);
+      autoSyncInterval = null;
+    }
     if (state.token) {
       apiRequest('/auth/logout', { method: 'POST' }).catch(() => {});
     }
@@ -315,14 +353,74 @@
     if (settingServerUrl) settingServerUrl.value = state.serverUrl || DEFAULT_SERVER_URL;
   }
 
-  // --- Data Loading ---
+  // --- Data Loading & Auto-Sync Engine ---
+  let autoSyncInterval = null;
+  let isAutoSyncRunning = false;
+
+  function showSyncIndicator(syncing) {
+    const dot = document.getElementById('server-status-dot');
+    const refreshBtn = document.getElementById('btn-refresh');
+    if (dot) {
+      if (syncing) {
+        dot.classList.add('syncing');
+      } else {
+        dot.classList.remove('syncing');
+      }
+    }
+    if (refreshBtn) {
+      const svg = refreshBtn.querySelector('svg');
+      if (svg) {
+        if (syncing) {
+          svg.classList.add('spin-sync');
+        } else {
+          svg.classList.remove('spin-sync');
+        }
+      }
+    }
+  }
+
+  async function performAutoSync(silent = true) {
+    if (isAutoSyncRunning || !state.token) return;
+    isAutoSyncRunning = true;
+    showSyncIndicator(true);
+
+    try {
+      await Promise.allSettled([
+        fetchCategories(silent),
+        fetchProducts(silent),
+        fetchTxOptions()
+      ]);
+
+      if (state.activeTab === 'view-history') {
+        await fetchHistory(state.historyPeriod, true);
+      }
+      updateServerStatus(true);
+    } catch (e) {
+      console.warn('[AutoSync Error]:', e);
+    } finally {
+      isAutoSyncRunning = false;
+      showSyncIndicator(false);
+    }
+  }
+
+  function startAutoSync() {
+    if (autoSyncInterval) clearInterval(autoSyncInterval);
+    // Background polling otomatis setiap 15 detik saat aplikasi aktif
+    autoSyncInterval = setInterval(() => {
+      if (state.token && document.visibilityState === 'visible') {
+        performAutoSync(true);
+      }
+    }, 15000);
+  }
+
   async function loadInitialData() {
     updateServerStatus(true);
     await Promise.allSettled([
-      fetchCategories(),
-      fetchProducts(),
+      fetchCategories(false),
+      fetchProducts(false),
       fetchTxOptions()
     ]);
+    startAutoSync();
   }
 
   function updateServerStatus(online) {
@@ -337,7 +435,7 @@
     }
   }
 
-  async function fetchCategories() {
+  async function fetchCategories(silent = false) {
     try {
       const res = await apiRequest('/item-categories');
       if (res && res.data && res.data.categories) {
@@ -349,23 +447,60 @@
     }
   }
 
-  async function fetchProducts() {
+  async function fetchProducts(silent = false) {
     const grid = document.getElementById('product-grid');
-    grid.innerHTML = '<div style="grid-column: 1/-1; text-align:center; padding: 40px; color: var(--text-muted);">Memuat produk...</div>';
+    if (!silent && (!state.products || state.products.length === 0)) {
+      grid.innerHTML = '<div style="grid-column: 1/-1; text-align:center; padding: 40px; color: var(--text-muted);">Memuat produk...</div>';
+    }
 
     try {
-      const res = await apiRequest('/items?is_active=1&per_page=100');
+      let allItems = [];
+      const res = await apiRequest('/items?is_active=1&per_page=100&page=1');
       if (res && res.data && res.data.items) {
-        state.products = res.data.items;
+        allItems = [...res.data.items];
+
+        const lastPage = res.data.meta?.last_page || 1;
+        if (lastPage > 1) {
+          const pagePromises = [];
+          for (let p = 2; p <= Math.min(lastPage, 10); p++) {
+            pagePromises.push(apiRequest(`/items?is_active=1&per_page=100&page=${p}`));
+          }
+          const pageResults = await Promise.allSettled(pagePromises);
+          pageResults.forEach(r => {
+            if (r.status === 'fulfilled' && r.value?.data?.items) {
+              allItems = allItems.concat(r.value.data.items);
+            }
+          });
+        }
+
+        state.products = allItems;
+
+        // Sinkronkan stok terbaru pada keranjang kasir
+        if (state.cart && state.cart.length > 0) {
+          state.cart.forEach(cartItem => {
+            const latest = state.products.find(p => p.id === cartItem.id);
+            if (latest) {
+              cartItem.stock = Number(latest.stock || 0);
+            }
+          });
+          renderCart();
+        }
+
         applyProductFilter();
         renderInventoryList();
+        renderPurchaseItemSelect();
         updateServerStatus(true);
       }
     } catch (err) {
-      updateServerStatus(false);
-      grid.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding: 30px; color: var(--danger);">
-        Gagal memuat produk.<br><small>${err.message}</small>
-      </div>`;
+      console.warn('Gagal memuat produk:', err);
+      if (!silent) {
+        updateServerStatus(false);
+        if (!state.products || state.products.length === 0) {
+          grid.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding: 30px; color: var(--danger);">
+            Gagal memuat produk.<br><small>${err.message}</small>
+          </div>`;
+        }
+      }
     }
   }
 
@@ -381,11 +516,13 @@
     }
   }
 
-  async function fetchHistory(period = state.historyPeriod) {
+  async function fetchHistory(period = state.historyPeriod, silent = false) {
     state.historyPeriod = period;
     const container = document.getElementById('history-list');
     if (!container) return;
-    container.innerHTML = '<div style="text-align:center; padding:30px; color:var(--text-muted);">Memuat riwayat...</div>';
+    if (!silent) {
+      container.innerHTML = '<div style="text-align:center; padding:30px; color:var(--text-muted);">Memuat riwayat...</div>';
+    }
 
     // Update filter pills UI
     document.querySelectorAll('.btn-history-filter').forEach(btn => {
@@ -416,16 +553,18 @@
       renderHistoryList(list);
     } catch (err) {
       console.warn('Gagal memuat riwayat:', err);
-      container.innerHTML = `
-        <div style="text-align:center; color:var(--danger); padding:24px;">
-          <div style="margin-bottom:8px;">Gagal memuat riwayat: ${err.message}</div>
-          <button class="btn-primary-action" id="btn-retry-history" style="width:auto; margin:0 auto; padding:8px 18px; font-size:0.82rem;">
-            Coba Lagi
-          </button>
-        </div>
-      `;
-      const retryBtn = document.getElementById('btn-retry-history');
-      if (retryBtn) retryBtn.addEventListener('click', () => fetchHistory(period));
+      if (!silent) {
+        container.innerHTML = `
+          <div style="text-align:center; color:var(--danger); padding:24px;">
+            <div style="margin-bottom:8px;">Gagal memuat riwayat: ${err.message}</div>
+            <button class="btn-primary-action" id="btn-retry-history" style="width:auto; margin:0 auto; padding:8px 18px; font-size:0.82rem;">
+              Coba Lagi
+            </button>
+          </div>
+        `;
+        const retryBtn = document.getElementById('btn-retry-history');
+        if (retryBtn) retryBtn.addEventListener('click', () => fetchHistory(period));
+      }
     }
   }
 
@@ -794,7 +933,7 @@
       const custLabel = document.getElementById('selected-customer-label');
       if (custLabel) custLabel.textContent = 'Pelanggan Umum';
       updateCartUI();
-      fetchProducts(); // Refresh stock
+      performAutoSync(true); // Auto-sync stock, history and options
     } catch (err) {
       console.warn('Gagal menyelesaikan transaksi:', err.message);
     } finally {
@@ -2712,11 +2851,31 @@
       });
     }
 
-    // Refresh button
-    document.getElementById('btn-refresh').addEventListener('click', () => {
-      vibrateTouch(20);
-      showToast('Memuat ulang data...');
-      loadInitialData();
+    // Refresh button (Manual trigger auto-sync)
+    const btnRefreshMain = document.getElementById('btn-refresh');
+    if (btnRefreshMain) {
+      btnRefreshMain.addEventListener('click', () => {
+        vibrateTouch(20);
+        performAutoSync(false);
+      });
+    }
+
+    // Auto-Sync Event Listeners (Foreground, focus, online reconnect)
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible' && state.token) {
+        performAutoSync(true);
+      }
+    });
+
+    window.addEventListener('focus', () => {
+      if (state.token) {
+        performAutoSync(true);
+      }
+    });
+
+    window.addEventListener('online', () => {
+      updateServerStatus(true);
+      performAutoSync(false);
     });
 
     // Cart Open/Close
@@ -3137,7 +3296,7 @@
             msgEl.textContent = '✓ Barang baru berhasil ditambahkan!';
           }
 
-          await fetchProducts(); // Refresh katalog
+          await performAutoSync(true); // Auto-sync katalog
           setTimeout(() => {
             switchTab('view-inventory');
           }, 1000);
@@ -3378,7 +3537,7 @@
           }
           showToast('✓ Pembelian berhasil dicatat!');
 
-          await fetchProducts(); // Refresh stok barang
+          await performAutoSync(true); // Auto-sync stok barang & pembelian
           setTimeout(() => {
             if (tabBtnPurchaseList) tabBtnPurchaseList.click();
           }, 1200);

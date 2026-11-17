@@ -1041,6 +1041,23 @@ body {
   background-color: var(--danger);
   box-shadow: 0 0 6px var(--danger);
 }
+.status-dot.syncing {
+  background-color: var(--primary-light, #10b981) !important;
+  box-shadow: 0 0 8px var(--primary-light, #10b981);
+  animation: pulseSyncDot 0.8s ease-in-out infinite alternate;
+}
+@keyframes pulseSyncDot {
+  from { opacity: 0.35; transform: scale(0.85); }
+  to { opacity: 1; transform: scale(1.2); }
+}
+.spin-sync {
+  animation: spinSync 0.9s linear infinite;
+  transform-origin: center;
+}
+@keyframes spinSync {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
 
 .top-bar-actions {
   display: flex;
