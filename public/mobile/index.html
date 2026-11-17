@@ -10,7 +10,7 @@
   <link rel="manifest" href="manifest.json">
   <link rel="icon" type="image/png" href="icon.png">
   <link rel="apple-touch-icon" href="icon.png">
-  <link rel="stylesheet" href="css/app.css?v=10">
+  <link rel="stylesheet" href="css/app.css?v=11">
 </head>
 <body>
   <div class="app-container">
@@ -650,7 +650,7 @@
           </p>
           <label class="settings-label">Alamat URL Server Aktif</label>
           <div style="display:flex; gap:8px; margin-bottom:10px;">
-            <input type="text" id="setting-server-url" class="settings-input" style="flex:1; margin-bottom:0; font-size:0.85rem;" placeholder="https://www.arcell.store">
+            <input type="text" id="setting-server-url" class="settings-input" style="flex:1; margin-bottom:0; font-size:0.85rem;" placeholder="https://arcell.store">
             <button class="btn-primary-action" id="btn-save-settings" style="margin-top:0; width:auto; padding:0 14px; font-size:0.8rem; background:var(--bg-surface); border:1px solid var(--border-gold); color:var(--text-main);">
               Simpan
             </button>
@@ -979,12 +979,11 @@
           Pastikan HP Android dan Server berada di jaringan WiFi yang sama.
         </p>
         <label class="settings-label">URL Server POS Backend</label>
-        <input type="url" id="modal-server-url" class="settings-input" value="https://www.arcell.store" placeholder="https://www.arcell.store">
+        <input type="url" id="modal-server-url" class="settings-input" value="https://arcell.store" placeholder="https://arcell.store">
 
         <div class="settings-label">Pilihan Cepat Server:</div>
         <div style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:14px;">
-          <button type="button" class="category-pill active btn-preset-ip" data-url="https://www.arcell.store">🌐 www.arcell.store (HTTPS)</button>
-          <button type="button" class="category-pill btn-preset-ip" data-url="http://www.arcell.store">🌐 www.arcell.store (HTTP)</button>
+          <button type="button" class="category-pill active btn-preset-ip" data-url="https://arcell.store">🌐 arcell.store (Online Cloud)</button>
           <button type="button" class="category-pill btn-preset-ip" data-url="http://192.168.1.40/ar-pos/public">💻 Laptop Laragon (192.168.1.40)</button>
           <button type="button" class="category-pill btn-preset-ip" data-url="http://192.168.100.218">WiFi Lokal (192.168.100.218)</button>
           <button type="button" class="category-pill btn-preset-ip" data-url="http://192.168.66.22">Proxmox (192.168.66.22)</button>
@@ -1021,7 +1020,7 @@
         </form>
 
         <div style="text-align:center; margin-top:20px;">
-          <div style="font-size:0.75rem; color:var(--text-muted); margin-bottom:6px;">Server: <span id="login-display-server" style="color:var(--primary-light); font-weight:700;">https://www.arcell.store</span></div>
+          <div style="font-size:0.75rem; color:var(--text-muted); margin-bottom:6px;">Server: <span id="login-display-server" style="color:var(--primary-light); font-weight:700;">https://arcell.store</span></div>
           <a href="#" id="link-config-server" style="color:var(--primary); font-size:0.8rem; text-decoration:none; font-weight:600;">⚙️ Ganti / Atur URL Server</a>
         </div>
       </div>
@@ -1041,7 +1040,7 @@
         <div style="font-size:0.75rem; color:var(--text-muted); margin-bottom:8px;" id="sidebar-user-email">admin@arcell.store</div>
         <div style="display:flex; gap:6px; align-items:center;">
           <span style="background:var(--primary-glow); border:1px solid var(--border-gold); color:var(--primary-light); font-size:0.68rem; font-weight:700; padding:2px 8px; border-radius:var(--radius-full);" id="sidebar-user-role">Super Admin</span>
-          <span style="font-size:0.68rem; color:var(--primary-light); cursor:pointer; text-decoration:underline; font-weight:600;" id="sidebar-server-url" title="Klik untuk ganti server">www.arcell.store</span>
+          <span style="font-size:0.68rem; color:var(--primary-light); cursor:pointer; text-decoration:underline; font-weight:600;" id="sidebar-server-url" title="Klik untuk ganti server">arcell.store</span>
         </div>
       </div>
 
@@ -1107,6 +1106,6 @@
     <span id="toast-text">Pemberitahuan</span>
   </div>
 
-  <script src="js/app.js?v=10"></script>
+  <script src="js/app.js?v=11"></script>
 </body>
 </html>

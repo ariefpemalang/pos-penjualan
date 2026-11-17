@@ -6,7 +6,7 @@
   'use strict';
 
   // --- Configuration & State ---
-  let autoDetectedUrl = 'https://www.arcell.store';
+  let autoDetectedUrl = 'https://arcell.store';
   if (window.location.protocol.startsWith('http')) {
     const origin = window.location.origin;
     const path = window.location.pathname;
@@ -30,6 +30,11 @@
     !window.location.hostname.includes('arcell.store');
 
   let savedServerUrl = localStorage.getItem('ar_pos_server_url');
+  // Hapus domain www.arcell.store yang bermasalah dan ganti otomatis ke https://arcell.store resmi
+  if (savedServerUrl && savedServerUrl.includes('www.arcell.store')) {
+    savedServerUrl = savedServerUrl.replace('://www.arcell.store', '://arcell.store');
+    localStorage.setItem('ar_pos_server_url', savedServerUrl);
+  }
   if (isLocalWebAccess && (!savedServerUrl || savedServerUrl.includes('arcell.store'))) {
     savedServerUrl = autoDetectedUrl;
     localStorage.setItem('ar_pos_server_url', savedServerUrl);
@@ -217,27 +222,16 @@
 
       return data;
     } catch (err) {
-      // Auto-fallback domain: jika https://www.arcell.store gagal redirect/CORS, otomatis coba https://arcell.store (dan sebaliknya)
-      if (!isRetry && state.serverUrl && state.serverUrl.includes('arcell.store')) {
-        let altUrl = null;
-        if (state.serverUrl.includes('://www.arcell.store')) {
-          altUrl = state.serverUrl.replace('://www.arcell.store', '://arcell.store');
-        } else if (state.serverUrl.includes('://arcell.store')) {
-          altUrl = state.serverUrl.replace('://arcell.store', '://www.arcell.store');
-        }
-
-        if (altUrl) {
-          console.log(`[Auto-Sync] Gagal ke ${state.serverUrl}, mencoba fallback server: ${altUrl}`);
-          const oldUrl = state.serverUrl;
-          state.serverUrl = altUrl;
-          try {
-            const retryRes = await apiRequest(endpoint, options, true);
-            localStorage.setItem('ar_pos_server_url', altUrl);
-            updateSidebarServerUrl();
-            return retryRes;
-          } catch (retryErr) {
-            state.serverUrl = oldUrl;
-          }
+      // Pastikan selalu menggunakan https://arcell.store resmi (menghapus www.arcell.store yang bermasalah)
+      if (!isRetry && state.serverUrl && state.serverUrl.includes('www.arcell.store')) {
+        const canonicalUrl = state.serverUrl.replace('://www.arcell.store', '://arcell.store');
+        state.serverUrl = canonicalUrl;
+        localStorage.setItem('ar_pos_server_url', canonicalUrl);
+        updateSidebarServerUrl();
+        try {
+          return await apiRequest(endpoint, options, true);
+        } catch (retryErr) {
+          // pass
         }
       }
 
