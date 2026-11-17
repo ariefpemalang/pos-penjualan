@@ -10,7 +10,7 @@
   <link rel="manifest" href="manifest.json">
   <link rel="icon" type="image/png" href="icon.png">
   <link rel="apple-touch-icon" href="icon.png">
-  <link rel="stylesheet" href="css/app.css?v=11">
+  <link rel="stylesheet" href="css/app.css?v=12">
 </head>
 <body>
   <div class="app-container">
@@ -1007,12 +1007,14 @@
           <p style="color:var(--text-muted); font-size:0.85rem;">Silakan masuk dengan akun kasir Anda</p>
         </div>
 
-        <form id="form-login">
-          <label class="settings-label">Email</label>
-          <input type="email" id="login-email" class="settings-input" value="admin@arcell.store" required autocomplete="username">
+        <form id="form-login" novalidate>
+          <div id="login-error-msg" class="inline-msg-box error" style="display:none; margin-bottom:12px;"></div>
+
+          <label class="settings-label">Email / Username Kasir</label>
+          <input type="text" id="login-email" class="settings-input" value="kasir@arcell" placeholder="Contoh: kasir@arcell" required autocomplete="username">
 
           <label class="settings-label">Password</label>
-          <input type="password" id="login-password" class="settings-input" value="password" required autocomplete="current-password">
+          <input type="password" id="login-password" class="settings-input" value="12345678" placeholder="Masukkan password" required autocomplete="current-password">
 
           <button type="submit" class="btn-primary-action" id="btn-submit-login">
             MASUK KE KASIR
@@ -1106,6 +1108,6 @@
     <span id="toast-text">Pemberitahuan</span>
   </div>
 
-  <script src="js/app.js?v=11"></script>
+  <script src="js/app.js?v=12"></script>
 </body>
 </html>

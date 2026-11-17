@@ -245,6 +245,13 @@
 
   // --- Authentication ---
   function checkAuth() {
+    // Pastikan serverUrl yang digunakan adalah https://arcell.store resmi
+    if (state.serverUrl && state.serverUrl.includes('www.arcell.store')) {
+      state.serverUrl = state.serverUrl.replace('://www.arcell.store', '://arcell.store');
+      localStorage.setItem('ar_pos_server_url', state.serverUrl);
+    }
+    updateSidebarServerUrl();
+
     const loginModal = document.getElementById('login-modal');
     if (!state.token || !state.user) {
       loginModal.classList.add('open');
@@ -256,11 +263,28 @@
   }
 
   async function login(email, password) {
-    showToast('Menghubungkan ke server...');
+    const errorEl = document.getElementById('login-error-msg');
+    const submitBtn = document.getElementById('btn-submit-login');
+    if (errorEl) {
+      errorEl.style.display = 'none';
+      errorEl.textContent = '';
+    }
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Memeriksa akun...';
+    }
+
+    // Pastikan serverUrl adalah https://arcell.store (bersihkan www)
+    if (!state.serverUrl || state.serverUrl.includes('www.arcell.store')) {
+      state.serverUrl = 'https://arcell.store';
+      localStorage.setItem('ar_pos_server_url', state.serverUrl);
+      updateSidebarServerUrl();
+    }
+
     try {
       const res = await apiRequest('/auth/login', {
         method: 'POST',
-        body: JSON.stringify({ email, password, device_name: 'AR-POS-Mobile' })
+        body: JSON.stringify({ email: (email || '').trim(), password, device_name: 'AR-POS-Mobile' })
       });
 
       if (res && res.data && res.data.token) {
@@ -273,10 +297,19 @@
         updateUserInfo();
         loadInitialData();
       } else {
-        throw new Error('Respon login tidak valid.');
+        throw new Error(res?.message || 'Respon login tidak valid.');
       }
     } catch (err) {
       console.warn('Login Gagal:', err.message);
+      if (errorEl) {
+        errorEl.textContent = err.message || 'Gagal masuk. Periksa email/username dan password.';
+        errorEl.style.display = 'block';
+      }
+    } finally {
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'MASUK KE KASIR';
+      }
     }
   }
 
