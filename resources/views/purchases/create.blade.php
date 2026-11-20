@@ -86,19 +86,17 @@
                         <div class="mb-3">
                             <label class="form-label" for="supplier_id">Supplier</label>
                             <select id="supplier_id" class="form-control-clean atha-searchable-select">
-                                <option value="">-- Opsional --</option>
-                                <optgroup label="Supplier terdaftar">
-                                    @foreach ($suppliers as $supplier)
-                                        <option value="{{ $supplier->id }}">
-                                            {{ $supplier->code }} — {{ $supplier->name }}
-                                        </option>
-                                    @endforeach
-                                </optgroup>
-                                <option value="__new__">+ Supplier baru...</option>
+                                <option value="">-- Pilih Supplier (Opsional) --</option>
+                                <option value="__new__">+ Supplier Baru</option>
+                                @foreach ($suppliers as $supplier)
+                                    <option value="{{ $supplier->id }}">
+                                        {{ $supplier->code }} — {{ $supplier->name }}
+                                    </option>
+                                @endforeach
                             </select>
-                            <div class="form-hint-sm">Pilih supplier terdaftar atau buat baru — otomatis tersimpan ke master data.</div>
+                            <div class="form-hint-sm mt-1">Pilih supplier terdaftar atau buat baru — otomatis tersimpan ke master data.</div>
                         </div>
-                        <div id="new-supplier-fields" class="border rounded p-3 mb-3 d-none">
+                        <div id="new-supplier-fields" class="border rounded p-3 mb-3 d-none bg-light">
                             <div class="small fw-semibold mb-2"><i class="bi bi-truck me-1"></i> Data supplier baru</div>
                             <div class="mb-2">
                                 <label class="form-label small mb-0" for="new_supplier_name">Nama <span class="text-danger">*</span></label>
