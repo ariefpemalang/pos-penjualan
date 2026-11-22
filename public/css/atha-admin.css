@@ -5,7 +5,7 @@
 :root,
 [data-bs-theme="light"] {
   /* Sidebar width */
-  --sidebar-w: 200px;
+  --sidebar-w: 225px;
   --sidebar-w-mini: 62px;
 
   /* Brand accent — gold premium (sesuai logo AR Service) */
@@ -328,15 +328,23 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.42rem 0.85rem 0.42rem 2.65rem;
+  padding: 0.42rem 0.65rem 0.42rem 2.65rem;
   margin: 1px 0.5rem;
   border-radius: 6px;
-  color: #8B95A5;
+  color: #777;
   font-size: 0.8rem;
-  font-weight: 600;
+  font-weight: 400 !important;
+  white-space: nowrap !important;
   text-decoration: none !important;
   cursor: pointer;
   transition: all 0.15s ease-in-out;
+}
+
+.sidebar-subgroup-label {
+  white-space: nowrap !important;
+  font-weight: 400 !important;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .sidebar-subgroup-toggle:hover {
@@ -347,6 +355,7 @@ body {
 .sidebar-subgroup-toggle.is-active,
 .sidebar-subgroup-toggle[aria-expanded="true"] {
   color: var(--accent-bright);
+  font-weight: 400 !important;
 }
 
 .sidebar-subgroup-toggle .sidebar-chevron {
@@ -354,6 +363,7 @@ body {
   color: inherit;
   transition: transform 0.2s;
   margin-left: auto;
+  flex-shrink: 0;
 }
 
 .sidebar-subgroup-toggle[aria-expanded="true"] .sidebar-chevron {
@@ -368,11 +378,13 @@ body {
 
 .sidebar-nested-link {
   display: block;
-  padding: 0.38rem 0.85rem 0.38rem 3.45rem;
+  padding: 0.38rem 0.65rem 0.38rem 3.35rem;
   margin: 1px 0.5rem;
   border-radius: 6px;
   color: #777;
   font-size: 0.78rem;
+  font-weight: 400 !important;
+  white-space: nowrap !important;
   text-decoration: none !important;
   transition: all 0.15s;
 }
