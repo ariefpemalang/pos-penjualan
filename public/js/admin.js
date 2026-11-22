@@ -34,7 +34,7 @@
         }
 
         html.setAttribute('data-theme', theme);
-        html.setAttribute('data-bs-theme', theme === 'light' ? 'light' : 'dark');
+        html.setAttribute('data-bs-theme', theme === 'dark' ? 'dark' : 'light');
         localStorage.setItem(THEME_KEY, theme);
 
         document.querySelectorAll('.theme-choice-btn').forEach(function (btn) {
@@ -54,7 +54,7 @@
             const colors = {
                 dark: '#0F172A',
                 light: '#D4A017',
-                hijau: '#059669'
+                hijau: '#94D1B5'
             };
             metaThemeColor.setAttribute('content', colors[theme] || '#0F172A');
         }

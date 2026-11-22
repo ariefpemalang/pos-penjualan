@@ -10,7 +10,7 @@
                     theme = 'dark';
                 }
                 document.documentElement.setAttribute('data-theme', theme);
-                document.documentElement.setAttribute('data-bs-theme', theme === 'light' ? 'light' : 'dark');
+                document.documentElement.setAttribute('data-bs-theme', theme === 'dark' ? 'dark' : 'light');
             } catch (e) {}
         })();
     </script>

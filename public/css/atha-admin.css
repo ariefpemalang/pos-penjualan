@@ -5,7 +5,7 @@
 :root,
 [data-bs-theme="light"] {
   /* Sidebar width */
-  --sidebar-w: 225px;
+  --sidebar-w: 235px;
   --sidebar-w-mini: 62px;
 
   /* Brand accent — gold premium (sesuai logo AR Service) */
@@ -82,35 +82,35 @@
    Suasana hijau sejuk, teduh, natural, dan aduhai di mata
    ══════════════════════════════════════ */
 [data-theme="hijau"] {
-  --accent: #10B981;
-  --accent-bright: #34D399;
-  --accent-dark: #059669;
-  --accent-glow: rgba(16, 185, 129, 0.45);
-  --accent-soft: rgba(16, 185, 129, 0.18);
-  --accent-muted: rgba(16, 185, 129, 0.10);
+  --accent: #059669;
+  --accent-bright: #10B981;
+  --accent-dark: #047857;
+  --accent-glow: rgba(5, 150, 105, 0.35);
+  --accent-soft: rgba(5, 150, 105, 0.14);
+  --accent-muted: rgba(5, 150, 105, 0.08);
   --accent-btn-color: #FFFFFF;
 
   --secondary-accent: #047857;
   --atha-yellow: #D1FAE5;
 
   /* Card elevation */
-  --card-shadow: none;
-  --card-shadow-hover: none;
+  --card-shadow: 0 2px 8px rgba(12, 36, 24, 0.08);
+  --card-shadow-hover: 0 4px 14px rgba(12, 36, 24, 0.14);
 
-  /* Surfaces — hijau hutan sejuk, nyaman & aduhai */
-  --admin-bg: #091712;
-  --admin-surface: #10261E;
-  --admin-surface-2: #163328;
-  --admin-border: #1E4636;
-  --admin-text: #C3DFD3;
-  --admin-text-heading: #ECFDF5;
-  --admin-text-muted: #7A9E8F;
-  --admin-text-silver: #A9C9BC;
-  --admin-sidebar-bg: #081611;
-  --admin-sidebar-text: #A9C9BC;
-  --admin-sidebar-hover: #142C21;
-  --admin-sidebar-active: #1A392B;
-  --admin-topbar-bg: #0C1E17;
+  /* Surfaces — Background #94D1B5 sesuai instruksi user */
+  --admin-bg: #94D1B5;
+  --admin-surface: #FFFFFF;
+  --admin-surface-2: #E8F5EF;
+  --admin-border: #7ABEA0;
+  --admin-text: #193829;
+  --admin-text-heading: #0B2418;
+  --admin-text-muted: #3D6652;
+  --admin-text-silver: #244635;
+  --admin-sidebar-bg: #0C2419;
+  --admin-sidebar-text: #A7CBB9;
+  --admin-sidebar-hover: rgba(52, 211, 153, 0.16);
+  --admin-sidebar-active: rgba(52, 211, 153, 0.28);
+  --admin-topbar-bg: #FFFFFF;
   --admin-topbar-h: 3.25rem;
 
   --bs-body-bg: var(--admin-bg);
@@ -118,20 +118,20 @@
   --bs-border-color: var(--admin-border);
   --bs-secondary-color: var(--admin-text-muted);
   --bs-tertiary-bg: var(--admin-surface-2);
-  --bs-emphasis-color: #FFFFFF;
+  --bs-emphasis-color: var(--admin-text-heading);
   --bs-primary: var(--accent);
-  --bs-primary-rgb: 16, 185, 129;
-  --bs-link-color: var(--accent-bright);
-  --bs-link-hover-color: #A7F3D0;
-  --bs-success: #10B981;
+  --bs-primary-rgb: 5, 150, 105;
+  --bs-link-color: var(--accent);
+  --bs-link-hover-color: var(--accent-dark);
+  --bs-success: #059669;
 }
 
 [data-theme="hijau"] .admin-sidebar {
-  --admin-sidebar-bg: #081611;
-  --admin-sidebar-text: #A9C9BC;
-  --admin-sidebar-hover: rgba(16, 185, 129, 0.14);
-  --admin-sidebar-active: rgba(16, 185, 129, 0.28);
-  border-right-color: #17382A;
+  --admin-sidebar-bg: #0C2419;
+  --admin-sidebar-text: #A7CBB9;
+  --admin-sidebar-hover: rgba(52, 211, 153, 0.16);
+  --admin-sidebar-active: rgba(52, 211, 153, 0.28);
+  border-right-color: #1A3E2E;
 }
 
 [data-theme="hijau"] .sidebar-brand-text {
@@ -151,6 +151,91 @@
   color: #34D399 !important;
 }
 
+[data-theme="hijau"] .sidebar-subgroup-toggle {
+  color: #A7CBB9 !important;
+}
+
+[data-theme="hijau"] .sidebar-subgroup-toggle:hover {
+  background: rgba(52, 211, 153, 0.16) !important;
+  color: #FFFFFF !important;
+}
+
+[data-theme="hijau"] .sidebar-subgroup-toggle.is-active,
+[data-theme="hijau"] .sidebar-subgroup-toggle[aria-expanded="true"] {
+  color: #34D399 !important;
+}
+
+[data-theme="hijau"] .sidebar-submenu-link,
+[data-theme="hijau"] .sidebar-nested-link {
+  color: #A7CBB9 !important;
+}
+
+[data-theme="hijau"] .sidebar-submenu-link:hover,
+[data-theme="hijau"] .sidebar-nested-link:hover {
+  background: rgba(52, 211, 153, 0.16) !important;
+  color: #FFFFFF !important;
+}
+
+[data-theme="hijau"] .card,
+[data-theme="hijau"] .data-panel,
+[data-theme="hijau"] .stat-card {
+  background: #FFFFFF;
+  border: 1px solid #7ABEA0;
+  box-shadow: 0 2px 8px rgba(12, 36, 24, 0.06);
+}
+
+[data-theme="hijau"] .card-header,
+[data-theme="hijau"] .data-panel-head {
+  background: #E8F5EF;
+  border-bottom: 1px solid #7ABEA0;
+  color: #0B2418;
+}
+
+[data-theme="hijau"] .table {
+  --bs-table-bg: #FFFFFF;
+  --bs-table-color: #193829;
+  --bs-table-striped-bg: #F2F9F5;
+  --bs-table-hover-bg: #E3F2EB;
+  --bs-table-border-color: #C8E3D6;
+}
+
+[data-theme="hijau"] .table thead th {
+  background: #E8F5EF;
+  color: #193829;
+  border-bottom: 1px solid #7ABEA0 !important;
+}
+
+[data-theme="hijau"] .form-control,
+[data-theme="hijau"] .form-select {
+  background-color: #FFFFFF;
+  border-color: #7ABEA0;
+  color: #193829;
+}
+
+[data-theme="hijau"] .form-control:focus,
+[data-theme="hijau"] .form-select:focus {
+  border-color: #059669;
+  box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.22);
+  background-color: #FFFFFF;
+  color: #0B2418;
+}
+
+[data-theme="hijau"] .dropdown-menu {
+  background: #FFFFFF;
+  border-color: #7ABEA0;
+  box-shadow: 0 8px 24px rgba(12, 36, 24, 0.15);
+}
+
+[data-theme="hijau"] .dropdown-item {
+  color: #193829;
+}
+
+[data-theme="hijau"] .dropdown-item:hover,
+[data-theme="hijau"] .dropdown-item:focus {
+  background: #E8F5EF;
+  color: #059669;
+}
+
 [data-theme="hijau"] .btn-primary {
   --bs-btn-bg: #059669;
   --bs-btn-border-color: #059669;
@@ -164,7 +249,7 @@
 }
 
 [data-theme="hijau"] .btn-outline-primary {
-  --bs-btn-color: #34D399;
+  --bs-btn-color: #059669;
   --bs-btn-border-color: #059669;
   --bs-btn-hover-bg: #059669;
   --bs-btn-hover-border-color: #059669;
@@ -176,10 +261,10 @@
   color: #FFFFFF !important;
 }
 
-[data-theme="hijau"] .form-control:focus,
-[data-theme="hijau"] .form-select:focus {
-  border-color: #10B981;
-  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.22);
+[data-theme="hijau"] .page-item.active .page-link {
+  background-color: #059669;
+  border-color: #059669;
+  color: #FFFFFF;
 }
 
 /* ── Shell ── */
@@ -425,6 +510,12 @@ body {
 }
 
 /* Subgroup in sidebar (Nested collapsible subcategories) */
+.admin-sidebar a,
+.admin-sidebar a:hover,
+.admin-sidebar a:focus {
+  text-decoration: none !important;
+}
+
 .sidebar-subgroup-item {
   margin: 2px 0;
 }
@@ -433,10 +524,10 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.42rem 0.65rem 0.42rem 2.65rem;
+  padding: 0.42rem 0.65rem 0.42rem 2.5rem;
   margin: 1px 0.5rem;
   border-radius: 6px;
-  color: #777;
+  color: #888888 !important;
   font-size: 0.8rem;
   font-weight: 400 !important;
   white-space: nowrap !important;
@@ -450,6 +541,8 @@ body {
   font-weight: 400 !important;
   overflow: hidden;
   text-overflow: ellipsis;
+  flex: 1;
+  text-align: left;
 }
 
 .sidebar-subgroup-toggle:hover {
@@ -483,10 +576,10 @@ body {
 
 .sidebar-nested-link {
   display: block;
-  padding: 0.38rem 0.65rem 0.38rem 3.35rem;
+  padding: 0.38rem 0.65rem 0.38rem 3.25rem;
   margin: 1px 0.5rem;
   border-radius: 6px;
-  color: #777;
+  color: #888888 !important;
   font-size: 0.78rem;
   font-weight: 400 !important;
   white-space: nowrap !important;
@@ -765,8 +858,8 @@ body {
 }
 
 .theme-swatch-hijau {
-  background: linear-gradient(135deg, #34D399, #059669);
-  border: 1.5px solid #047857;
+  background: linear-gradient(135deg, #B5EAD1, #94D1B5);
+  border: 1.5px solid #059669;
 }
 
 /* Theme toggle icon state */
