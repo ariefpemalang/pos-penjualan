@@ -3,7 +3,6 @@
  */
 (function () {
     const THEME_KEY = 'atha-theme';
-    const VALID_THEMES = ['normal', 'dark'];
     const SIDEBAR_COLLAPSED_KEY = 'atha-sidebar-collapsed';
     const DESKTOP_BP = 992;
 
@@ -21,36 +20,12 @@
     }
 
     function getTheme() {
-        let theme = localStorage.getItem(THEME_KEY) || 'normal';
-        if (theme !== 'dark') theme = 'normal';
-        return theme;
+        return localStorage.getItem(THEME_KEY) || 'dark';
     }
 
     function setTheme(theme) {
-        if (theme !== 'dark') theme = 'normal';
-
-        html.setAttribute('data-theme', theme);
-        html.setAttribute('data-bs-theme', theme === 'dark' ? 'dark' : 'light');
+        html.setAttribute('data-bs-theme', theme);
         localStorage.setItem(THEME_KEY, theme);
-
-        document.querySelectorAll('.theme-choice-btn').forEach(function (btn) {
-            const val = btn.getAttribute('data-theme-value');
-            const check = btn.querySelector('.theme-check-icon');
-            if (val === theme) {
-                btn.classList.add('is-active', 'active');
-                if (check) check.classList.remove('d-none');
-            } else {
-                btn.classList.remove('is-active', 'active');
-                if (check) check.classList.add('d-none');
-            }
-        });
-
-        const metaThemeColor = document.querySelector('meta[name="theme-color"]');
-        if (metaThemeColor) {
-            metaThemeColor.setAttribute('content', theme === 'dark' ? '#0F172A' : '#D4A017');
-        }
-
-        window.dispatchEvent(new CustomEvent('atha-theme-changed', { detail: { theme } }));
     }
 
     function isSidebarCollapsed() {
@@ -239,18 +214,8 @@
         setSidebarCollapsed(true, false);
     }
 
-    document.querySelectorAll('.theme-choice-btn').forEach(function (btn) {
-        btn.addEventListener('click', function () {
-            const chosen = this.getAttribute('data-theme-value');
-            if (chosen) {
-                setTheme(chosen);
-            }
-        });
-    });
-
     btnTheme?.addEventListener('click', function () {
-        const current = getTheme();
-        const next = current === 'dark' ? 'normal' : 'dark';
+        const next = html.getAttribute('data-bs-theme') === 'dark' ? 'light' : 'dark';
         setTheme(next);
     });
 

@@ -3,41 +3,37 @@
  * Accent emas premium — harmony light & dark
  */
 :root,
-[data-bs-theme="light"],
-[data-theme="normal"] {
+[data-bs-theme="light"] {
   /* Sidebar width */
-  --sidebar-w: 235px;
+  --sidebar-w: 200px;
   --sidebar-w-mini: 62px;
 
-  /* Brand accent — gold premium */
+  /* Brand accent — gold premium (sesuai logo AR Service) */
   --accent: #D4A017;
   --accent-bright: #F0C040;
   --accent-dark: #8C5A14;
   --accent-glow: rgba(212, 160, 23, 0.45);
   --accent-soft: rgba(212, 160, 23, 0.16);
   --accent-muted: rgba(212, 160, 23, 0.09);
-  --accent-btn-color: #1a1a1a;
 
   --secondary-accent: #E6B01F;
   --atha-yellow: #FFF1B5;
 
-  /* Card elevation */
+  /* Card elevation — flat, tanpa shadow */
   --card-shadow: none;
   --card-shadow-hover: none;
 
-  /* Surfaces — cerah, bersih & elegan */
-  --admin-bg: #FAF8F4;
+  /* Light mode surfaces */
+  --admin-bg: #F0F2F5;
   --admin-surface: #FFFFFF;
-  --admin-surface-2: #F4EFE6;
-  --admin-border: #E8E0D2;
-  --admin-text: #4B5563;
-  --admin-text-heading: #1F2937;
-  --admin-text-muted: #6B7280;
-  --admin-text-silver: #4B5563;
-  --admin-sidebar-bg: #2B2314;
-  --admin-sidebar-text: rgba(255, 255, 255, 0.88);
-  --admin-sidebar-hover: rgba(212, 160, 23, 0.22);
-  --admin-sidebar-active: rgba(212, 160, 23, 0.38);
+  --admin-surface-2: #F5F6F8;
+  --admin-border: #E2E5EA;
+  --admin-text: #5C6573;
+  --admin-text-heading: #3D4654;
+  --admin-text-muted: #8B95A5;
+  --admin-text-silver: #6B7280;
+  --admin-sidebar-bg: #2B2B2B;
+  --admin-sidebar-text: rgba(255, 255, 255, 0.65);
   --admin-topbar-bg: #FFFFFF;
   --admin-topbar-h: 3.25rem;
 
@@ -46,52 +42,28 @@
   --bs-link-color: var(--accent-dark);
   --bs-link-hover-color: var(--accent);
   --bs-success: var(--accent);
-  --bs-body-bg: var(--admin-bg);
-  --bs-body-color: var(--admin-text);
-  --bs-border-color: var(--admin-border);
 }
 
-[data-theme="normal"] .admin-sidebar {
-  --admin-sidebar-bg: #2B2314;
-  --admin-sidebar-text: rgba(255, 255, 255, 0.88);
-  --admin-sidebar-hover: rgba(212, 160, 23, 0.22);
-  --admin-sidebar-active: rgba(212, 160, 23, 0.38);
-  border-right-color: #3D3524;
-}
-[data-theme="normal"] .sidebar-brand-text { color: #FFF2CC; }
-
-/* ══════════════════════════════════════
-   THEME 2: DARK (Obsidian Midnight)
-   ══════════════════════════════════════ */
-[data-bs-theme="dark"],
-[data-theme="dark"] {
-  --accent: #F59E0B;
-  --accent-bright: #FBBF24;
-  --accent-dark: #D97706;
-  --accent-glow: rgba(245, 158, 11, 0.45);
-  --accent-soft: rgba(245, 158, 11, 0.18);
-  --accent-muted: rgba(245, 158, 11, 0.1);
-  --accent-btn-color: #0F172A;
-  --secondary-accent: #E6B01F;
-  --atha-yellow: #FEF3C7;
-
+/* Dark mode — seperti referensi panel gelap */
+[data-bs-theme="dark"] {
+  --admin-bg: #121212;
+  --admin-surface: #1c1c1c;
+  --admin-surface-2: #282828;
+  --admin-border: #3d3d3d;
+  --admin-text: #c8cdd5;
+  --admin-text-heading: #eceef2;
+  --admin-text-muted: #9aa3b0;
+  --admin-text-silver: #b0b8c4;
+  --admin-sidebar-bg: #1a1a1a;
+  --admin-sidebar-text: #aaaaaa;
+  --admin-sidebar-hover: #2d2d2d;
+  --admin-sidebar-active: #333333;
+  --admin-topbar-bg: #1a1a1a;
+  --admin-topbar-h: 3.25rem;
+  --accent-soft: rgba(240, 192, 64, 0.18);
+  --accent-muted: rgba(240, 192, 64, 0.1);
   --card-shadow: none;
   --card-shadow-hover: none;
-
-  --admin-bg: #0B1120;
-  --admin-surface: #1E293B;
-  --admin-surface-2: #273549;
-  --admin-border: #334155;
-  --admin-text: #CBD5E1;
-  --admin-text-heading: #F8FAFC;
-  --admin-text-muted: #94A3B8;
-  --admin-text-silver: #E2E8F0;
-  --admin-sidebar-bg: #0F172A;
-  --admin-sidebar-text: rgba(255, 255, 255, 0.88);
-  --admin-sidebar-hover: rgba(255, 255, 255, 0.12);
-  --admin-sidebar-active: rgba(245, 158, 11, 0.3);
-  --admin-topbar-bg: #131D31;
-  --admin-topbar-h: 3.25rem;
 
   --bs-body-bg: var(--admin-bg);
   --bs-body-color: var(--admin-text);
@@ -100,23 +72,9 @@
   --bs-tertiary-bg: var(--admin-surface-2);
   --bs-emphasis-color: #fff;
   --bs-primary: var(--accent);
-  --bs-primary-rgb: 245, 158, 11;
+  --bs-primary-rgb: 212, 160, 23;
   --bs-link-color: var(--accent-bright);
-  --bs-link-hover-color: #FEF3C7;
-  --bs-success: #10B981;
-}
-
-[data-theme="dark"] .admin-sidebar,
-[data-bs-theme="dark"] .admin-sidebar {
-  --admin-sidebar-bg: #0F172A;
-  --admin-sidebar-text: rgba(255, 255, 255, 0.88);
-  --admin-sidebar-hover: rgba(255, 255, 255, 0.12);
-  --admin-sidebar-active: rgba(245, 158, 11, 0.3);
-  border-right-color: #1E293B;
-}
-[data-theme="dark"] .sidebar-brand-text,
-[data-bs-theme="dark"] .sidebar-brand-text {
-  color: #F8FAFC;
+  --bs-link-hover-color: #FFF1B5;
 }
 
 /* ── Shell ── */
@@ -218,11 +176,9 @@ body {
 .sidebar-brand-logo {
   width: 40px;
   height: 40px;
-  object-fit: cover;
-  border-radius: 50%;
-  background: #ffffff;
-  padding: 1px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  object-fit: contain;
+  border-radius: 8px;
+  background: #111;
   flex-shrink: 0;
   margin-top: 0.1rem;
 }
@@ -235,7 +191,7 @@ body {
 }
 
 .sidebar-brand-text {
-  color: #FFFFFF;
+  color: #F0F0F0;
   font-weight: 700;
   font-size: 0.88rem;
   letter-spacing: -0.01em;
@@ -243,7 +199,7 @@ body {
 }
 
 .sidebar-brand-sub {
-  color: rgba(255, 255, 255, 0.75);
+  color: #666;
   font-size: 0.68rem;
   font-weight: 400;
   line-height: 1.2;
@@ -252,7 +208,7 @@ body {
 .btn-sidebar-close {
   background: none;
   border: none;
-  color: rgba(255, 255, 255, 0.8);
+  color: #888;
   padding: 0.25rem;
   font-size: 1rem;
   line-height: 1;
@@ -276,22 +232,22 @@ body {
   align-items: center;
   gap: 0;
   padding: 0.6rem 0.85rem;
-  margin: 2px 0.5rem;
-  border-radius: 8px;
-  color: rgba(255, 255, 255, 0.88);
+  margin: 1px 0.5rem;
+  border-radius: 6px;
+  color: var(--admin-sidebar-text);
   text-decoration: none;
   font-size: 0.84rem;
-  font-weight: 500;
-  transition: background 0.15s, color 0.15s, transform 0.1s;
+  font-weight: 400;
+  transition: background 0.15s, color 0.15s;
   cursor: pointer;
 }
 
 .sidebar-menu-icon {
   width: 28px;
   flex-shrink: 0;
-  font-size: 1.1rem;
+  font-size: 1.05rem;
   text-align: center;
-  color: rgba(255, 255, 255, 0.85);
+  color: #777;
   transition: color 0.15s;
 }
 
@@ -303,8 +259,8 @@ body {
 }
 
 .sidebar-chevron {
-  font-size: 0.68rem;
-  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.65rem;
+  color: #666;
   transition: transform 0.2s;
   margin-left: auto;
 }
@@ -313,136 +269,71 @@ body {
   transform: rotate(180deg);
 }
 
-/* Hover — semi-transparan elegan */
+/* Hover — subtle gray */
 .sidebar-menu-link:hover {
   background: var(--admin-sidebar-hover);
-  color: #FFFFFF;
+  color: #D0D0D0;
 }
 
 .sidebar-menu-link:hover .sidebar-menu-icon {
-  color: #FFFFFF;
+  color: #AAA;
 }
 
-/* Active — solid cerah & kontras tinggi */
+/* Active — gray bg + red icon (seperti hijau di referensi) */
 .sidebar-menu-link.active,
 .sidebar-menu-link.is-active {
   background: var(--admin-sidebar-active) !important;
-  color: #FFFFFF !important;
-  font-weight: 600;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+  color: #E8E8E8 !important;
 }
 
 .sidebar-menu-link.active .sidebar-menu-icon,
 .sidebar-menu-link.is-active .sidebar-menu-icon {
-  color: #FFFFFF !important;
+  color: var(--accent-bright) !important;
 }
 
 /* Submenu */
 .sidebar-submenu {
-  padding: 0.2rem 0 0.4rem 0;
+  padding: 0.15rem 0 0.35rem 0;
   margin: 0;
 }
 
 .sidebar-submenu-link {
   display: block;
-  padding: 0.45rem 0.85rem 0.45rem 2.25rem;
-  margin: 2px 0.5rem;
+  padding: 0.42rem 0.85rem 0.42rem 2.65rem;
+  margin: 1px 0.5rem;
   border-radius: 6px;
-  color: rgba(255, 255, 255, 0.8);
-  font-size: 0.81rem;
-  font-weight: 450;
+  color: #777;
+  font-size: 0.8rem;
   text-decoration: none;
-  white-space: nowrap;
   transition: all 0.15s;
 }
 
 .sidebar-submenu-link:hover {
   background: var(--admin-sidebar-hover);
-  color: #FFFFFF;
+  color: #CCC;
 }
 
 .sidebar-submenu-link.active {
   background: var(--admin-sidebar-active) !important;
-  color: #FFFFFF !important;
-  font-weight: 600;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.14);
-}
-
-/* Subgroup in sidebar (Nested collapsible subcategories) */
-.sidebar-subgroup-item {
-  margin: 3px 0;
-}
-
-.sidebar-subgroup-toggle {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0.5rem 0.85rem 0.5rem 2.25rem;
-  margin: 2px 0.5rem;
-  border-radius: 6px;
-  color: #FFFFFF;
-  font-size: 0.84rem;
-  font-weight: 700;
-  text-decoration: none;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: all 0.15s ease-in-out;
-}
-
-.sidebar-subgroup-toggle:hover {
-  background: var(--admin-sidebar-hover);
-  color: #FFFFFF;
-}
-
-.sidebar-subgroup-toggle.is-active {
-  color: #FFFFFF;
-}
-
-.sidebar-subgroup-toggle .sidebar-chevron {
-  font-size: 0.65rem;
-  color: rgba(255, 255, 255, 0.75);
-  transition: transform 0.2s;
-  margin-left: auto;
-}
-
-.sidebar-subgroup-toggle[aria-expanded="true"] .sidebar-chevron {
-  transform: rotate(180deg);
-}
-
-.sidebar-nested-list {
-  padding: 0.15rem 0 0.35rem 0;
-  margin: 0;
-}
-
-.sidebar-nested-link {
-  display: block;
-  padding: 0.42rem 0.85rem 0.42rem 3rem;
-  margin: 2px 0.5rem;
-  border-radius: 6px;
-  color: rgba(255, 255, 255, 0.78);
-  font-size: 0.81rem;
-  font-weight: 450;
-  text-decoration: none;
-  white-space: nowrap;
-  transition: all 0.15s;
-}
-
-.sidebar-nested-link:hover {
-  background: var(--admin-sidebar-hover);
-  color: #FFFFFF;
-}
-
-.sidebar-nested-link.active {
-  background: var(--admin-sidebar-active) !important;
-  color: #FFFFFF !important;
-  font-weight: 600;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.14);
+  color: var(--accent-bright) !important;
+  font-weight: 500;
 }
 
 /* Flyout title — hanya tampil saat sidebar mini */
 .sidebar-flyout-head {
   display: none;
 }
+
+/* Light mode: sidebar tetap gelap panel-style */
+[data-bs-theme="light"] .admin-sidebar {
+  --admin-sidebar-bg: #1E1E1E;
+  --admin-sidebar-text: #AAAAAA;
+  --admin-sidebar-hover: #2D2D2D;
+  --admin-sidebar-active: #333333;
+  border-right-color: #2a2a2a;
+}
+
+[data-bs-theme="light"] .sidebar-brand-text { color: #E8E8E8; }
 
 /* ── Sidebar collapsed (desktop mini) ── */
 @media (min-width: 992px) {
@@ -612,94 +503,9 @@ body {
 
 .btn-icon-sm { width: 32px; height: 32px; }
 
-/* ── Theme Selector Dropdown ── */
-.theme-dropdown .dropdown-toggle::after {
-  display: none !important;
-}
-
-.theme-toggle-btn {
-  position: relative;
-}
-
-.theme-current-dot {
-  position: absolute;
-  bottom: 4px;
-  right: 4px;
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  background: var(--accent-bright);
-  box-shadow: 0 0 6px var(--accent-glow);
-  border: 1.5px solid var(--admin-surface);
-  transition: all 0.25s ease;
-}
-
-.theme-menu-dropdown {
-  background: var(--admin-surface);
-  border: 1px solid var(--admin-border) !important;
-  box-shadow: 0 12px 28px -6px rgba(0, 0, 0, 0.25), 0 8px 12px -6px rgba(0, 0, 0, 0.15) !important;
-  border-radius: 12px;
-}
-
-.theme-choice-btn {
-  color: var(--admin-text);
-  font-size: 0.84rem;
-  transition: all 0.15s ease;
-  cursor: pointer;
-  background: transparent;
-  border: none;
-  width: 100%;
-}
-
-.theme-choice-btn:hover {
-  background: var(--accent-soft);
-  color: var(--admin-text-heading);
-}
-
-.theme-choice-btn.is-active {
-  background: var(--accent-soft);
-  color: var(--admin-text-heading);
-  font-weight: 600;
-}
-
-.theme-choice-btn.is-active .theme-check-icon {
-  display: inline-block !important;
-  color: var(--accent) !important;
-}
-
-.theme-swatch {
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  display: inline-block;
-  flex-shrink: 0;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
-}
-
-.theme-swatch-normal {
-  background: linear-gradient(135deg, #F0C040, #D4A017);
-  border: 1.5px solid #8C5A14;
-}
-
-.theme-swatch-dark {
-  background: linear-gradient(135deg, #334155, #0F172A);
-  border: 1.5px solid #F59E0B;
-}
-
-/* Theme toggle icon support (Normal & Dark) */
-.theme-icon-dark { display: none !important; }
-.theme-icon-light { display: inline-block !important; }
-
-[data-bs-theme="dark"] .theme-icon-light,
-[data-theme="dark"] .theme-icon-light {
-  display: none !important;
-}
-
-[data-bs-theme="dark"] .theme-icon-dark,
-[data-theme="dark"] .theme-icon-dark {
-  display: inline-block !important;
-  color: #FBBF24 !important;
-}
+#btn-theme-toggle .theme-icon-dark { display: none; }
+[data-bs-theme="dark"] #btn-theme-toggle .theme-icon-light { display: none; }
+[data-bs-theme="dark"] #btn-theme-toggle .theme-icon-dark { display: inline; color: var(--accent-bright); }
 
 /* Profile pill */
 .btn-profile {
@@ -892,7 +698,7 @@ body {
 .btn-primary {
   --bs-btn-bg: var(--accent);
   --bs-btn-border-color: var(--accent);
-  --bs-btn-color: var(--accent-btn-color, #1a1a1a);
+  --bs-btn-color: #1a1a1a;
   --bs-btn-hover-bg: var(--accent-dark);
   --bs-btn-hover-border-color: var(--accent-dark);
   --bs-btn-hover-color: #fff;
@@ -1019,22 +825,6 @@ table.dataTable thead th {
   border-color: var(--admin-border);
 }
 
-div.dataTables_processing {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: var(--admin-surface) !important;
-  color: var(--admin-text) !important;
-  border: 1px solid var(--admin-border) !important;
-  border-radius: 10px !important;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15) !important;
-  padding: 0.65rem 1.4rem !important;
-  z-index: 1050;
-  font-size: 0.86rem;
-  backdrop-filter: blur(4px);
-}
-
 /* ── Forms ── */
 .form-control,
 .form-select {
@@ -1088,6 +878,11 @@ div.dataTables_processing {
 
 [data-bs-theme="dark"] .btn-close {
   filter: invert(1) grayscale(100%) opacity(0.6);
+}
+
+/* Light mode: sidebar tetap gelap, konten terang */
+[data-bs-theme="light"] .admin-sidebar {
+  border-right-color: #2a2a2a;
 }
 
 [data-bs-theme="light"] .stat-ring::before {
@@ -2291,7 +2086,6 @@ a.dash-card-link .stat-card {
 .dash-kpi-success .dash-kpi-icon { background: rgba(34, 197, 94, 0.12); color: #22c55e; }
 .dash-kpi-warning .dash-kpi-icon { background: rgba(245, 158, 11, 0.12); color: #f59e0b; }
 .dash-kpi-info .dash-kpi-icon { background: rgba(6, 182, 212, 0.12); color: #06b6d4; }
-.dash-kpi-danger .dash-kpi-icon { background: rgba(239, 68, 68, 0.12); color: #ef4444; }
 
 .dash-kpi-label {
   font-size: 0.75rem;
