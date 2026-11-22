@@ -5,10 +5,12 @@
     <script>
         (function () {
             try {
-                var theme = localStorage.getItem('atha-theme');
-                if (theme === 'light' || theme === 'dark') {
-                    document.documentElement.setAttribute('data-bs-theme', theme);
+                var theme = localStorage.getItem('atha-theme') || 'dark';
+                if (theme !== 'dark' && theme !== 'light' && theme !== 'hijau') {
+                    theme = 'dark';
                 }
+                document.documentElement.setAttribute('data-theme', theme);
+                document.documentElement.setAttribute('data-bs-theme', theme === 'light' ? 'light' : 'dark');
             } catch (e) {}
         })();
     </script>
@@ -52,11 +54,48 @@
                 </div>
 
                 <div class="ms-auto d-flex align-items-center gap-2 gap-md-3">
-                    <button type="button" class="btn btn-icon" id="btn-theme-toggle"
-                        aria-label="Ganti tema" title="Ganti tema terang/gelap">
-                        <i class="bi bi-sun-fill theme-icon-light"></i>
-                        <i class="bi bi-moon-stars-fill theme-icon-dark"></i>
-                    </button>
+                    <div class="dropdown theme-dropdown" id="theme-dropdown-wrap">
+                        <button type="button" class="btn btn-icon theme-toggle-btn dropdown-toggle"
+                            id="btn-theme-dropdown" data-bs-toggle="dropdown" aria-expanded="false"
+                            aria-label="Pilih Suasana Tema" title="Pilih Suasana Tema Tampilan">
+                            <i class="bi bi-moon-stars-fill theme-icon-dark fs-5"></i>
+                            <i class="bi bi-sun-fill theme-icon-light fs-5"></i>
+                            <i class="bi bi-tree-fill theme-icon-hijau fs-5"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end border-0 shadow-lg mt-2 p-2 theme-menu-dropdown" style="min-width: 220px;">
+                            <li class="dropdown-header px-2 py-1 text-uppercase fw-bold" style="font-size: 0.68rem; letter-spacing: 0.06em; color: var(--admin-text-muted);">
+                                <i class="bi bi-palette me-1"></i> Suasana Tema
+                            </li>
+                            <li><hr class="dropdown-divider my-1"></li>
+                            <li>
+                                <button type="button" class="dropdown-item d-flex align-items-center justify-content-between rounded-2 px-2 py-2 theme-choice-btn" data-theme-value="dark">
+                                    <span class="d-flex align-items-center gap-2">
+                                        <span class="theme-swatch theme-swatch-dark"></span>
+                                        <span class="theme-label fw-medium">Dark (Obsidian)</span>
+                                    </span>
+                                    <i class="bi bi-check2 theme-check-icon text-success d-none fs-6"></i>
+                                </button>
+                            </li>
+                            <li>
+                                <button type="button" class="dropdown-item d-flex align-items-center justify-content-between rounded-2 px-2 py-2 theme-choice-btn" data-theme-value="light">
+                                    <span class="d-flex align-items-center gap-2">
+                                        <span class="theme-swatch theme-swatch-light"></span>
+                                        <span class="theme-label fw-medium">Normal (Light)</span>
+                                    </span>
+                                    <i class="bi bi-check2 theme-check-icon text-success d-none fs-6"></i>
+                                </button>
+                            </li>
+                            <li>
+                                <button type="button" class="dropdown-item d-flex align-items-center justify-content-between rounded-2 px-2 py-2 theme-choice-btn" data-theme-value="hijau">
+                                    <span class="d-flex align-items-center gap-2">
+                                        <span class="theme-swatch theme-swatch-hijau"></span>
+                                        <span class="theme-label fw-medium">Hijau Sejuk (Natural)</span>
+                                    </span>
+                                    <i class="bi bi-check2 theme-check-icon text-success d-none fs-6"></i>
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
 
                     @auth
                         <div class="dropdown">

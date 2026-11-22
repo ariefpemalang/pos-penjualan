@@ -77,6 +77,111 @@
   --bs-link-hover-color: #FFF1B5;
 }
 
+/* ══════════════════════════════════════
+   THEME HIJAU SEJUK (Natural Emerald & Forest Breeze)
+   Suasana hijau sejuk, teduh, natural, dan aduhai di mata
+   ══════════════════════════════════════ */
+[data-theme="hijau"] {
+  --accent: #10B981;
+  --accent-bright: #34D399;
+  --accent-dark: #059669;
+  --accent-glow: rgba(16, 185, 129, 0.45);
+  --accent-soft: rgba(16, 185, 129, 0.18);
+  --accent-muted: rgba(16, 185, 129, 0.10);
+  --accent-btn-color: #FFFFFF;
+
+  --secondary-accent: #047857;
+  --atha-yellow: #D1FAE5;
+
+  /* Card elevation */
+  --card-shadow: none;
+  --card-shadow-hover: none;
+
+  /* Surfaces — hijau hutan sejuk, nyaman & aduhai */
+  --admin-bg: #091712;
+  --admin-surface: #10261E;
+  --admin-surface-2: #163328;
+  --admin-border: #1E4636;
+  --admin-text: #C3DFD3;
+  --admin-text-heading: #ECFDF5;
+  --admin-text-muted: #7A9E8F;
+  --admin-text-silver: #A9C9BC;
+  --admin-sidebar-bg: #081611;
+  --admin-sidebar-text: #A9C9BC;
+  --admin-sidebar-hover: #142C21;
+  --admin-sidebar-active: #1A392B;
+  --admin-topbar-bg: #0C1E17;
+  --admin-topbar-h: 3.25rem;
+
+  --bs-body-bg: var(--admin-bg);
+  --bs-body-color: var(--admin-text);
+  --bs-border-color: var(--admin-border);
+  --bs-secondary-color: var(--admin-text-muted);
+  --bs-tertiary-bg: var(--admin-surface-2);
+  --bs-emphasis-color: #FFFFFF;
+  --bs-primary: var(--accent);
+  --bs-primary-rgb: 16, 185, 129;
+  --bs-link-color: var(--accent-bright);
+  --bs-link-hover-color: #A7F3D0;
+  --bs-success: #10B981;
+}
+
+[data-theme="hijau"] .admin-sidebar {
+  --admin-sidebar-bg: #081611;
+  --admin-sidebar-text: #A9C9BC;
+  --admin-sidebar-hover: rgba(16, 185, 129, 0.14);
+  --admin-sidebar-active: rgba(16, 185, 129, 0.28);
+  border-right-color: #17382A;
+}
+
+[data-theme="hijau"] .sidebar-brand-text {
+  color: #D1FAE5;
+}
+
+[data-theme="hijau"] .sidebar-menu-link.active,
+[data-theme="hijau"] .sidebar-menu-link.is-active,
+[data-theme="hijau"] .sidebar-submenu-link.active,
+[data-theme="hijau"] .sidebar-nested-link.active {
+  background: rgba(16, 185, 129, 0.22) !important;
+  color: #34D399 !important;
+}
+
+[data-theme="hijau"] .sidebar-menu-link.active .sidebar-menu-icon,
+[data-theme="hijau"] .sidebar-menu-link.is-active .sidebar-menu-icon {
+  color: #34D399 !important;
+}
+
+[data-theme="hijau"] .btn-primary {
+  --bs-btn-bg: #059669;
+  --bs-btn-border-color: #059669;
+  --bs-btn-color: #FFFFFF;
+  --bs-btn-hover-bg: #047857;
+  --bs-btn-hover-border-color: #047857;
+  --bs-btn-hover-color: #FFFFFF;
+  --bs-btn-active-bg: #065F46;
+  --bs-btn-active-border-color: #065F46;
+  --bs-btn-active-color: #FFFFFF;
+}
+
+[data-theme="hijau"] .btn-outline-primary {
+  --bs-btn-color: #34D399;
+  --bs-btn-border-color: #059669;
+  --bs-btn-hover-bg: #059669;
+  --bs-btn-hover-border-color: #059669;
+  --bs-btn-hover-color: #FFFFFF;
+}
+
+[data-theme="hijau"] .badge.bg-primary {
+  background-color: #059669 !important;
+  color: #FFFFFF !important;
+}
+
+[data-theme="hijau"] .form-control:focus,
+[data-theme="hijau"] .form-select:focus {
+  border-color: #10B981;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.22);
+}
+
 /* ── Shell ── */
 body {
   font-family: 'Inter', system-ui, sans-serif;
@@ -596,9 +701,100 @@ body {
 
 .btn-icon-sm { width: 32px; height: 32px; }
 
-#btn-theme-toggle .theme-icon-dark { display: none; }
-[data-bs-theme="dark"] #btn-theme-toggle .theme-icon-light { display: none; }
-[data-bs-theme="dark"] #btn-theme-toggle .theme-icon-dark { display: inline; color: var(--accent-bright); }
+/* ── Theme Selector & Dropdown ── */
+.theme-dropdown .dropdown-toggle::after {
+  display: none !important;
+}
+
+.theme-toggle-btn {
+  position: relative;
+}
+
+.theme-menu-dropdown {
+  background: var(--admin-surface);
+  border: 1px solid var(--admin-border) !important;
+  box-shadow: 0 12px 28px -6px rgba(0, 0, 0, 0.35), 0 8px 12px -6px rgba(0, 0, 0, 0.2) !important;
+  border-radius: 12px;
+}
+
+.theme-choice-btn {
+  color: var(--admin-text);
+  font-size: 0.84rem;
+  transition: all 0.15s ease;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  width: 100%;
+}
+
+.theme-choice-btn:hover {
+  background: var(--admin-sidebar-hover);
+  color: var(--admin-text-heading);
+}
+
+.theme-choice-btn.is-active,
+.theme-choice-btn.active {
+  background: var(--accent-soft);
+  color: var(--accent-bright);
+  font-weight: 600;
+}
+
+.theme-choice-btn.is-active .theme-check-icon,
+.theme-choice-btn.active .theme-check-icon {
+  display: inline-block !important;
+  color: var(--accent) !important;
+}
+
+.theme-swatch {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+}
+
+.theme-swatch-dark {
+  background: linear-gradient(135deg, #334155, #0F172A);
+  border: 1.5px solid #F59E0B;
+}
+
+.theme-swatch-light {
+  background: linear-gradient(135deg, #F0C040, #D4A017);
+  border: 1.5px solid #8C5A14;
+}
+
+.theme-swatch-hijau {
+  background: linear-gradient(135deg, #34D399, #059669);
+  border: 1.5px solid #047857;
+}
+
+/* Theme toggle icon state */
+.theme-icon-dark,
+.theme-icon-light,
+.theme-icon-hijau {
+  display: none !important;
+}
+
+/* Default Dark */
+[data-theme="dark"] .theme-icon-dark,
+[data-bs-theme="dark"]:not([data-theme="hijau"]):not([data-theme="light"]) .theme-icon-dark {
+  display: inline-block !important;
+  color: #FBBF24 !important;
+}
+
+/* Light / Normal */
+[data-theme="light"] .theme-icon-light,
+[data-bs-theme="light"]:not([data-theme="hijau"]) .theme-icon-light {
+  display: inline-block !important;
+  color: #D4A017 !important;
+}
+
+/* Hijau Sejuk Natural */
+[data-theme="hijau"] .theme-icon-hijau {
+  display: inline-block !important;
+  color: #34D399 !important;
+}
 
 /* Profile pill */
 .btn-profile {

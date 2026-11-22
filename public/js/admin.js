@@ -3,6 +3,7 @@
  */
 (function () {
     const THEME_KEY = 'atha-theme';
+    const VALID_THEMES = ['dark', 'light', 'hijau'];
     const SIDEBAR_COLLAPSED_KEY = 'atha-sidebar-collapsed';
     const DESKTOP_BP = 992;
 
@@ -13,19 +14,52 @@
     const btnOpen = document.getElementById('btn-sidebar-toggle');
     const btnClose = document.getElementById('btn-sidebar-close');
     const btnCollapse = document.getElementById('btn-sidebar-collapse');
-    const btnTheme = document.getElementById('btn-theme-toggle');
+    const btnTheme = document.getElementById('btn-theme-dropdown') || document.getElementById('btn-theme-toggle');
 
     function isDesktop() {
         return window.innerWidth >= DESKTOP_BP;
     }
 
     function getTheme() {
-        return localStorage.getItem(THEME_KEY) || 'dark';
+        let theme = localStorage.getItem(THEME_KEY) || 'dark';
+        if (!VALID_THEMES.includes(theme)) {
+            theme = 'dark';
+        }
+        return theme;
     }
 
     function setTheme(theme) {
-        html.setAttribute('data-bs-theme', theme);
+        if (!VALID_THEMES.includes(theme)) {
+            theme = 'dark';
+        }
+
+        html.setAttribute('data-theme', theme);
+        html.setAttribute('data-bs-theme', theme === 'light' ? 'light' : 'dark');
         localStorage.setItem(THEME_KEY, theme);
+
+        document.querySelectorAll('.theme-choice-btn').forEach(function (btn) {
+            const val = btn.getAttribute('data-theme-value');
+            const check = btn.querySelector('.theme-check-icon');
+            if (val === theme) {
+                btn.classList.add('is-active', 'active');
+                if (check) check.classList.remove('d-none');
+            } else {
+                btn.classList.remove('is-active', 'active');
+                if (check) check.classList.add('d-none');
+            }
+        });
+
+        const metaThemeColor = document.querySelector('meta[name="theme-color"]');
+        if (metaThemeColor) {
+            const colors = {
+                dark: '#0F172A',
+                light: '#D4A017',
+                hijau: '#059669'
+            };
+            metaThemeColor.setAttribute('content', colors[theme] || '#0F172A');
+        }
+
+        window.dispatchEvent(new CustomEvent('atha-theme-changed', { detail: { theme } }));
     }
 
     function isSidebarCollapsed() {
@@ -214,9 +248,13 @@
         setSidebarCollapsed(true, false);
     }
 
-    btnTheme?.addEventListener('click', function () {
-        const next = html.getAttribute('data-bs-theme') === 'dark' ? 'light' : 'dark';
-        setTheme(next);
+    document.querySelectorAll('.theme-choice-btn').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            const chosen = this.getAttribute('data-theme-value');
+            if (chosen) {
+                setTheme(chosen);
+            }
+        });
     });
 
     btnOpen?.addEventListener('click', openSidebar);
