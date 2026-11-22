@@ -18,58 +18,50 @@
     @endphp
 
     {{-- ══════════════════════════════════════════════════════════════
-         KARTU KPI UTAMA PENJUALAN KATEGORI
+         KARTU KPI UTAMA PENJUALAN KATEGORI (STYLE DASHBOARD ATHA-ADMIN)
          ══════════════════════════════════════════════════════════════ --}}
     <div class="row g-3 mb-4">
         <div class="col-sm-6 col-xl-3">
-            <div class="data-panel h-100 p-3 border-start border-4 border-info">
-                <div class="d-flex align-items-center justify-content-between mb-2">
-                    <span class="text-muted small fw-semibold text-uppercase">Kategori Terjual</span>
-                    <span class="badge bg-info-subtle text-info p-2 rounded-3">
-                        <i class="bi bi-tags fs-6"></i>
-                    </span>
+            <div class="dash-kpi dash-kpi-info h-100">
+                <div class="dash-kpi-icon"><i class="bi bi-tags"></i></div>
+                <div class="dash-kpi-body">
+                    <div class="dash-kpi-label">Kategori Terjual</div>
+                    <div class="dash-kpi-value text-info">{{ $summary['total_categories'] }} Kategori</div>
+                    <div class="dash-kpi-meta">Grup kategori yang memiliki transaksi</div>
                 </div>
-                <div class="fs-4 fw-bold text-info">{{ $summary['total_categories'] }} Kategori</div>
-                <div class="small text-muted mt-1">Grup kategori yang memiliki transaksi</div>
             </div>
         </div>
 
         <div class="col-sm-6 col-xl-3">
-            <div class="data-panel h-100 p-3 border-start border-4 border-primary">
-                <div class="d-flex align-items-center justify-content-between mb-2">
-                    <span class="text-muted small fw-semibold text-uppercase">Total Unit Terjual</span>
-                    <span class="badge bg-primary-subtle text-primary p-2 rounded-3">
-                        <i class="bi bi-cart-check fs-6"></i>
-                    </span>
+            <div class="dash-kpi dash-kpi-primary h-100">
+                <div class="dash-kpi-icon"><i class="bi bi-cart-check"></i></div>
+                <div class="dash-kpi-body">
+                    <div class="dash-kpi-label">Total Unit Terjual</div>
+                    <div class="dash-kpi-value text-primary">{{ number_format($summary['total_qty'], 0, ',', '.') }} Unit</div>
+                    <div class="dash-kpi-meta">Volume seluruh item keluar</div>
                 </div>
-                <div class="fs-4 fw-bold text-primary">{{ number_format($summary['total_qty'], 0, ',', '.') }} Unit</div>
-                <div class="small text-muted mt-1">Volume seluruh item keluar</div>
             </div>
         </div>
 
         <div class="col-sm-6 col-xl-3">
-            <div class="data-panel h-100 p-3 border-start border-4 border-success">
-                <div class="d-flex align-items-center justify-content-between mb-2">
-                    <span class="text-muted small fw-semibold text-uppercase">Total Omset Kategori</span>
-                    <span class="badge bg-success-subtle text-success p-2 rounded-3">
-                        <i class="bi bi-cash-stack fs-6"></i>
-                    </span>
+            <div class="dash-kpi dash-kpi-success h-100">
+                <div class="dash-kpi-icon"><i class="bi bi-cash-stack"></i></div>
+                <div class="dash-kpi-body">
+                    <div class="dash-kpi-label">Total Omset Kategori</div>
+                    <div class="dash-kpi-value text-success">{{ $rp($summary['total_sales']) }}</div>
+                    <div class="dash-kpi-meta">Total pendapatan kotor penjualan</div>
                 </div>
-                <div class="fs-4 fw-bold text-success">{{ $rp($summary['total_sales']) }}</div>
-                <div class="small text-muted mt-1">Total pendapatan kotor penjualan</div>
             </div>
         </div>
 
         <div class="col-sm-6 col-xl-3">
-            <div class="data-panel h-100 p-3 border-start border-4 border-warning">
-                <div class="d-flex align-items-center justify-content-between mb-2">
-                    <span class="text-muted small fw-semibold text-uppercase">Estimasi Laba Kotor</span>
-                    <span class="badge bg-warning-subtle text-warning p-2 rounded-3">
-                        <i class="bi bi-graph-up fs-6"></i>
-                    </span>
+            <div class="dash-kpi dash-kpi-warning h-100">
+                <div class="dash-kpi-icon"><i class="bi bi-graph-up"></i></div>
+                <div class="dash-kpi-body">
+                    <div class="dash-kpi-label">Estimasi Laba Kotor</div>
+                    <div class="dash-kpi-value text-warning">{{ $rp($summary['gross_profit']) }}</div>
+                    <div class="dash-kpi-meta">Rata-rata Margin: <strong>{{ $summary['avg_margin'] }}%</strong></div>
                 </div>
-                <div class="fs-4 fw-bold text-warning">{{ $rp($summary['gross_profit']) }}</div>
-                <div class="small text-muted mt-1">Rata-rata Margin: <strong>{{ $summary['avg_margin'] }}%</strong></div>
             </div>
         </div>
     </div>
@@ -142,7 +134,7 @@
         <div class="data-panel-body p-0">
             <div class="table-responsive">
                 <table class="table table-hover align-middle mb-0">
-                    <thead class="table-light">
+                    <thead>
                         <tr>
                             <th class="ps-3" style="width: 40px;">No</th>
                             <th>Nama Kategori</th>
@@ -163,7 +155,7 @@
                                     <div class="fw-bold text-primary">{{ $cat['category_name'] }}</div>
                                 </td>
                                 <td class="text-center">
-                                    <span class="badge bg-light text-dark border">{{ $cat['items_count'] }} SKU</span>
+                                    <span class="badge bg-secondary-subtle text-body">{{ $cat['items_count'] }} SKU</span>
                                 </td>
                                 <td class="text-center">
                                     <span class="badge bg-primary-subtle text-primary fw-bold px-2 py-1">
@@ -199,7 +191,7 @@
                         @endforelse
                     </tbody>
                     @if ($categories->isNotEmpty())
-                        <tfoot class="table-light fw-bold">
+                        <tfoot class="fw-bold" style="background: var(--admin-surface-2);">
                             <tr>
                                 <td colspan="3" class="text-end ps-3">TOTAL KESELURUHAN:</td>
                                 <td class="text-center">{{ number_format($summary['total_qty'], 0, ',', '.') }} Unit</td>

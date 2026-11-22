@@ -18,71 +18,63 @@
     @endphp
 
     {{-- ══════════════════════════════════════════════════════════════
-         4 KARTU KPI UTAMA PEMBELIAN
+         4 KARTU KPI UTAMA PEMBELIAN (STYLE DASHBOARD ATHA-ADMIN)
          ══════════════════════════════════════════════════════════════ --}}
     <div class="row g-3 mb-4">
         {{-- 1. Pembelian Hari Ini --}}
         <div class="col-sm-6 col-xl-3">
-            <div class="data-panel h-100 p-3 border-start border-4 border-primary">
-                <div class="d-flex align-items-center justify-content-between mb-2">
-                    <span class="text-muted small fw-semibold text-uppercase">Pembelian Hari Ini</span>
-                    <span class="badge bg-primary-subtle text-primary p-2 rounded-3">
-                        <i class="bi bi-calendar-check fs-6"></i>
-                    </span>
-                </div>
-                <div class="fs-4 fw-bold text-primary">{{ $rp($summaryCards['today']['total']) }}</div>
-                <div class="small text-muted mt-1 d-flex justify-content-between">
-                    <span><i class="bi bi-cart-check me-1"></i><strong>{{ $summaryCards['today']['count'] }}</strong> Transaksi</span>
-                    <span><strong>{{ $summaryCards['today']['items_bought'] }}</strong> Item</span>
+            <div class="dash-kpi dash-kpi-primary h-100">
+                <div class="dash-kpi-icon"><i class="bi bi-calendar-check"></i></div>
+                <div class="dash-kpi-body">
+                    <div class="dash-kpi-label">Pembelian Hari Ini</div>
+                    <div class="dash-kpi-value text-primary">{{ $rp($summaryCards['today']['total']) }}</div>
+                    <div class="dash-kpi-meta d-flex justify-content-between">
+                        <span><i class="bi bi-cart-check me-1"></i><strong>{{ $summaryCards['today']['count'] }}</strong> Transaksi</span>
+                        <span><strong>{{ $summaryCards['today']['items_bought'] }}</strong> Item</span>
+                    </div>
                 </div>
             </div>
         </div>
 
         {{-- 2. Pembelian Bulan Ini --}}
         <div class="col-sm-6 col-xl-3">
-            <div class="data-panel h-100 p-3 border-start border-4 border-success">
-                <div class="d-flex align-items-center justify-content-between mb-2">
-                    <span class="text-muted small fw-semibold text-uppercase">Pembelian Bulan Ini</span>
-                    <span class="badge bg-success-subtle text-success p-2 rounded-3">
-                        <i class="bi bi-calendar-month fs-6"></i>
-                    </span>
-                </div>
-                <div class="fs-4 fw-bold text-success">{{ $rp($summaryCards['month']['total']) }}</div>
-                <div class="small text-muted mt-1 d-flex justify-content-between">
-                    <span><i class="bi bi-cart-check me-1"></i><strong>{{ $summaryCards['month']['count'] }}</strong> Transaksi</span>
-                    <span><strong>{{ $summaryCards['month']['items_bought'] }}</strong> Item</span>
+            <div class="dash-kpi dash-kpi-success h-100">
+                <div class="dash-kpi-icon"><i class="bi bi-calendar-month"></i></div>
+                <div class="dash-kpi-body">
+                    <div class="dash-kpi-label">Pembelian Bulan Ini</div>
+                    <div class="dash-kpi-value text-success">{{ $rp($summaryCards['month']['total']) }}</div>
+                    <div class="dash-kpi-meta d-flex justify-content-between">
+                        <span><i class="bi bi-cart-check me-1"></i><strong>{{ $summaryCards['month']['count'] }}</strong> Transaksi</span>
+                        <span><strong>{{ $summaryCards['month']['items_bought'] }}</strong> Item</span>
+                    </div>
                 </div>
             </div>
         </div>
 
         {{-- 3. Pembelian Tahun Ini --}}
         <div class="col-sm-6 col-xl-3">
-            <div class="data-panel h-100 p-3 border-start border-4 border-warning">
-                <div class="d-flex align-items-center justify-content-between mb-2">
-                    <span class="text-muted small fw-semibold text-uppercase">Pembelian Tahun Ini</span>
-                    <span class="badge bg-warning-subtle text-warning p-2 rounded-3">
-                        <i class="bi bi-calendar2-range fs-6"></i>
-                    </span>
-                </div>
-                <div class="fs-4 fw-bold text-warning">{{ $rp($summaryCards['year']['total']) }}</div>
-                <div class="small text-muted mt-1">
-                    <span><i class="bi bi-cart-check me-1"></i><strong>{{ $summaryCards['year']['count'] }}</strong> Transaksi selesai tahun {{ now()->year }}</span>
+            <div class="dash-kpi dash-kpi-warning h-100">
+                <div class="dash-kpi-icon"><i class="bi bi-calendar2-range"></i></div>
+                <div class="dash-kpi-body">
+                    <div class="dash-kpi-label">Pembelian Tahun Ini</div>
+                    <div class="dash-kpi-value text-warning">{{ $rp($summaryCards['year']['total']) }}</div>
+                    <div class="dash-kpi-meta">
+                        <span><i class="bi bi-cart-check me-1"></i><strong>{{ $summaryCards['year']['count'] }}</strong> Transaksi selesai tahun {{ now()->year }}</span>
+                    </div>
                 </div>
             </div>
         </div>
 
         {{-- 4. Pembelian Selama Ini --}}
         <div class="col-sm-6 col-xl-3">
-            <div class="data-panel h-100 p-3 border-start border-4 border-info">
-                <div class="d-flex align-items-center justify-content-between mb-2">
-                    <span class="text-muted small fw-semibold text-uppercase">Pembelian Selama Ini</span>
-                    <span class="badge bg-info-subtle text-info p-2 rounded-3">
-                        <i class="bi bi-graph-up-arrow fs-6"></i>
-                    </span>
-                </div>
-                <div class="fs-4 fw-bold text-info">{{ $rp($summaryCards['all_time']['total']) }}</div>
-                <div class="small text-muted mt-1">
-                    <span><i class="bi bi-infinity me-1"></i>Total <strong>{{ $summaryCards['all_time']['count'] }}</strong> Pembelian akumulasi</span>
+            <div class="dash-kpi dash-kpi-info h-100">
+                <div class="dash-kpi-icon"><i class="bi bi-graph-up-arrow"></i></div>
+                <div class="dash-kpi-body">
+                    <div class="dash-kpi-label">Pembelian Selama Ini</div>
+                    <div class="dash-kpi-value text-info">{{ $rp($summaryCards['all_time']['total']) }}</div>
+                    <div class="dash-kpi-meta">
+                        <span><i class="bi bi-infinity me-1"></i>Total <strong>{{ $summaryCards['all_time']['count'] }}</strong> Pembelian akumulasi</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -182,27 +174,27 @@
          ══════════════════════════════════════════════════════════════ --}}
     <div class="row g-3 mb-4">
         <div class="col-md-3">
-            <div class="p-3 rounded-3 bg-light border text-center">
+            <div class="p-3 rounded-3 text-center" style="background: var(--admin-surface-2); border: 1px solid var(--admin-border);">
                 <div class="text-muted small text-uppercase fw-semibold">Total Nilai Pembelian</div>
-                <div class="fs-4 fw-bold text-dark mt-1">{{ $rp($report['total_purchases']) }}</div>
+                <div class="fs-4 fw-bold mt-1" style="color: var(--admin-text-heading);">{{ $rp($report['total_purchases']) }}</div>
             </div>
         </div>
         <div class="col-md-3">
-            <div class="p-3 rounded-3 bg-light border text-center">
+            <div class="p-3 rounded-3 text-center" style="background: var(--admin-surface-2); border: 1px solid var(--admin-border);">
                 <div class="text-muted small text-uppercase fw-semibold">Jumlah Transaksi</div>
-                <div class="fs-4 fw-bold text-dark mt-1">{{ $report['count'] }} <span class="fs-6 fw-normal text-muted">transaksi</span></div>
+                <div class="fs-4 fw-bold mt-1" style="color: var(--admin-text-heading);">{{ $report['count'] }} <span class="fs-6 fw-normal text-muted">transaksi</span></div>
             </div>
         </div>
         <div class="col-md-3">
-            <div class="p-3 rounded-3 bg-light border text-center">
+            <div class="p-3 rounded-3 text-center" style="background: var(--admin-surface-2); border: 1px solid var(--admin-border);">
                 <div class="text-muted small text-uppercase fw-semibold">Total Item Barang Dibeli</div>
-                <div class="fs-4 fw-bold text-dark mt-1">{{ $report['total_items_bought'] }} <span class="fs-6 fw-normal text-muted">unit</span></div>
+                <div class="fs-4 fw-bold mt-1" style="color: var(--admin-text-heading);">{{ $report['total_items_bought'] }} <span class="fs-6 fw-normal text-muted">unit</span></div>
             </div>
         </div>
         <div class="col-md-3">
-            <div class="p-3 rounded-3 bg-light border text-center">
+            <div class="p-3 rounded-3 text-center" style="background: var(--admin-surface-2); border: 1px solid var(--admin-border);">
                 <div class="text-muted small text-uppercase fw-semibold">Rata-rata per Transaksi</div>
-                <div class="fs-4 fw-bold text-dark mt-1">{{ $rp($report['avg_ticket']) }}</div>
+                <div class="fs-4 fw-bold mt-1" style="color: var(--admin-text-heading);">{{ $rp($report['avg_ticket']) }}</div>
             </div>
         </div>
     </div>
@@ -225,7 +217,7 @@
         <div class="data-panel-body p-0">
             <div class="table-responsive">
                 <table class="table table-hover align-middle mb-0">
-                    <thead class="table-light text-uppercase small">
+                    <thead class="text-uppercase small">
                         <tr>
                             <th class="text-center" style="width: 50px;">No</th>
                             <th>No. Pembelian</th>
@@ -306,7 +298,7 @@
 
                                                     <div class="table-responsive">
                                                         <table class="table table-sm table-bordered align-middle">
-                                                            <thead class="table-light">
+                                                            <thead class="text-muted small">
                                                                 <tr>
                                                                     <th style="width: 40px;" class="text-center">No</th>
                                                                     <th>Kode</th>
@@ -332,7 +324,7 @@
                                                                     </tr>
                                                                 @endforelse
                                                             </tbody>
-                                                            <tfoot class="table-light">
+                                                            <tfoot style="background: var(--admin-surface-2);">
                                                                 <tr>
                                                                     <td colspan="5" class="text-end fw-semibold">Subtotal</td>
                                                                     <td class="text-end fw-semibold">{{ $rp($p->subtotal) }}</td>
@@ -352,7 +344,7 @@
                                                     </div>
 
                                                     @if ($p->notes)
-                                                        <div class="p-2 bg-light rounded small mt-2">
+                                                        <div class="p-2 rounded small mt-2" style="background: var(--admin-surface-2); border: 1px solid var(--admin-border);">
                                                             <strong>Catatan:</strong> {{ $p->notes }}
                                                         </div>
                                                     @endif
@@ -375,7 +367,7 @@
                         @endforelse
                     </tbody>
                     @if ($report['count'] > 0)
-                        <tfoot class="table-light fw-bold">
+                        <tfoot class="fw-bold" style="background: var(--admin-surface-2);">
                             <tr>
                                 <td colspan="7" class="text-end text-uppercase">Total Seluruh Pembelian:</td>
                                 <td class="text-end text-primary fs-6">{{ $rp($report['total_purchases']) }}</td>

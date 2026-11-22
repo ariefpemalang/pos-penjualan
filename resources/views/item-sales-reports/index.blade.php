@@ -18,58 +18,50 @@
     @endphp
 
     {{-- ══════════════════════════════════════════════════════════════
-         KARTU KPI UTAMA PENJUALAN BARANG
+         KARTU KPI UTAMA PENJUALAN BARANG (STYLE DASHBOARD ATHA-ADMIN)
          ══════════════════════════════════════════════════════════════ --}}
     <div class="row g-3 mb-4">
         <div class="col-sm-6 col-xl-3">
-            <div class="data-panel h-100 p-3 border-start border-4 border-info">
-                <div class="d-flex align-items-center justify-content-between mb-2">
-                    <span class="text-muted small fw-semibold text-uppercase">Ragam Produk Terjual</span>
-                    <span class="badge bg-info-subtle text-info p-2 rounded-3">
-                        <i class="bi bi-box-seam fs-6"></i>
-                    </span>
+            <div class="dash-kpi dash-kpi-info h-100">
+                <div class="dash-kpi-icon"><i class="bi bi-box-seam"></i></div>
+                <div class="dash-kpi-body">
+                    <div class="dash-kpi-label">Ragam Produk Terjual</div>
+                    <div class="dash-kpi-value text-info">{{ $summary['unique_items'] }} SKU</div>
+                    <div class="dash-kpi-meta">Variasi item berbeda terjual</div>
                 </div>
-                <div class="fs-4 fw-bold text-info">{{ $summary['unique_items'] }} SKU</div>
-                <div class="small text-muted mt-1">Variasi item berbeda terjual</div>
             </div>
         </div>
 
         <div class="col-sm-6 col-xl-3">
-            <div class="data-panel h-100 p-3 border-start border-4 border-primary">
-                <div class="d-flex align-items-center justify-content-between mb-2">
-                    <span class="text-muted small fw-semibold text-uppercase">Total Unit Terjual</span>
-                    <span class="badge bg-primary-subtle text-primary p-2 rounded-3">
-                        <i class="bi bi-cart-check fs-6"></i>
-                    </span>
+            <div class="dash-kpi dash-kpi-primary h-100">
+                <div class="dash-kpi-icon"><i class="bi bi-cart-check"></i></div>
+                <div class="dash-kpi-body">
+                    <div class="dash-kpi-label">Total Unit Terjual</div>
+                    <div class="dash-kpi-value text-primary">{{ number_format($summary['total_qty'], 0, ',', '.') }} Unit</div>
+                    <div class="dash-kpi-meta">Kuantitas fisik produk keluar</div>
                 </div>
-                <div class="fs-4 fw-bold text-primary">{{ number_format($summary['total_qty'], 0, ',', '.') }} Unit</div>
-                <div class="small text-muted mt-1">Kuantitas fisik produk keluar</div>
             </div>
         </div>
 
         <div class="col-sm-6 col-xl-3">
-            <div class="data-panel h-100 p-3 border-start border-4 border-success">
-                <div class="d-flex align-items-center justify-content-between mb-2">
-                    <span class="text-muted small fw-semibold text-uppercase">Total Omset Penjualan</span>
-                    <span class="badge bg-success-subtle text-success p-2 rounded-3">
-                        <i class="bi bi-cash-stack fs-6"></i>
-                    </span>
+            <div class="dash-kpi dash-kpi-success h-100">
+                <div class="dash-kpi-icon"><i class="bi bi-cash-stack"></i></div>
+                <div class="dash-kpi-body">
+                    <div class="dash-kpi-label">Total Omset Penjualan</div>
+                    <div class="dash-kpi-value text-success">{{ $rp($summary['total_sales']) }}</div>
+                    <div class="dash-kpi-meta">Total nilai penjualan barang</div>
                 </div>
-                <div class="fs-4 fw-bold text-success">{{ $rp($summary['total_sales']) }}</div>
-                <div class="small text-muted mt-1">Total nilai penjualan barang</div>
             </div>
         </div>
 
         <div class="col-sm-6 col-xl-3">
-            <div class="data-panel h-100 p-3 border-start border-4 border-warning">
-                <div class="d-flex align-items-center justify-content-between mb-2">
-                    <span class="text-muted small fw-semibold text-uppercase">Estimasi Laba Kotor</span>
-                    <span class="badge bg-warning-subtle text-warning p-2 rounded-3">
-                        <i class="bi bi-graph-up fs-6"></i>
-                    </span>
+            <div class="dash-kpi dash-kpi-warning h-100">
+                <div class="dash-kpi-icon"><i class="bi bi-graph-up"></i></div>
+                <div class="dash-kpi-body">
+                    <div class="dash-kpi-label">Estimasi Laba Kotor</div>
+                    <div class="dash-kpi-value text-warning">{{ $rp($summary['gross_profit']) }}</div>
+                    <div class="dash-kpi-meta">Rata-rata Margin: <strong>{{ $summary['avg_margin'] }}%</strong></div>
                 </div>
-                <div class="fs-4 fw-bold text-warning">{{ $rp($summary['gross_profit']) }}</div>
-                <div class="small text-muted mt-1">Rata-rata Margin: <strong>{{ $summary['avg_margin'] }}%</strong></div>
             </div>
         </div>
     </div>
@@ -161,7 +153,7 @@
         <div class="data-panel-body p-0">
             <div class="table-responsive">
                 <table class="table table-hover align-middle mb-0">
-                    <thead class="table-light">
+                    <thead>
                         <tr>
                             <th class="ps-3" style="width: 40px;">No</th>
                             <th>Kode Barang</th>
@@ -181,7 +173,7 @@
                             <tr>
                                 <td class="ps-3 text-muted">{{ $idx + 1 }}</td>
                                 <td>
-                                    <span class="badge bg-light text-dark border">{{ $item['item_code'] }}</span>
+                                    <span class="badge bg-secondary-subtle text-body">{{ $item['item_code'] }}</span>
                                 </td>
                                 <td>
                                     <span class="fw-semibold">{{ $item['item_name'] }}</span>
@@ -189,7 +181,7 @@
                                 <td>
                                     <span class="badge bg-secondary-subtle text-secondary">{{ $item['category_name'] }}</span>
                                 </td>
-                                <td class="text-end">{{ $rp($item['avg_price']) }}</td>
+                                <td>{{ $rp($item['avg_price']) }}</td>
                                 <td class="text-end text-muted">{{ $rp($item['avg_cost']) }}</td>
                                 <td class="text-center">
                                     <span class="badge bg-primary-subtle text-primary fw-bold px-2 py-1">
@@ -217,7 +209,7 @@
                         @endforelse
                     </tbody>
                     @if ($items->isNotEmpty())
-                        <tfoot class="table-light fw-bold">
+                        <tfoot class="fw-bold" style="background: var(--admin-surface-2);">
                             <tr>
                                 <td colspan="6" class="text-end ps-3">TOTAL:</td>
                                 <td class="text-center">{{ number_format($summary['total_qty'], 0, ',', '.') }} Unit</td>

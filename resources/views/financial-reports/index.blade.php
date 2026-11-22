@@ -42,9 +42,6 @@
                     <a href="{{ route('financial-reports.export-pdf', ['from' => $from, 'to' => $to]) }}" class="btn btn-outline-secondary">
                         <i class="bi bi-file-earmark-pdf me-1"></i> Export PDF
                     </a>
-                    <a href="{{ route('asset-reports.index') }}" class="btn btn-outline-primary">
-                        <i class="bi bi-wallet2 me-1"></i> Laporan Aset Kategori
-                    </a>
                 </div>
             </form>
 
