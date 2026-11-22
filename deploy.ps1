@@ -20,7 +20,7 @@ cd $REMOTE_PATH
 git config --global --add safe.directory $REMOTE_PATH
 git pull origin main
 php artisan migrate --force
-php artisan storage:link
+if (!(Test-Path public/storage)) { php artisan storage:link }
 php artisan optimize:clear
 chown -R www-data:www-data $REMOTE_PATH
 chmod -R 775 $REMOTE_PATH/storage $REMOTE_PATH/bootstrap/cache
