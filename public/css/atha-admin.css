@@ -319,6 +319,75 @@ body {
   font-weight: 500;
 }
 
+/* Subgroup in sidebar (Nested collapsible subcategories) */
+.sidebar-subgroup-item {
+  margin: 2px 0;
+}
+
+.sidebar-subgroup-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.42rem 0.85rem 0.42rem 2.65rem;
+  margin: 1px 0.5rem;
+  border-radius: 6px;
+  color: #8B95A5;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-decoration: none !important;
+  cursor: pointer;
+  transition: all 0.15s ease-in-out;
+}
+
+.sidebar-subgroup-toggle:hover {
+  background: var(--admin-sidebar-hover);
+  color: #CCC;
+}
+
+.sidebar-subgroup-toggle.is-active,
+.sidebar-subgroup-toggle[aria-expanded="true"] {
+  color: var(--accent-bright);
+}
+
+.sidebar-subgroup-toggle .sidebar-chevron {
+  font-size: 0.65rem;
+  color: inherit;
+  transition: transform 0.2s;
+  margin-left: auto;
+}
+
+.sidebar-subgroup-toggle[aria-expanded="true"] .sidebar-chevron {
+  transform: rotate(180deg);
+}
+
+.sidebar-nested-list {
+  padding: 0.1rem 0 0.25rem 0;
+  margin: 0;
+  list-style: none;
+}
+
+.sidebar-nested-link {
+  display: block;
+  padding: 0.38rem 0.85rem 0.38rem 3.45rem;
+  margin: 1px 0.5rem;
+  border-radius: 6px;
+  color: #777;
+  font-size: 0.78rem;
+  text-decoration: none !important;
+  transition: all 0.15s;
+}
+
+.sidebar-nested-link:hover {
+  background: var(--admin-sidebar-hover);
+  color: #CCC;
+}
+
+.sidebar-nested-link.active {
+  background: var(--admin-sidebar-active) !important;
+  color: var(--accent-bright) !important;
+  font-weight: 500;
+}
+
 /* Flyout title — hanya tampil saat sidebar mini */
 .sidebar-flyout-head {
   display: none;
@@ -440,6 +509,18 @@ body {
 
   .admin-layout.is-sidebar-collapsed .sidebar-submenu-link {
     padding: 0.45rem 0.85rem;
+    margin: 1px 0.4rem;
+    white-space: nowrap;
+  }
+
+  .admin-layout.is-sidebar-collapsed .sidebar-subgroup-toggle {
+    padding: 0.45rem 0.85rem;
+    margin: 1px 0.4rem;
+    white-space: nowrap;
+  }
+
+  .admin-layout.is-sidebar-collapsed .sidebar-nested-link {
+    padding: 0.42rem 0.85rem 0.42rem 1.45rem;
     margin: 1px 0.4rem;
     white-space: nowrap;
   }
@@ -823,6 +904,22 @@ table.dataTable thead th {
   color: var(--accent-bright);
   background: var(--admin-surface);
   border-color: var(--admin-border);
+}
+
+div.dataTables_processing {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: var(--admin-surface) !important;
+  color: var(--admin-text) !important;
+  border: 1px solid var(--admin-border) !important;
+  border-radius: 10px !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15) !important;
+  padding: 0.65rem 1.4rem !important;
+  z-index: 1050;
+  font-size: 0.86rem;
+  backdrop-filter: blur(4px);
 }
 
 /* ── Forms ── */
