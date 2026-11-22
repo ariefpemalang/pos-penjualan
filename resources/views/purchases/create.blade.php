@@ -88,9 +88,9 @@
                     </div>
                     <div class="data-panel-body">
                         <div class="mb-3">
-                            <label class="form-label" for="supplier_id">Supplier</label>
-                            <select id="supplier_id" class="form-control-clean atha-searchable-select">
-                                <option value="">-- Pilih Supplier (Opsional) --</option>
+                            <label class="form-label" for="supplier_id">Supplier <span class="text-danger">*</span></label>
+                            <select id="supplier_id" class="form-control-clean atha-searchable-select" required>
+                                <option value="">-- Pilih Supplier --</option>
                                 <option value="__new__">+ Supplier Baru</option>
                                 @foreach ($suppliers as $supplier)
                                     <option value="{{ $supplier->id }}">
@@ -98,7 +98,7 @@
                                     </option>
                                 @endforeach
                             </select>
-                            <div class="form-hint-sm mt-1">Pilih supplier terdaftar atau buat baru — otomatis tersimpan ke master data.</div>
+                            <div class="form-hint-sm mt-1">Wajib pilih supplier terdaftar atau buat baru — otomatis tersimpan ke master data.</div>
                         </div>
                         <div id="new-supplier-fields" class="border rounded p-3 mb-3 d-none bg-light">
                             <div class="small fw-semibold mb-2"><i class="bi bi-truck me-1"></i> Data supplier baru</div>

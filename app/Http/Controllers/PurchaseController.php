@@ -195,7 +195,7 @@ class PurchaseController extends Controller
 
         if (! $forUpdate) {
             $rules = array_merge($rules, [
-                'supplier_mode' => ['nullable', 'in:none,existing,new'],
+                'supplier_mode' => ['required', 'in:existing,new'],
                 'supplier_id' => ['nullable', 'required_if:supplier_mode,existing', 'exists:suppliers,id'],
                 'new_supplier' => ['nullable', 'array'],
                 'new_supplier.name' => ['required_if:supplier_mode,new', 'string', 'max:255'],
@@ -205,7 +205,14 @@ class PurchaseController extends Controller
             ]);
         }
 
-        return $request->validate($rules);
+        $messages = [
+            'supplier_mode.required' => 'Supplier wajib dipilih atau daftarkan supplier baru.',
+            'supplier_mode.in' => 'Supplier wajib dipilih atau daftarkan supplier baru.',
+            'supplier_id.required_if' => 'Supplier terdaftar wajib dipilih.',
+            'new_supplier.name.required_if' => 'Nama supplier baru wajib diisi.',
+        ];
+
+        return $request->validate($rules, $messages);
     }
 
     private function paymentBadge(Purchase $p): string

@@ -29,12 +29,25 @@
                 return 'none';
             }
 
+            function isSupplierValid() {
+                const mode = getSupplierMode();
+                if (mode === 'existing') {
+                    return true;
+                }
+                if (mode === 'new') {
+                    return !!$('#new_supplier_name').val().trim();
+                }
+                return false;
+            }
+
             function toggleNewSupplierFields() {
                 const isNew = getSupplierMode() === 'new';
                 $('#new-supplier-fields').toggleClass('d-none', !isNew);
+                updateSummary();
             }
 
             $('#supplier_id').on('change', toggleNewSupplierFields);
+            $('#new_supplier_name').on('input', updateSummary);
             toggleNewSupplierFields();
 
             function findItem(id) {
@@ -90,14 +103,15 @@
                 discount = Math.max(0, Math.min(discount, subtotal));
                 const total = subtotal - discount;
                 const paymentOk = $('#payment_method').val() !== 'transfer' || !!$('#bank_account_id').val();
+                const supplierOk = isSupplierValid();
 
                 $('#sum-subtotal').text(formatRp(subtotal));
                 $('#sum-discount').text('- ' + formatRp(discount));
                 $('#sum-total').text(formatRp(total));
-                $submit.prop('disabled', cart.length === 0 || !paymentOk);
+                $submit.prop('disabled', cart.length === 0 || !paymentOk || !supplierOk);
             }
 
-            $('#discount, #payment_method, #bank_account_id').on('change input', updateSummary);
+            $('#discount, #payment_method, #bank_account_id, #supplier_id, #new_supplier_name').on('change input', updateSummary);
 
             let isAdding = false;
             function addItemToCart(item, qty, customPrice) {
@@ -293,6 +307,10 @@
                 }
 
                 const supplierMode = getSupplierMode();
+                if (supplierMode === 'none') {
+                    Swal.fire({ icon: 'warning', title: 'Supplier wajib dipilih.', text: 'Pilih supplier terdaftar atau buat supplier baru.' });
+                    return;
+                }
                 if (supplierMode === 'new' && !$('#new_supplier_name').val().trim()) {
                     Swal.fire({ icon: 'warning', title: 'Nama supplier baru wajib diisi.' });
                     return;
