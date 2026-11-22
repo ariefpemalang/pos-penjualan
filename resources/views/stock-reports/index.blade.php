@@ -99,15 +99,15 @@
             order: [[9, 'desc']],
             columns: [
                 { data: 'DT_RowIndex', orderable: false, searchable: false },
-                { data: 'code', name: 'code' },
-                { data: 'name', name: 'name' },
+                { data: 'code', name: 'code', orderable: true },
+                { data: 'name', name: 'name', orderable: true },
                 { data: 'category_name', name: 'category.name', orderable: false },
                 { data: 'unit_name', name: 'unit.name', orderable: false },
-                { data: 'stock_display', name: 'stock' },
-                { data: 'stock_opname', name: 'stock_opname', searchable: false },
+                { data: 'stock_display', name: 'stock', orderable: true },
+                { data: 'stock_opname', name: 'stock_opname', orderable: true, searchable: false },
                 { data: 'status', name: 'is_active', orderable: false, searchable: false },
-                { data: 'selling_price', name: 'selling_price', orderable: false, searchable: false },
-                { data: 'created_at', name: 'created_at', visible: false, searchable: false },
+                { data: 'selling_price', name: 'selling_price', orderable: true, searchable: false },
+                { data: 'created_at', name: 'created_at', orderable: true, visible: false, searchable: false },
             ],
         });
     </script>

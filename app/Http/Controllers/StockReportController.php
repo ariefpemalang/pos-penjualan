@@ -18,8 +18,7 @@ class StockReportController extends Controller
     {
         if (request()->ajax()) {
             $query = Item::query()
-                ->with(['category:id,name', 'unit:id,name,abbreviation'])
-                ->latest();
+                ->with(['category:id,name', 'unit:id,name,abbreviation']);
 
             $filter = request('filter');
             if ($filter === 'low_stock') {
@@ -29,6 +28,24 @@ class StockReportController extends Controller
             }
 
             return DataTables::of($query)
+                ->orderColumn('name', function ($query, $order) {
+                    $query->orderBy('items.name', $order);
+                })
+                ->orderColumn('code', function ($query, $order) {
+                    $query->orderBy('items.code', $order);
+                })
+                ->orderColumn('stock', function ($query, $order) {
+                    $query->orderBy('items.stock', $order);
+                })
+                ->orderColumn('stock_opname', function ($query, $order) {
+                    $query->orderBy('items.stock_opname', $order);
+                })
+                ->orderColumn('selling_price', function ($query, $order) {
+                    $query->orderBy('items.selling_price', $order);
+                })
+                ->orderColumn('created_at', function ($query, $order) {
+                    $query->orderBy('items.created_at', $order);
+                })
                 ->addIndexColumn()
                 ->addColumn('category_name', fn (Item $i) => $i->category?->name ?? '-')
                 ->addColumn('unit_name', fn (Item $i) => $i->unit?->abbreviation ?: $i->unit?->name ?: '-')
