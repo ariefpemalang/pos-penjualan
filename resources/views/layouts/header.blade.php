@@ -6,7 +6,7 @@
         (function () {
             try {
                 var theme = localStorage.getItem('atha-theme') || 'normal';
-                if (theme === 'light') theme = 'normal';
+                if (theme !== 'dark') theme = 'normal';
                 document.documentElement.setAttribute('data-theme', theme);
                 document.documentElement.setAttribute('data-bs-theme', theme === 'dark' ? 'dark' : 'light');
             } catch (e) {}
@@ -55,20 +55,20 @@
                     <div class="dropdown theme-dropdown" id="theme-dropdown-wrap">
                         <button type="button" class="btn btn-icon theme-toggle-btn dropdown-toggle"
                             id="btn-theme-dropdown" data-bs-toggle="dropdown" aria-expanded="false"
-                            aria-label="Pilih Tema Tampilan" title="Pilih Tema Warna Sidebar & Aplikasi">
-                            <i class="bi bi-palette2"></i>
-                            <span class="theme-current-dot" id="theme-current-dot"></span>
+                            aria-label="Pilih Tema (Normal / Dark)" title="Pilih Mode Tampilan (Normal / Dark)">
+                            <i class="bi bi-moon-stars theme-icon-light fs-5"></i>
+                            <i class="bi bi-sun theme-icon-dark fs-5 text-warning"></i>
                         </button>
-                        <ul class="dropdown-menu dropdown-menu-end border-0 shadow-lg mt-2 p-2 theme-menu-dropdown" style="min-width: 240px; max-height: 460px; overflow-y: auto;">
+                        <ul class="dropdown-menu dropdown-menu-end border-0 shadow-lg mt-2 p-2 theme-menu-dropdown" style="min-width: 190px;">
                             <li class="dropdown-header px-2 py-1 text-uppercase fw-bold" style="font-size: 0.68rem; letter-spacing: 0.06em; color: var(--admin-text-muted);">
-                                <i class="bi bi-paint-bucket me-1"></i> 10 Tema Warna
+                                <i class="bi bi-palette me-1"></i> Mode Tampilan
                             </li>
                             <li><hr class="dropdown-divider my-1"></li>
                             <li>
                                 <button type="button" class="dropdown-item d-flex align-items-center justify-content-between rounded-2 px-2 py-2 theme-choice-btn" data-theme-value="normal">
                                     <span class="d-flex align-items-center gap-2">
                                         <span class="theme-swatch theme-swatch-normal"></span>
-                                        <span class="theme-label fw-medium">Normal (Gold)</span>
+                                        <span class="theme-label fw-medium">Normal (Light)</span>
                                     </span>
                                     <i class="bi bi-check2 theme-check-icon text-primary d-none fs-6"></i>
                                 </button>
@@ -78,78 +78,6 @@
                                     <span class="d-flex align-items-center gap-2">
                                         <span class="theme-swatch theme-swatch-dark"></span>
                                         <span class="theme-label fw-medium">Dark (Midnight)</span>
-                                    </span>
-                                    <i class="bi bi-check2 theme-check-icon text-primary d-none fs-6"></i>
-                                </button>
-                            </li>
-                            <li>
-                                <button type="button" class="dropdown-item d-flex align-items-center justify-content-between rounded-2 px-2 py-2 theme-choice-btn" data-theme-value="hijau">
-                                    <span class="d-flex align-items-center gap-2">
-                                        <span class="theme-swatch theme-swatch-hijau"></span>
-                                        <span class="theme-label fw-medium">Hijau (Emerald)</span>
-                                    </span>
-                                    <i class="bi bi-check2 theme-check-icon text-primary d-none fs-6"></i>
-                                </button>
-                            </li>
-                            <li>
-                                <button type="button" class="dropdown-item d-flex align-items-center justify-content-between rounded-2 px-2 py-2 theme-choice-btn" data-theme-value="biru">
-                                    <span class="d-flex align-items-center gap-2">
-                                        <span class="theme-swatch theme-swatch-biru"></span>
-                                        <span class="theme-label fw-medium">Biru (Sapphire)</span>
-                                    </span>
-                                    <i class="bi bi-check2 theme-check-icon text-primary d-none fs-6"></i>
-                                </button>
-                            </li>
-                            <li>
-                                <button type="button" class="dropdown-item d-flex align-items-center justify-content-between rounded-2 px-2 py-2 theme-choice-btn" data-theme-value="ungu">
-                                    <span class="d-flex align-items-center gap-2">
-                                        <span class="theme-swatch theme-swatch-ungu"></span>
-                                        <span class="theme-label fw-medium">Ungu (Amethyst)</span>
-                                    </span>
-                                    <i class="bi bi-check2 theme-check-icon text-primary d-none fs-6"></i>
-                                </button>
-                            </li>
-                            <li>
-                                <button type="button" class="dropdown-item d-flex align-items-center justify-content-between rounded-2 px-2 py-2 theme-choice-btn" data-theme-value="merah">
-                                    <span class="d-flex align-items-center gap-2">
-                                        <span class="theme-swatch theme-swatch-merah"></span>
-                                        <span class="theme-label fw-medium">Merah (Ruby)</span>
-                                    </span>
-                                    <i class="bi bi-check2 theme-check-icon text-primary d-none fs-6"></i>
-                                </button>
-                            </li>
-                            <li>
-                                <button type="button" class="dropdown-item d-flex align-items-center justify-content-between rounded-2 px-2 py-2 theme-choice-btn" data-theme-value="teal">
-                                    <span class="d-flex align-items-center gap-2">
-                                        <span class="theme-swatch theme-swatch-teal"></span>
-                                        <span class="theme-label fw-medium">Teal (Turquoise)</span>
-                                    </span>
-                                    <i class="bi bi-check2 theme-check-icon text-primary d-none fs-6"></i>
-                                </button>
-                            </li>
-                            <li>
-                                <button type="button" class="dropdown-item d-flex align-items-center justify-content-between rounded-2 px-2 py-2 theme-choice-btn" data-theme-value="oranye">
-                                    <span class="d-flex align-items-center gap-2">
-                                        <span class="theme-swatch theme-swatch-oranye"></span>
-                                        <span class="theme-label fw-medium">Oranye (Sunset)</span>
-                                    </span>
-                                    <i class="bi bi-check2 theme-check-icon text-primary d-none fs-6"></i>
-                                </button>
-                            </li>
-                            <li>
-                                <button type="button" class="dropdown-item d-flex align-items-center justify-content-between rounded-2 px-2 py-2 theme-choice-btn" data-theme-value="rose">
-                                    <span class="d-flex align-items-center gap-2">
-                                        <span class="theme-swatch theme-swatch-rose"></span>
-                                        <span class="theme-label fw-medium">Rose (Pink Gold)</span>
-                                    </span>
-                                    <i class="bi bi-check2 theme-check-icon text-primary d-none fs-6"></i>
-                                </button>
-                            </li>
-                            <li>
-                                <button type="button" class="dropdown-item d-flex align-items-center justify-content-between rounded-2 px-2 py-2 theme-choice-btn" data-theme-value="slate">
-                                    <span class="d-flex align-items-center gap-2">
-                                        <span class="theme-swatch theme-swatch-slate"></span>
-                                        <span class="theme-label fw-medium">Slate (Titanium)</span>
                                     </span>
                                     <i class="bi bi-check2 theme-check-icon text-primary d-none fs-6"></i>
                                 </button>

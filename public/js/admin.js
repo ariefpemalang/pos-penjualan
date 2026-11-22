@@ -3,7 +3,7 @@
  */
 (function () {
     const THEME_KEY = 'atha-theme';
-    const VALID_THEMES = ['normal', 'dark', 'hijau', 'biru', 'ungu', 'merah', 'teal', 'oranye', 'rose', 'slate'];
+    const VALID_THEMES = ['normal', 'dark'];
     const SIDEBAR_COLLAPSED_KEY = 'atha-sidebar-collapsed';
     const DESKTOP_BP = 992;
 
@@ -22,14 +22,12 @@
 
     function getTheme() {
         let theme = localStorage.getItem(THEME_KEY) || 'normal';
-        if (theme === 'light') theme = 'normal';
-        if (!VALID_THEMES.includes(theme)) theme = 'normal';
+        if (theme !== 'dark') theme = 'normal';
         return theme;
     }
 
     function setTheme(theme) {
-        if (theme === 'light') theme = 'normal';
-        if (!VALID_THEMES.includes(theme)) theme = 'normal';
+        if (theme !== 'dark') theme = 'normal';
 
         html.setAttribute('data-theme', theme);
         html.setAttribute('data-bs-theme', theme === 'dark' ? 'dark' : 'light');
@@ -37,28 +35,19 @@
 
         document.querySelectorAll('.theme-choice-btn').forEach(function (btn) {
             const val = btn.getAttribute('data-theme-value');
+            const check = btn.querySelector('.theme-check-icon');
             if (val === theme) {
-                btn.classList.add('is-active');
+                btn.classList.add('is-active', 'active');
+                if (check) check.classList.remove('d-none');
             } else {
-                btn.classList.remove('is-active');
+                btn.classList.remove('is-active', 'active');
+                if (check) check.classList.add('d-none');
             }
         });
 
         const metaThemeColor = document.querySelector('meta[name="theme-color"]');
         if (metaThemeColor) {
-            const themeColors = {
-                normal: '#D4A017',
-                dark: '#0F172A',
-                hijau: '#10B981',
-                biru: '#2563EB',
-                ungu: '#8B5CF6',
-                merah: '#E11D48',
-                teal: '#0D9488',
-                oranye: '#EA580C',
-                rose: '#DB2777',
-                slate: '#0284C7'
-            };
-            metaThemeColor.setAttribute('content', themeColors[theme] || '#D4A017');
+            metaThemeColor.setAttribute('content', theme === 'dark' ? '#0F172A' : '#D4A017');
         }
 
         window.dispatchEvent(new CustomEvent('atha-theme-changed', { detail: { theme } }));
