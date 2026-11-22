@@ -49,7 +49,7 @@
                     <div class="data-panel-body">
                         <div class="stock-cart-add border rounded p-3 mb-3">
                             <div class="cart-add-row row g-2">
-                                <div class="col-md-8">
+                                <div class="col-md-5">
                                     <label class="form-label small mb-0" for="item_select">Pilih Barang</label>
                                     <select id="item_select" class="form-control-clean cart-add-control atha-searchable-select atha-select2-item">
                                         <option value="">-- Pilih Barang --</option>
@@ -67,6 +67,10 @@
                                             </option>
                                         @endforeach
                                     </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label small mb-0" for="item_price">Harga Beli (Rp)</label>
+                                    <input type="number" id="item_price" class="form-control form-control-clean cart-add-control" min="0" step="1" placeholder="Otomatis master">
                                 </div>
                                 <div class="col-md-2">
                                     <label class="form-label small mb-0" for="item_qty">Qty</label>
@@ -88,10 +92,10 @@
                                 <thead class="table-light">
                                     <tr>
                                         <th>Barang</th>
-                                        <th class="text-center">Qty</th>
-                                        <th class="text-end">Harga Beli</th>
-                                        <th class="text-end">Subtotal</th>
-                                        <th></th>
+                                        <th class="text-center" style="width: 100px;">Qty</th>
+                                        <th class="text-end" style="width: 160px;">Harga Beli</th>
+                                        <th class="text-end" style="width: 130px;">Subtotal</th>
+                                        <th style="width: 50px;"></th>
                                     </tr>
                                 </thead>
                                 <tbody id="items-cart-body"></tbody>

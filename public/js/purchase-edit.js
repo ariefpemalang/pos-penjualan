@@ -55,15 +55,25 @@
                     cart.forEach(function (line, index) {
                         $itemsBody.append(`
                             <tr>
-                                <td><div class="fw-medium">${line.code}</div><div class="text-muted small">${line.name}</div></td>
-                                <td class="text-center" style="width:90px">
-                                    <input type="number" class="form-control form-control-clean cart-qty-input"
+                                <td>
+                                    <div class="fw-medium">${line.code}</div>
+                                    <div class="text-muted small">${line.name}</div>
+                                </td>
+                                <td class="text-center" style="width:100px">
+                                    <input type="number" class="form-control form-control-sm form-control-clean cart-qty-input text-center"
                                         data-index="${index}"
                                         value="${line.quantity}" min="1" step="1">
                                 </td>
-                                <td class="text-end">${formatRp(line.unit_price)}</td>
+                                <td class="text-end" style="width:160px">
+                                    <div class="input-group input-group-sm">
+                                        <span class="input-group-text py-0 px-2 text-muted small">Rp</span>
+                                        <input type="number" class="form-control form-control-sm form-control-clean text-end cart-price-input"
+                                            data-index="${index}"
+                                            value="${line.unit_price}" min="0" step="1">
+                                    </div>
+                                </td>
                                 <td class="text-end fw-medium cart-subtotal">${formatRp(line.subtotal)}</td>
-                                <td class="text-end">
+                                <td class="text-end" style="width:50px">
                                     <button type="button" class="btn btn-sm btn-outline-danger btn-remove-item" data-index="${index}">
                                         <i class="bi bi-trash"></i>
                                     </button>
@@ -91,15 +101,21 @@
             $('#discount, #payment_method, #bank_account_id').on('change input', updateSummary);
 
             let isAdding = false;
-            function addItemToCart(item, qty) {
+            function addItemToCart(item, qty, customPrice) {
                 if (!item) return;
                 qty = qty && qty > 0 ? qty : 1;
 
+                const parsedPrice = customPrice !== undefined && customPrice !== null && customPrice !== '' && !isNaN(customPrice)
+                    ? Math.max(0, parseFloat(customPrice))
+                    : (parseFloat(item.purchase_price) || 0);
+
                 const existing = cart.find(function (l) { return String(l.item_id) === String(item.id); });
-                const unitPrice = parseFloat(item.purchase_price) || 0;
 
                 if (existing) {
                     existing.quantity += qty;
+                    if (customPrice !== undefined && customPrice !== null && customPrice !== '') {
+                        existing.unit_price = parsedPrice;
+                    }
                     recalcLine(existing);
                 } else {
                     cart.push({
@@ -107,13 +123,14 @@
                         code: item.code,
                         name: item.name,
                         quantity: qty,
-                        unit_price: unitPrice,
-                        subtotal: unitPrice * qty,
+                        unit_price: parsedPrice,
+                        subtotal: parsedPrice * qty,
                     });
                 }
 
                 renderCart();
-                $('#item_qty').val('');
+                $('#item_qty').val('1');
+                $('#item_price').val('');
                 $('#item-hint').text('');
             }
 
@@ -128,7 +145,8 @@
                 }
 
                 const qty = parseInt($('#item_qty').val(), 10) || 1;
-                addItemToCart(item, qty);
+                const customPrice = $('#item_price').val();
+                addItemToCart(item, qty, customPrice);
 
                 setTimeout(function () {
                     if (window.AthaSearchableSelect) {
@@ -153,6 +171,7 @@
             $('#btn-add-item').on('click', function () {
                 const itemId = $('#item_select').val();
                 const qty = parseInt($('#item_qty').val(), 10) || 1;
+                const customPrice = $('#item_price').val();
                 const item = findItem(itemId);
 
                 if (!item) {
@@ -160,7 +179,7 @@
                     return;
                 }
 
-                addItemToCart(item, qty);
+                addItemToCart(item, qty, customPrice);
                 if (window.AthaSearchableSelect) {
                     AthaSearchableSelect.clear('#item_select');
                 } else {
@@ -168,7 +187,7 @@
                 }
             });
 
-            $('#item_qty').on('keypress', function (e) {
+            $('#item_qty, #item_price').on('keypress', function (e) {
                 if (e.which === 13) {
                     e.preventDefault();
                     $('#btn-add-item').click();
@@ -232,6 +251,43 @@
                 return true;
             }
 
+            function handlePriceInput($input, showError) {
+                const index = parseInt($input.data('index'), 10);
+                const line = cart[index];
+                if (!line) {
+                    return false;
+                }
+
+                const price = parseFloat($input.val());
+                if (isNaN(price) || price < 0) {
+                    if (showError) {
+                        $input.val(line.unit_price);
+                        Swal.fire({ icon: 'warning', title: 'Harga beli tidak valid (minimal 0).' });
+                    }
+                    return false;
+                }
+
+                line.unit_price = price;
+                recalcLine(line);
+                $input.closest('tr').find('.cart-subtotal').text(formatRp(line.subtotal));
+                updateSummary();
+                return true;
+            }
+
+            function validateCart() {
+                for (let i = 0; i < cart.length; i++) {
+                    if (cart[i].quantity < 1) {
+                        Swal.fire({ icon: 'warning', title: 'Qty barang tidak valid.', text: cart[i].name });
+                        return false;
+                    }
+                    if (isNaN(cart[i].unit_price) || cart[i].unit_price < 0) {
+                        Swal.fire({ icon: 'warning', title: 'Harga beli tidak valid.', text: cart[i].name });
+                        return false;
+                    }
+                }
+                return true;
+            }
+
             $itemsBody.on('input', '.cart-qty-input', function () {
                 handleQtyInput($(this), false);
             });
@@ -240,9 +296,21 @@
                 handleQtyInput($(this), true);
             });
 
+            $itemsBody.on('input', '.cart-price-input', function () {
+                handlePriceInput($(this), false);
+            });
+
+            $itemsBody.on('blur', '.cart-price-input', function () {
+                handlePriceInput($(this), true);
+            });
+
             $('#purchase-form').on('submit', function (e) {
                 e.preventDefault();
                 if (!cart.length) {
+                    return;
+                }
+
+                if (!validateCart()) {
                     return;
                 }
 
@@ -265,7 +333,11 @@
                         payment_method: $('#payment_method').val(),
                         bank_account_id: $('#bank_account_id').val() || null,
                         items: cart.map(function (l) {
-                            return { item_id: l.item_id, quantity: l.quantity };
+                            return {
+                                item_id: l.item_id,
+                                quantity: l.quantity,
+                                unit_price: l.unit_price,
+                            };
                         }),
                     },
                     success: function (res) {

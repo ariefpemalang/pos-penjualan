@@ -261,6 +261,7 @@ class PurchaseService
     private function resolveItemLines(array $lines, array $previousItemQty = []): Collection
     {
         $merged = [];
+        $customPrices = [];
 
         foreach ($lines as $line) {
             $itemId = (int) ($line['item_id'] ?? 0);
@@ -269,6 +270,10 @@ class PurchaseService
                 continue;
             }
             $merged[$itemId] = ($merged[$itemId] ?? 0) + $qty;
+
+            if (isset($line['unit_price']) && is_numeric($line['unit_price'])) {
+                $customPrices[$itemId] = max(0, (float) $line['unit_price']);
+            }
         }
 
         if (empty($merged)) {
@@ -306,7 +311,13 @@ class PurchaseService
                 );
             }
 
-            $unitPrice = (float) $item->purchase_price;
+            $unitPrice = array_key_exists($itemId, $customPrices)
+                ? $customPrices[$itemId]
+                : (float) $item->purchase_price;
+
+            if ((float) $item->purchase_price !== (float) $unitPrice) {
+                $item->update(['purchase_price' => $unitPrice]);
+            }
 
             $resolved->push([
                 'item_id' => $item->id,
